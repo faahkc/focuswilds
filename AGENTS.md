@@ -53,3 +53,11 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Every commit must have a concise English subject and a descriptive body explaining what changed, why, validation performed, and material limitations when applicable.
 - Report the commit hash and a brief summary to the user.
 - After committing verified task changes, push to the configured remote and branch unless the user asks otherwise. Report whether the push succeeded. Never force-push, amend commits, or rewrite history unless explicitly requested.
+
+## Instruction loading and token efficiency
+
+- This file is the primary source of Ponytail Full rules for this project. Do not read or inject another copy of those rules when this file is already in context.
+- Reuse available file reads and passing checks. Repeat only after relevant changes or unresolved failures.
+- Batch independent reads, search narrowly, and keep tool output concise.
+- Avoid repeated CI/deployment polling; report pending status and the run link unless completion must be verified now.
+- Request escalation only when necessary; preserve approval and sandbox protections.

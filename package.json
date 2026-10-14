@@ -1,7 +1,7 @@
 {
     "name": "focuswilds",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.1.4",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -11,7 +11,8 @@
         "test": "node --test scripts/*.test.mjs",
         "app:version": "node scripts/version.mjs",
         "version:minor": "node scripts/version.mjs minor",
-        "version:major": "node scripts/version.mjs major"
+        "version:major": "node scripts/version.mjs major",
+        "prepare": "node scripts/install-hooks.mjs"
     },
     "dependencies": {
         "@base-ui/react": "^1.9.0",

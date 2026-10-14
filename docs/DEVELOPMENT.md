@@ -1,6 +1,6 @@
 # Development
 
-Requirements: Node.js 24, npm, and a Git clone with full history.
+Requirements: Node.js 24, npm, and a Git clone.
 
 ```sh
 npm ci
@@ -24,9 +24,9 @@ React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components 
 npm run app:version
 ```
 
-The displayed application version is computed from `version.json`: its base patch plus the number of commits reachable from HEAD after its anchor. Every new commit counts, including documentation and merge commits. Multiple commits in one push each count. No automated version commits or Git hooks are needed. Restart the dev server or rebuild after committing to refresh the displayed version.
+`package.json` is the single source of the application version. The lockfile and the website use the same value. Dev/build do not change tracked files. Restart the dev server or rebuild after committing to refresh the displayed version.
 
-`package.json` identifies the private application package; its version is not the live Git-derived application version. `version.json` is the release base. Full Git history is required; for a shallow clone, run `git fetch --unshallow`.
+`npm install` and `npm ci` install the repository's pre-commit hook through the `prepare` script (skipped in CI). On an existing checkout, run `npm run prepare` once. The installer refuses to replace existing custom hooks. Before each normal local commit with staged changes, the hook increments patch and stages both package files in that same commit. A retry after a failed commit preserves the already-staged increment. Partially staged package edits block the commit rather than being overwritten.
 
 Only change major or minor when explicitly requested by the owner:
 
@@ -36,7 +36,9 @@ npm run version:minor
 npm run version:major
 ```
 
-These commands reset the base patch to zero and set the anchor to the current commit. The commit recording that change then adds patch 1. Review, commit, and push `version.json` normally. Do not rewrite published history: it can change commit counts and therefore versions.
+These commands update both package files and reset patch to zero. Stage both files and commit; the hook preserves the explicit version instead of adding patch again. Never run these commands without the owner's request.
+
+Commits made through GitHub's web UI, merges created by GitHub, and commits made with hooks disabled do not run the local hook. Make versioned changes from a configured local clone. CI builds the committed version and does not bump it. Empty commits do not bump version.
 
 ## Cloud data
 

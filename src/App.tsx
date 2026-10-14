@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { AuthPanel } from '@/components/auth-panel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -6,9 +7,10 @@ export default function App() {
   return (
     <main className="min-h-screen bg-[#14251f] px-6 py-10 text-[#f4eddc] sm:py-16">
       <div className="mx-auto max-w-5xl">
-        <header className="flex items-center justify-between gap-4 border-b border-white/15 pb-6">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6">
           <span className="font-serif text-2xl tracking-wide">Focuswilds</span>
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{__APP_VERSION__}</Badge>
+          <AuthPanel />
         </header>
         <section className="max-w-3xl py-20 sm:py-28">
           <p className="mb-6 text-xs tracking-[0.25em] text-[#e8c782] uppercase">A little focus. A new discovery.</p>

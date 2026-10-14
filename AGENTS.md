@@ -44,7 +44,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 ## Git history and commits
 
 - Use npm. Validate implementation changes with `npm test`, `npm run lint`, and `npm run build` as appropriate.
-- Application versions are derived from `version.json` and Git history. Patch increases automatically with new commits; change the major/minor base only when the owner explicitly requests it. Do not add version-only commits for patch bumps.
+- `package.json` is the application version source. The pre-commit hook updates its patch and the lockfile in the same commit. Install hooks with `npm run prepare`; stage both package files completely if edited. Change major/minor only when the owner explicitly requests it. Do not add version-only patch commits or bypass the hook.
 
 - Before editing, inspect git status, recent commits, and the history or diffs of the files involved. Use the current code and relevant checks to confirm assumptions; history alone does not guarantee compatibility.
 - Reuse completed work and preserve existing behavior unless the task requires a change.

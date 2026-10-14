@@ -49,4 +49,4 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Inspect the staged diff and stage only files belonging to the task. Do not include unrelated user changes or secrets.
 - Every commit must have a concise English subject and a descriptive body explaining what changed, why, validation performed, and material limitations when applicable.
 - Report the commit hash and a brief summary to the user.
-- Do not push, amend commits, or rewrite history unless explicitly requested.
+- After committing verified task changes, push to the configured remote and branch unless the user asks otherwise. Report whether the push succeeded. Never force-push, amend commits, or rewrite history unless explicitly requested.

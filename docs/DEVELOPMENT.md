@@ -40,7 +40,11 @@ These commands reset the base patch to zero and set the anchor to the current co
 
 ## Cloud data
 
-The Supabase client library is installed, but authentication and database access are not implemented yet. `.env.example` reserves public configuration names. No personal progress is stored in browser localStorage. When cloud saves are implemented, restrict access with database policies before storing personal data.
+Copy `.env.example` to `.env.local` and set the project URL and publishable key. GitHub OAuth sign-in and local sign-out are implemented. Enable the GitHub provider in Supabase and allow both `https://faahkc.github.io/focuswilds/` and `http://localhost:5173/focuswilds/` as redirect URLs. OAuth uses PKCE and returns to the app root, so no server callback route is needed on Pages.
+
+Authentication tokens and the PKCE verifier are stored in sessionStorage for the current browser tab. Reloading the tab preserves the session; a new browser session may require signing in again. No game progress is stored in browser storage. Cloud saves and owner-only database policies are not implemented yet; login alone does not restrict signup to one account.
+
+For deployment, set repository Actions Variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The workflow injects them at build time. These values are public frontend configuration, not secrets. Never substitute database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
 
 ## GitHub Pages
 

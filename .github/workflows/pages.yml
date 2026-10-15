@@ -24,16 +24,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run lint
-      - name: Build with public Supabase configuration
-        env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "::error::Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in repository Actions Variables."
-            exit 1
-          fi
-          npm run build
+      - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
+import { DiscoveryJournal } from '@/components/discovery-journal'
+import type { DiscoveryJournal as Journal } from '@/lib/discoveries'
 import { supabase } from '@/lib/supabase'
-import { loadCompletedFocusCount, loadProgress, saveFocus } from '@/lib/focus-sessions'
+import { loadCompletedFocusCount, loadDiscoveryJournal, loadProgress, saveFocus } from '@/lib/focus-sessions'
 import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer } from '@/lib/pomodoro'
 
 export function Pomodoro({ userId }: { userId: string }) {
@@ -17,6 +19,7 @@ export function Pomodoro({ userId }: { userId: string }) {
   const [now, setNow] = useState(Date.now)
   const [progress, setProgress] = useState<{ day: string; sessions: number; minutes: number; error: string } | null>(null)
   const [companion, setCompanion] = useState<{ sessions: number; error: string } | null>(null)
+  const [journal, setJournal] = useState<{ data: Journal | null; error: string } | null>(null)
   const [saveError, setSaveError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [retry, setRetry] = useState(0)
@@ -83,6 +86,20 @@ export function Pomodoro({ userId }: { userId: string }) {
     return () => { active = false }
   }, [userId, refresh])
 
+  useEffect(() => {
+    if (!supabase) return
+    let active = true
+    void (async () => {
+      try {
+        const data = await loadDiscoveryJournal(supabase!, userId)
+        if (active) setJournal({ data, error: '' })
+      } catch {
+        if (active) setJournal({ data: null, error: 'Could not load your discoveries. Check your connection and retry.' })
+      }
+    })()
+    return () => { active = false }
+  }, [userId, refresh])
+
   const pending = timer.pending
   useEffect(() => {
     if (!pending || !supabase) return
@@ -113,7 +130,7 @@ export function Pomodoro({ userId }: { userId: string }) {
     setTimer(current => toggleTimer(current, timestamp, id))
   }
 
-  return (
+  return (<>
     <section id="journey" aria-label="Focus timer" className="grid gap-6 py-12 sm:grid-cols-[2fr_1fr]">
       <Card className="border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">{isFocus ? 'Time to focus' : 'Rest at camp'}</CardTitle></CardHeader>
@@ -156,5 +173,7 @@ export function Pomodoro({ userId }: { userId: string }) {
       </Card>
       </div>
     </section>
+    <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)} />
+    </>
   )
 }

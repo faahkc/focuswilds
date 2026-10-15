@@ -64,6 +64,12 @@ Moss is the fixed starter companion, drawn as a simple SVG. Each saved completed
 
 Companion progress comes from an exact all-time count of the account's completed focus sessions, using the existing RLS-protected table. It does not reset at midnight and needs no new table or migration. Breaks, cancelled/unfinished sessions, and pending unsaved sessions do not contribute. Retrying or reloading does not award extra EXP because the count uses saved rows rather than a separate reward balance. Progress refreshes after saving, on returning to the page, or through Refresh progress. Loading failures show an error with Retry rather than resetting the companion to Level 1.
 
+### Discovery journal
+
+Each saved completed focus session reveals one of three species: Fern Hare, Dawn Finch, or Amber Squirrel. Discoveries are added automatically; repeats increase that species' encounter count. The journal shows the latest saved encounter and hides undiscovered species. Moss remains the travelling companion; catching and choosing creatures are not implemented.
+
+Species derive deterministically from the final eight hexadecimal digits of the saved session UUID, modulo 3. The journal loads the account's completed focus sessions, including historical ones, in paginated completion order with UUID ordering as a stable tie-breaker. Reloading, retrying a save, or using another device reconstructs the same journal without extra tables or browser reward storage. Breaks and unfinished sessions are filtered out. Failed journal loads show Retry rather than an empty or partial collection. The mapping is fixed; persist discovery records before changing the species order or mapping. This is a simple noncompetitive discovery system, not a server-verified random reward.
+
 For deployment, set repository Actions Variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The workflow injects them at build time. These values are public frontend configuration, not secrets. Never substitute database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
 
 ## GitHub Pages

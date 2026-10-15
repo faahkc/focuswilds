@@ -39,7 +39,7 @@ export default function App() {
         </section>
         <p className="mt-6 text-sm text-[#c3cec1]">Sign in with GitHub to start focusing and save your progress.</p>
         </>}
-        <footer className="mt-16 border-t border-white/15 pt-6 text-sm text-[#c3cec1]">One focused session at a time. Your companion grows with you. Discoveries are coming later.</footer>
+        <footer className="mt-16 border-t border-white/15 pt-6 text-sm text-[#c3cec1]">One focused session at a time. Grow with your companion and discover who waits along the trail.</footer>
       </div>
     </main>
   )

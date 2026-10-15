@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { CompletedFocus } from './pomodoro'
+import { encounterIndex, type DiscoveryJournal } from './discoveries.ts'
 
 export async function saveFocus(client: SupabaseClient, userId: string, session: CompletedFocus) {
   const { error } = await client.from('focus_sessions').upsert({
@@ -35,4 +36,19 @@ export async function loadCompletedFocusCount(client: SupabaseClient, userId: st
   if (error) throw error
   if (count === null) throw new Error('Completed focus count was not returned')
   return count
+}
+
+export async function loadDiscoveryJournal(client: SupabaseClient, userId: string): Promise<DiscoveryJournal> {
+  const journal: DiscoveryJournal = { encounters: [0, 0, 0], latest: null }
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await client.from('focus_sessions').select('id,finished_at')
+      .eq('user_id', userId).eq('session_type', 'focus').eq('status', 'completed')
+      .order('finished_at', { ascending: false }).order('id').range(offset, offset + 999)
+    if (error) throw error
+    for (const row of data ?? []) {
+      journal.latest ??= { id: row.id, finishedAt: row.finished_at }
+      journal.encounters[encounterIndex(row.id)] += 1
+    }
+    if (!data || data.length < 1000) return journal
+  }
 }

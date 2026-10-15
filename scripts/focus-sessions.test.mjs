@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createClient } from '@supabase/supabase-js'
-import { saveFocus, loadProgress, loadCompletedFocusCount } from '../src/lib/focus-sessions.ts'
+import { saveFocus, loadProgress, loadCompletedFocusCount, loadDiscoveryJournal } from '../src/lib/focus-sessions.ts'
 
 const userId = '00000000-0000-4000-8000-000000000001'
 const session = {
@@ -20,6 +20,7 @@ test('a lost save response can be retried with the same ID and without updating 
   const api = client(async (input, options) => {
     const url = new URL(input)
     if (options.method === 'HEAD') return new Response(null, { headers: { 'Content-Range': `*/${rows.size}` } })
+    if (options.method === 'GET') return Response.json([...rows.values()].map(row => ({ id: row.id, finished_at: row.finished_at })))
     assert.equal(url.searchParams.get('on_conflict'), 'id')
     assert.match(new Headers(options.headers).get('prefer'), /resolution=ignore-duplicates/)
     const row = JSON.parse(options.body)
@@ -35,12 +36,17 @@ test('a lost save response can be retried with the same ID and without updating 
     return new Response(null, { status: 201 })
   })
   assert.equal(await loadCompletedFocusCount(api, userId), 0)
+  assert.deepEqual(await loadDiscoveryJournal(api, userId), { encounters: [0, 0, 0], latest: null })
   await assert.rejects(saveFocus(api, userId, session))
   await saveFocus(api, userId, session)
   assert.equal(attempts, 2)
   assert.equal(rows.size, 1)
   assert.equal(await loadCompletedFocusCount(api, userId), 1)
   assert.equal(await loadCompletedFocusCount(api, userId), 1)
+  const journal = await loadDiscoveryJournal(api, userId)
+  assert.deepEqual(journal.encounters, [0, 0, 1])
+  assert.deepEqual(journal.latest, { id: session.id, finishedAt: session.completedAt })
+  assert.deepEqual(await loadDiscoveryJournal(api, userId), journal)
 })
 
 test('daily totals include existing variable-duration focus sessions across API pages', async () => {
@@ -67,8 +73,39 @@ test('permission and network failures stay errors rather than appearing saved or
   await assert.rejects(saveFocus(denied, userId, session), { code: '42501' })
   await assert.rejects(loadProgress(denied, userId, session.startedAt, session.completedAt), { code: '42501' })
   await assert.rejects(loadCompletedFocusCount(denied, userId), { code: '42501' })
+  await assert.rejects(loadDiscoveryJournal(denied, userId), { code: '42501' })
   const offline = client(async () => { throw new Error('Offline') })
   await assert.rejects(loadProgress(offline, userId, session.startedAt, session.completedAt))
+})
+
+test('the journal reads saved focus history for the account across API pages', async () => {
+  let calls = 0
+  const api = client(async input => {
+    const params = new URL(input).searchParams
+    assert.equal(params.get('user_id'), `eq.${userId}`)
+    assert.equal(params.get('status'), 'eq.completed')
+    assert.equal(params.get('session_type'), 'eq.focus')
+    assert.equal(params.has('finished_at'), false)
+    assert.equal(params.get('order'), 'finished_at.desc,id.asc')
+    assert.equal(params.get('offset'), String(calls * 1000))
+    const offset = calls++ * 1000
+    return Response.json(Array.from({ length: offset === 0 ? 1000 : 2 }, (_, index) => ({
+      id: `00000000-0000-4000-8000-${(offset + index).toString(16).padStart(12, '0')}`,
+      finished_at: session.completedAt,
+    })))
+  })
+  const journal = await loadDiscoveryJournal(api, userId)
+  assert.deepEqual(journal.encounters, [334, 334, 334])
+  assert.deepEqual(journal.latest, { id: '00000000-0000-4000-8000-000000000000', finishedAt: session.completedAt })
+  assert.equal(calls, 2)
+})
+
+test('a failed later journal page does not return a partial collection', async () => {
+  let calls = 0
+  const api = client(async () => calls++ === 0
+    ? Response.json(Array.from({ length: 1000 }, () => ({ id: session.id, finished_at: session.completedAt })))
+    : Response.json({ message: 'Load failed', code: '42501' }, { status: 403 }))
+  await assert.rejects(loadDiscoveryJournal(api, userId), { code: '42501' })
 })
 
 test('companion EXP counts only this account’s completed focus sessions across all dates', async () => {

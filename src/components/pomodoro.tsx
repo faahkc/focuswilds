@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
 import { FocusHistory } from '@/components/focus-history'
+import { JourneyScene } from '@/components/journey-scene'
 import { DEFAULT_FOCUS_TITLE, MAX_FOCUS_TITLE_LENGTH } from '@/lib/focus-title'
 import { SOURCE_OWNER_ID, dayKey } from '@/lib/account'
 import type { CompanionId } from '@/lib/companion'
@@ -126,6 +127,7 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
   }
 
   return (<>
+    <JourneyScene phase={timer.phase} running={timer.deadline !== null} selected={selection.value} sessions={overview.profile.sessions} />
     <section id="journey" aria-label="Focus timer" className="grid gap-6 py-12 sm:grid-cols-[2fr_1fr]">
       <Card className="border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">{isFocus ? 'Time to focus' : 'Rest at camp'}</CardTitle></CardHeader>

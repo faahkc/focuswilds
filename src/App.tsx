@@ -4,13 +4,14 @@ import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScreenLayout } from '@/components/screen-layout'
 
 const FocusJourney = lazy(() => import('@/components/focus-journey').then(module => ({ default: module.FocusJourney })))
 
 export default function App() {
   const [session, setSession] = useState<User | null>(null)
   return (
-    <main className="min-h-screen bg-[#14251f] px-6 py-10 text-[#f4eddc] sm:py-16">
+    <ScreenLayout><main className="min-h-screen bg-[#0d1317] px-4 py-6 text-[#f4eddc] sm:px-6 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6">
           <span className="font-serif text-2xl tracking-wide">Focuswilds</span>
@@ -42,6 +43,6 @@ export default function App() {
         </>}
         <footer className="mt-16 border-t border-white/15 pt-6 text-sm text-[#c3cec1]">One focused session at a time. Grow with your companion and discover who waits along the trail.</footer>
       </div>
-    </main>
+    </main></ScreenLayout>
   )
 }

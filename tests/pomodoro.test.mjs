@@ -1,10 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { FOCUS_MS, BREAK_MS, newTimer, remaining, advance, toggleTimer, resetTimer, restoreTimer, todayBounds } from '../src/lib/pomodoro.ts'
+import { FOCUS_MS, BREAK_MS, newTimer, remaining, advance, toggleTimer, resetTimer, restoreTimer, todayBounds, dailyGoalProgress } from '../src/lib/pomodoro.ts'
 
 const id = '00000000-0000-4000-8000-000000000001'
 const otherId = '00000000-0000-4000-8000-000000000002'
 const now = Date.parse('2026-10-15T08:00:00Z')
+
+test('the daily goal reaches four saved sessions and stays full beyond the target', () => {
+  assert.deepEqual(dailyGoalProgress(0), { completed: 0, remaining: 4 })
+  assert.deepEqual(dailyGoalProgress(1), { completed: 1, remaining: 3 })
+  assert.deepEqual(dailyGoalProgress(3), { completed: 3, remaining: 1 })
+  assert.deepEqual(dailyGoalProgress(4), { completed: 4, remaining: 0 })
+  assert.deepEqual(dailyGoalProgress(5), { completed: 4, remaining: 0 })
+})
 
 test('deadline follows elapsed time after background throttling and reload', () => {
   const running = toggleTimer(newTimer(id), now, otherId)

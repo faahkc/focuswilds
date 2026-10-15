@@ -16,7 +16,7 @@ npm run build
 npm run preview
 ```
 
-React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP.
+React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP. Tests live in `tests/`; `npm test` runs the JavaScript tests, while SQL tests run in SQL Editor. Development scripts remain in `scripts/` and database migrations in `migrations/`.
 
 ## Application version
 
@@ -74,7 +74,7 @@ Species derive deterministically from the final eight hexadecimal digits of the 
 
 Run `migrations/202610150001_companion_preferences.sql` once in the existing project's SQL Editor. This creates `companion_preferences` with one selected companion per account, without changing existing focus sessions or their owner-only policies. Its RLS policy allows authenticated users to read/write only their own preference; writes additionally require Moss or a species discovered in that account's completed focus history. The database applies the same unsigned hexadecimal modulo-3 mapping as the browser. Anonymous access and deletion are not granted. The migration includes mapping assertions.
 
-Run `scripts/companion-preferences.test.sql` in SQL Editor to test actual grants and RLS, using the most recent account with a completed focus session. It tests selecting Moss and a discovered species, cross-account read/write isolation, and rejection of an undiscovered species. Test writes are rolled back.
+Run `tests/companion-preferences.test.sql` in SQL Editor to test actual grants and RLS, using the most recent account with a completed focus session. It tests selecting Moss and a discovered species, cross-account read/write isolation, and rejection of an undiscovered species. Test writes are rolled back.
 
 Choose Travel with a discovered creature in the journal, or Travel with Moss on the companion card to return to the starter. The portrait, name, and description update only after the server confirms the selection. The same preference reloads on another device or after returning to the page. A missing preference defaults to Moss; failed loads show an error and disable initial selection rather than overwriting an existing preference. Save failures keep the last confirmed selection and offer reload or another attempt. Reload after an uncertain response retrieves whatever the server committed. Concurrent devices use the last successful write; no live subscription is added.
 

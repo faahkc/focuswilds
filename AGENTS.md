@@ -31,6 +31,8 @@ Take the first option that fully works:
 
 - Keep responses concise and actionable.
 - Keep README focused on the product concept and user experience. Do not include specific backend providers, configuration, migration/restore steps, or implementation details; put necessary technical guidance in docs/DEVELOPMENT.md.
+- Keep visual references, inspiration titles, and private design discussions out of repository files, commit messages, and public UI copy.
+- Design desktop layouts for wide screens and phone layouts for portrait use. Preserve accessibility zoom, reduced-motion support, and timer state during rotation. Installation as a web app is a product goal; do not claim PWA support before it exists.
 - Follow the existing project structure and coding conventions.
 - Use the package manager indicated by the project's lockfile.
 - Use the project's existing build, lint, and test commands when available.
@@ -50,6 +52,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - No realtime database listeners, polling, refetch on focus/visibility, or unbounded retries. Deduplicate simultaneous reads. Reuse transaction results instead of rereading after writes.
 - Completed sessions and summary updates must commit atomically and idempotently. Import backups in bounded resumable chunks after local validation. Do not reset or overwrite existing user progress during import.
 - Use the account timezone Asia/Bangkok consistently across devices. Document actual read/write budgets and any change that increases them.
+- Keep initial scene assets within 500 kB; reuse compressed scene images and small sprites. Load artwork after sign-in, avoid GIF/video loops and cloud-backed asset requests, and do not commit unused full-resolution originals.
 
 ## Git history and commits
 

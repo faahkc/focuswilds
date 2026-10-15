@@ -1,0 +1,159 @@
+.wilds-shell {
+  --background: #101715;
+  --foreground: #eee5cf;
+  --card: #19201a;
+  --card-foreground: #eee5cf;
+  --primary: #d5b46e;
+  --primary-foreground: #171b16;
+  --secondary: #30382b;
+  --secondary-foreground: #eee5cf;
+  --ring: #e0c183;
+  height: 100svh;
+  overflow: hidden;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 15% 0%, #34412b55, transparent 55%), repeating-linear-gradient(0deg, #c5aa6b03 0 1px, transparent 1px 4px), #0d1312;
+  color: var(--foreground);
+}
+.wilds-shell > div { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.wilds-header { flex-shrink: 0; border-bottom: 2px solid #6d6243; padding-bottom: 12px; }
+.wilds-header > span:first-child { color: #e3cc94; text-shadow: 2px 2px #000; }
+.wilds-shell [data-slot="badge"] { border-radius: 0; font-variant-numeric: tabular-nums; }
+.wilds-shell [data-slot="card"], .wilds-window [data-slot="card"] {
+  border: 1px solid #786747; border-radius: 2px;
+  background: linear-gradient(135deg, #283025 0%, #1a211c 45%, #151c18 100%);
+  box-shadow: inset 0 0 0 3px #0b110e, inset 0 0 0 4px #78674740, 3px 3px 0 #070b09;
+  color: #eee5cf;
+}
+.wilds-shell [data-slot="card-header"], .wilds-window [data-slot="card-header"] { padding: 4px 22px 12px; border-bottom: 1px solid #87734b55; }
+.wilds-shell [data-slot="card-title"], .wilds-window [data-slot="card-title"] { color: #e0c58a; }
+.wilds-shell [data-slot="card-content"], .wilds-window [data-slot="card-content"] { padding-inline: 22px; }
+.wilds-shell [data-slot="button"], .wilds-window [data-slot="button"] {
+  border-radius: 2px; border: 1px solid #a68b52; min-height: 40px;
+  box-shadow: inset 0 0 0 2px #0003, 2px 2px 0 #070b09;
+  padding-inline: 14px; transition: background-color .15s, color .15s;
+}
+.wilds-shell [data-slot="button"]:focus-visible, .wilds-window [data-slot="button"]:focus-visible { outline: 2px solid #f0d79c; outline-offset: 3px; }
+.wilds-shell [data-slot="button"]:active, .wilds-window [data-slot="button"]:active { transform: translateY(1px); }
+.wilds-shell input { border-radius: 1px; border-color: #8c784f; background: #0e1511; min-height: 42px; font-size: 16px; }
+.wilds-kicker, .wilds-emblem-label { color: #bca672; font-size: 10px; letter-spacing: .19em; text-transform: uppercase; }
+.wilds-toolbar { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px; }
+.wilds-menu { display: flex; gap: 8px; }
+.wilds-menu [data-slot="button"] { min-height: 48px; gap: 8px; background: #252e24; color: #dac28b; }
+.wilds-menu svg { width: 20px !important; height: 20px !important; }
+.wilds-board { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); gap: 20px; flex: 1; min-height: 0; padding-bottom: 4px; }
+.wilds-panels { display: contents; }
+.wilds-board .journey-scene { margin: 0; height: 100%; min-height: 0; border-radius: 2px; border: 2px solid #786747; box-shadow: 3px 3px 0 #070b09; }
+.wilds-board .journey-landscape { object-position: 54% 50%; }
+.wilds-board .journey-caption { padding: 24px; flex-direction: column; align-items: start; }
+.wilds-board .journey-traveler { bottom: 29%; left: 43%; width: 96px; }
+.wilds-board .is-resting .journey-traveler { left: 56%; }
+.wilds-board .journey-fire { bottom: 29%; }
+.wilds-timer { min-height: 0; justify-content: center; gap: 16px; }
+.wilds-timer [data-slot="card-content"] { display: flex; flex-direction: column; gap: 16px; }
+.wilds-timer [data-slot="card-content"] > * { margin-block: 0; }
+.wilds-clock { color: #f1dba4; text-align: center; line-height: 1.1; letter-spacing: -.04em; text-shadow: 3px 4px #090e0b; border-block: 1px solid #8a744c55; padding-block: 14px; }
+.wilds-timer-note { display: none; }
+.wilds-timer [role="status"] { font-size: 12px; line-height: 1.5; }
+.wilds-progress-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.wilds-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.wilds-companion-portrait { background: radial-gradient(ellipse at 50% 70%, #a58d4933, transparent 70%); border-bottom: 2px solid #766845; }
+.wilds-discovery { background: #0f1813; border: 1px solid #766845; box-shadow: inset 0 0 0 3px #202b21; }
+.wilds-window {
+  --primary: #d5b46e; --primary-foreground: #171b16; --secondary: #30382b; --secondary-foreground: #eee5cf;
+  width: min(940px, calc(100% - 24px)); max-height: calc(100svh - 32px); margin: auto; padding: 0;
+  color: #eee5cf; background: #141c16; border: 2px solid #a48b58; border-radius: 2px;
+  box-shadow: 0 0 0 4px #080e0b, 0 24px 80px #000b; overflow: hidden;
+}
+.wilds-window[open] { display: flex; flex-direction: column; }
+.wilds-window::backdrop { background: #050a08da; }
+.wilds-window-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 22px; background: #293023; border-bottom: 1px solid #a48b58; flex-shrink: 0; }
+.wilds-window-content { overflow: auto; padding: 20px; overscroll-behavior: contain; min-height: 0; }
+.wilds-window-content, .wilds-window [role="region"] { scrollbar-width: none; }
+.wilds-window-content::-webkit-scrollbar, .wilds-window [role="region"]::-webkit-scrollbar { display: none; }
+.wilds-window progress { border: 1px solid #8b774e; border-radius: 0; background: #0c130f; }
+.wilds-window progress::-webkit-progress-bar { background: #0c130f; }
+.wilds-window progress::-webkit-progress-value { background: #b5a064; }
+.wilds-window progress::-moz-progress-bar { background: #b5a064; }
+.wilds-window table { background: #111a14; }
+.wilds-window thead { color: #e1c68d; background: #2c3325; }
+.wilds-window tbody tr:nth-child(even) { background: #d0b47708; }
+.wilds-window [data-slot="card"] { margin-top: 0; }
+.wilds-welcome { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: center; padding-block: 24px; }
+.wilds-introduction h1 { font-size: clamp(32px, 4.7vw, 68px); }
+.wilds-introduction > p { margin-block: 16px; }
+.wilds-introduction > p:first-child { margin-top: 0; }
+.wilds-introduction > p:nth-of-type(2) { font-size: 16px; }
+.wilds-emblem { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; height: 100%; position: relative; }
+.wilds-emblem > img { width: min(100%, 28svh); height: auto; image-rendering: crisp-edges; }
+.wilds-party { display: flex; justify-content: center; gap: 24px; }
+.wilds-party svg { width: 44px; height: 50px; }
+.wilds-emblem-label { padding-block: 12px; text-align: center; }
+.wilds-chapters { flex-shrink: 0; }
+.wilds-chapters [data-slot="card"] { gap: 10px; padding-block: 16px; }
+.wilds-chapters [data-slot="card-content"] { font-size: 13px; }
+.wilds-footer { flex-shrink: 0; text-align: center; padding-top: 18px; color: #9fa98e; }
+@media (max-width: 767px) {
+  .wilds-shell { padding: 12px; }
+  .wilds-header { gap: 8px; padding-bottom: 8px; }
+  .wilds-header > span:first-child { font-size: 20px; }
+  .wilds-header > [data-slot="badge"] { display: none; }
+  .wilds-header [aria-label="Account"] > div > span { max-width: 110px; }
+  .wilds-header [data-slot="button"] { min-height: 44px; padding-inline: 10px; font-size: 12px; }
+  .wilds-toolbar { padding-block: 10px; gap: 8px; }
+  .wilds-toolbar h1 { font-size: 18px; }
+  .wilds-kicker { font-size: 9px; }
+  .wilds-menu { gap: 6px; }
+  .wilds-menu [data-slot="button"] { min-width: 44px; min-height: 44px; padding: 8px; }
+  .wilds-menu-label { display: none; }
+  .wilds-board { grid-template-columns: 1fr; grid-template-rows: minmax(100px, 1fr) auto; gap: 10px; }
+  .wilds-board .journey-caption { padding: 12px; flex-direction: row; align-items: end; gap: 8px; }
+  .wilds-board .journey-caption .font-serif { font-size: 19px; margin-top: 4px; }
+  .wilds-board .journey-caption .text-sm { display: none; }
+  .wilds-board .journey-caption .text-xs { font-size: 9px; }
+  .wilds-board .journey-caption [data-slot="button"] { font-size: 11px; padding: 8px; }
+  .wilds-board .journey-traveler { bottom: 32%; width: 64px; }
+  .wilds-timer { padding-block: 12px; gap: 8px; }
+  .wilds-timer [data-slot="card-header"] { padding: 0 16px 6px; }
+  .wilds-timer [data-slot="card-title"] { font-size: 20px; }
+  .wilds-timer [data-slot="card-content"] { padding-inline: 16px; gap: 8px; }
+  .wilds-clock { font-size: clamp(42px, 8svh, 64px); padding-block: 4px; }
+  .wilds-timer [data-slot="button"] { min-height: 44px; flex: 1; }
+  .wilds-timer label { font-size: 12px; }
+  .wilds-progress-panels { grid-template-columns: 1fr; }
+  .wilds-window-header { padding: 12px; }
+  .wilds-window-header h2 { font-size: 20px; }
+  .wilds-window-content { padding: 12px; }
+  .wilds-window [data-slot="button"] { min-height: 44px; }
+  .wilds-welcome { grid-template-columns: 1fr; gap: 12px; padding-block: 16px; }
+  .wilds-introduction h1 { font-size: clamp(30px, 5svh, 44px); }
+  .wilds-introduction > p { margin-block: 12px; font-size: 13px; }
+  .wilds-introduction > p:nth-of-type(2) { font-size: 14px; line-height: 1.6; }
+  .wilds-introduction [data-slot="button"] { margin-top: 4px; min-height: 44px; }
+  .wilds-emblem { display: none; }
+  .wilds-chapters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .wilds-chapters [data-slot="card"] { padding-block: 12px; gap: 0; }
+  .wilds-chapters [data-slot="card-header"] { padding: 4px 10px; border-bottom: 0; }
+  .wilds-chapters [data-slot="card-title"] { font-size: 16px; }
+  .wilds-chapters [data-slot="card-content"] { display: none; }
+  .wilds-chapters .wilds-kicker { font-size: 8px; letter-spacing: .04em; }
+  .wilds-footer { font-size: 11px; padding-top: 12px; }
+}
+@media (max-height: 600px) and (min-width: 768px) {
+  .wilds-toolbar { padding-block: 8px; }
+  .wilds-timer { gap: 8px; padding-block: 12px; }
+  .wilds-timer [data-slot="card-content"] { gap: 8px; }
+  .wilds-clock { font-size: 60px; padding-block: 4px; }
+  .wilds-welcome { padding-block: 12px; }
+  .wilds-introduction h1 { font-size: 36px; }
+  .wilds-introduction > p { margin-block: 8px; }
+  .wilds-chapters [data-slot="card-content"] { display: none; }
+}
+@media (max-width: 767px) and (max-height: 700px) {
+  .wilds-toolbar > div:first-child { display: none; }
+  .wilds-toolbar { justify-content: end; }
+  .wilds-timer { padding-block: 8px; }
+  .wilds-timer [data-slot="card-title"] { font-size: 18px; }
+  .wilds-timer [role="status"] { font-size: 11px; }
+  .wilds-clock { font-size: 44px; }
+  .wilds-board .journey-caption .font-serif { font-size: 16px; }
+}

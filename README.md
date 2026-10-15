@@ -26,4 +26,4 @@ Follow your daily progress, revisit familiar companions, and pick up your journe
 
 ---
 
-*Currently taking shape. The adventure described here is the vision for Focuswilds; it is not playable yet.*
+*Currently taking shape. GitHub sign-in, a 25/5 focus timer, and daily cloud progress are implemented. Companions, discoveries, and the adventure described above are still the vision. Cloud progress uses the existing owner-only Supabase table described in [Development](docs/DEVELOPMENT.md#focus-sessions).*

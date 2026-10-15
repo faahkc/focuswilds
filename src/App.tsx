@@ -14,7 +14,7 @@ export default function App() {
     <ScreenLayout><main className="min-h-screen bg-[#0d1317] px-4 py-6 text-[#f4eddc] sm:px-6 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6">
-          <span className="font-serif text-2xl tracking-wide">Focuswilds</span>
+          <span className="flex items-center gap-3 font-serif text-2xl tracking-wide"><img src={`${import.meta.env.BASE_URL}favicon.png`} alt="" width="32" height="32" className="size-8" />Focuswilds</span>
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{__APP_VERSION__}</Badge>
           <AuthPanel onSessionChange={setSession} />
         </header>

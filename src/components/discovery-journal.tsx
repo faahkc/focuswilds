@@ -1,10 +1,8 @@
-import { Bird, Rabbit, Squirrel } from 'lucide-react'
+import { PixelCompanion } from '@/components/pixel-companion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { creatures, encounterIndex, type DiscoveryJournal as Journal } from '@/lib/discoveries'
 import type { CompanionId } from '@/lib/companion'
-
-const icons = { rabbit: Rabbit, bird: Bird, squirrel: Squirrel }
 
 export function DiscoveryJournal({ journal, error, onRetry, selected, saving, onSelect }: {
   journal: Journal | null
@@ -33,9 +31,8 @@ export function DiscoveryJournal({ journal, error, onRetry, selected, saving, on
           <ul aria-label="Discovered creatures" className="grid gap-4 sm:grid-cols-3">
             {creatures.map((creature, index) => {
               const count = journal.encounters[index]
-              const Icon = icons[creature.icon]
               return <li key={creature.name} className="rounded-xl border border-white/15 p-5 text-center">
-                {count > 0 ? <Icon aria-hidden="true" className="mx-auto mb-3 size-14" style={{ color: creature.color }} />
+                {count > 0 ? <div aria-hidden="true" className="mx-auto mb-3 h-16 w-14"><PixelCompanion selected={creature.icon} /></div>
                   : <span aria-hidden="true" className="mb-3 block text-5xl text-[#c3cec1]">?</span>}
                 <h2 className="font-serif text-xl">{count > 0 ? creature.name : 'Undiscovered'}</h2>
                 <p className="mt-2 text-sm text-[#c3cec1]">{count > 0 ? creature.description : 'A new friend waits along the trail.'}</p>

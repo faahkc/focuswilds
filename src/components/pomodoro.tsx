@@ -138,7 +138,7 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
             <input id="focus-title" type="text" value={timer.title} maxLength={MAX_FOCUS_TITLE_LENGTH} placeholder={DEFAULT_FOCUS_TITLE}
               disabled={timer.startedAt !== null || Boolean(pending)}
               onChange={event => { const title = event.target.value; setTimer(current => ({ ...current, title })) }}
-              aria-describedby="focus-title-hint" className="w-full rounded-lg border border-white/25 bg-[#14251f] px-3 py-2 text-inherit focus-visible:outline-2 focus-visible:outline-[#e8c782] disabled:opacity-70" />
+              aria-describedby="focus-title-hint" className="w-full rounded-lg border border-white/25 bg-[#14251f] px-3 py-2 text-base text-inherit focus-visible:outline-2 focus-visible:outline-[#e8c782] disabled:opacity-70" />
             <p id="focus-title-hint" className="text-sm text-[#c3cec1]">Optional, up to {MAX_FOCUS_TITLE_LENGTH} characters. Blank names use “{DEFAULT_FOCUS_TITLE}”. The name stays fixed once you start.</p>
           </div> : <p className="break-words text-sm text-[#e8c782]">Completed: {timer.title}</p>}
           <p role="timer" aria-label={`${isFocus ? 'Focus' : 'Break'} time remaining`} className="font-mono text-7xl tabular-nums sm:text-8xl">{time}</p>

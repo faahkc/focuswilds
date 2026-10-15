@@ -39,15 +39,16 @@ test('history follows calendar days over daylight-saving and year boundaries', (
 
 test('history groups by local completion date, sums recorded durations, and sorts newest first', () => {
   inTimezone('Asia/Bangkok', () => {
-    assert.deepEqual(summarizeHistory([
+    const rows = [
       { finished_at: '2026-10-14T16:59:59Z', duration_seconds: 60 },
       { finished_at: '2026-10-14T17:00:00Z', duration_seconds: 1500 },
       { finished_at: '2026-10-15T08:00:00Z', duration_seconds: 600 },
-    ]), { sessions: 3, minutes: 36, days: [
+    ]
+    assert.deepEqual(summarizeHistory(rows), { sessions: 3, minutes: 36, entries: rows.map(row => ({ ...row, title: 'Focus session' })), days: [
       { date: '2026-10-15', sessions: 2, minutes: 35 },
       { date: '2026-10-14', sessions: 1, minutes: 1 },
     ] })
-    assert.deepEqual(summarizeHistory([]), { sessions: 0, minutes: 0, days: [] })
+    assert.deepEqual(summarizeHistory([]), { sessions: 0, minutes: 0, days: [], entries: [] })
   })
 })
 
@@ -60,10 +61,11 @@ test('history requests only saved focus sessions for this account and the select
       assert.equal(params.get('user_id'), `eq.${userId}`)
       assert.equal(params.get('status'), 'eq.completed')
       assert.equal(params.get('session_type'), 'eq.focus')
+      assert.equal(params.get('select'), 'id,title,finished_at,duration_seconds')
       assert.deepEqual(params.getAll('finished_at'), [`lt.${expected.end}`, ...(expected.start ? [`gte.${expected.start}`] : [])])
       return Response.json([])
     })
-    assert.deepEqual(await loadFocusHistory(api, userId, period, now), { sessions: 0, minutes: 0, days: [] })
+    assert.deepEqual(await loadFocusHistory(api, userId, period, now), { sessions: 0, minutes: 0, days: [], entries: [] })
   }
 })
 
@@ -88,4 +90,15 @@ test('a failed later history page rejects the result instead of showing partial 
     ? Response.json(Array.from({ length: 1000 }, () => ({ finished_at: '2026-10-15T08:00:00Z', duration_seconds: 1500 })))
     : Response.json({ code: '42501', message: 'Permission denied' }, { status: 403 }))
   await assert.rejects(loadFocusHistory(api, userId, 'all', now), { code: '42501' })
+})
+
+test('individual history entries preserve named sessions and default old or blank names', () => {
+  const rows = [
+    { id: 'first', title: '  อ่านหนังสือ  ', finished_at: '2026-10-15T08:00:00Z', duration_seconds: 1500 },
+    { id: 'second', title: ' ', finished_at: '2026-10-15T07:00:00Z', duration_seconds: 1500 },
+  ]
+  const history = summarizeHistory(rows)
+  assert.deepEqual(history.entries.map(row => [row.id, row.title]), [['first', 'อ่านหนังสือ'], ['second', 'Focus session']])
+  assert.equal(history.sessions, 2)
+  assert.equal(history.minutes, 50)
 })

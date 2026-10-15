@@ -51,6 +51,20 @@ export function FocusHistory({ userId, todayStart, refresh }: { userId: string; 
               </tr>)}</tbody>
             </table>
           </div>}
+          {current.result.entries.length > 0 && <details className="rounded-lg border border-white/15 p-3">
+            <summary className="cursor-pointer font-medium">View individual sessions</summary>
+            <div role="region" aria-label="Individual focus sessions" tabIndex={0} className="mt-3 max-h-96 overflow-auto">
+              <table className="w-full text-left text-sm">
+                <caption className="sr-only">Focus session names, local completion times, and durations</caption>
+                <thead><tr><th scope="col" className="p-3">Session</th><th scope="col" className="p-3">Completed</th><th scope="col" className="p-3 text-right">Minutes</th></tr></thead>
+                <tbody>{current.result.entries.map(entry => <tr key={entry.id} className="border-t border-white/10">
+                  <th scope="row" className="max-w-xs break-words p-3 font-normal">{entry.title}</th>
+                  <td className="p-3"><time dateTime={entry.finished_at}>{new Date(entry.finished_at).toLocaleString()}</time></td>
+                  <td className="p-3 text-right tabular-nums">{Math.floor(entry.duration_seconds / 60)}</td>
+                </tr>)}</tbody>
+              </table>
+            </div>
+          </details>}
         </>}
         <Button variant="secondary" onClick={() => setRetry(value => value + 1)}>Refresh history</Button>
       </CardContent>

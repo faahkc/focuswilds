@@ -8,6 +8,7 @@ const session = {
   id: '00000000-0000-4000-8000-000000000002',
   startedAt: '2026-10-15T08:00:00.000Z',
   completedAt: '2026-10-15T08:25:00.000Z',
+  title: 'อ่านหนังสือ',
 }
 const client = fetch => createClient('https://example.supabase.co', 'test-public-key', {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -31,6 +32,7 @@ test('a lost save response can be retried with the same ID and without updating 
     assert.equal(row.duration_seconds, 1500)
     assert.equal(row.started_at, session.startedAt)
     assert.equal(row.finished_at, session.completedAt)
+    assert.equal(row.title, session.title)
     if (!rows.has(row.id)) rows.set(row.id, row)
     if (++attempts === 1) throw new Error('Response lost after database commit')
     return new Response(null, { status: 201 })

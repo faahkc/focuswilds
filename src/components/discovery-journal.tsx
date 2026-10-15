@@ -2,13 +2,17 @@ import { Bird, Rabbit, Squirrel } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { creatures, encounterIndex, type DiscoveryJournal as Journal } from '@/lib/discoveries'
+import type { CompanionId } from '@/lib/companion'
 
 const icons = { rabbit: Rabbit, bird: Bird, squirrel: Squirrel }
 
-export function DiscoveryJournal({ journal, error, onRetry }: {
+export function DiscoveryJournal({ journal, error, onRetry, selected, saving, onSelect }: {
   journal: Journal | null
   error: string
   onRetry: () => void
+  selected: CompanionId | null
+  saving: boolean
+  onSelect: (selected: CompanionId) => void
 }) {
   const latest = journal?.latest ? creatures[encounterIndex(journal.latest.id)] : null
 
@@ -36,6 +40,10 @@ export function DiscoveryJournal({ journal, error, onRetry }: {
                 <h2 className="font-serif text-xl">{count > 0 ? creature.name : 'Undiscovered'}</h2>
                 <p className="mt-2 text-sm text-[#c3cec1]">{count > 0 ? creature.description : 'A new friend waits along the trail.'}</p>
                 {count > 0 && <p className="mt-3 text-sm text-[#e8c782]">Encountered {count} {count === 1 ? 'time' : 'times'}</p>}
+                {count > 0 && <Button className="mt-3" variant="secondary" aria-pressed={selected === creature.icon}
+                  disabled={saving || selected === null || selected === creature.icon} onClick={() => onSelect(creature.icon)}>
+                  {selected === creature.icon ? 'Travelling with you' : `Travel with ${creature.name}`}
+                </Button>}
               </li>
             })}
           </ul>

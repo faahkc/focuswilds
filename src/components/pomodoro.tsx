@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
-import type { DiscoveryJournal as Journal } from '@/lib/discoveries'
+import { creatures, type DiscoveryJournal as Journal } from '@/lib/discoveries'
+import { loadSelectedCompanion, saveSelectedCompanion, type CompanionId } from '@/lib/companion'
 import { supabase } from '@/lib/supabase'
 import { loadCompletedFocusCount, loadDiscoveryJournal, loadProgress, saveFocus } from '@/lib/focus-sessions'
 import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer } from '@/lib/pomodoro'
@@ -20,6 +21,9 @@ export function Pomodoro({ userId }: { userId: string }) {
   const [progress, setProgress] = useState<{ day: string; sessions: number; minutes: number; error: string } | null>(null)
   const [companion, setCompanion] = useState<{ sessions: number; error: string } | null>(null)
   const [journal, setJournal] = useState<{ data: Journal | null; error: string } | null>(null)
+  const [selection, setSelection] = useState<{ value: CompanionId | null; error: string }>({ value: null, error: '' })
+  const [savingSelection, setSavingSelection] = useState(false)
+  const [selectionSaveError, setSelectionSaveError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [retry, setRetry] = useState(0)
@@ -100,6 +104,35 @@ export function Pomodoro({ userId }: { userId: string }) {
     return () => { active = false }
   }, [userId, refresh])
 
+  useEffect(() => {
+    if (!supabase || savingSelection) return
+    let active = true
+    void (async () => {
+      try {
+        const value = await loadSelectedCompanion(supabase!, userId)
+        if (active) setSelection({ value, error: '' })
+      } catch {
+        if (active) setSelection(current => ({ ...current, error: 'Could not load your selected companion. Check your connection and reload the selection.' }))
+      }
+    })()
+    return () => { active = false }
+  }, [userId, refresh, savingSelection])
+
+  async function selectCompanion(selected: CompanionId) {
+    if (!supabase || savingSelection || selection.value === null) return
+    if (selected !== 'moss' && !journal?.data?.encounters[creatures.findIndex(creature => creature.icon === selected)]) return
+    setSavingSelection(true)
+    setSelectionSaveError('')
+    try {
+      const value = await saveSelectedCompanion(supabase, userId, selected)
+      setSelection({ value, error: '' })
+    } catch {
+      setSelectionSaveError('Could not confirm your selection was saved. Reload the selection or try choosing again when connected.')
+    } finally {
+      setSavingSelection(false)
+    }
+  }
+
   const pending = timer.pending
   useEffect(() => {
     if (!pending || !supabase) return
@@ -157,7 +190,8 @@ export function Pomodoro({ userId }: { userId: string }) {
         </CardContent>
       </Card>
       <div className="space-y-6">
-      <CompanionCard completedSessions={companion?.sessions ?? null} error={companion?.error ?? ''} onRetry={() => setRefresh(value => value + 1)} />
+      <CompanionCard completedSessions={companion?.sessions ?? null} error={companion?.error ?? ''} onRetry={() => { setSelectionSaveError(''); setRefresh(value => value + 1) }}
+        selected={selection.value} selectionError={selectionSaveError || selection.error} saving={savingSelection} onSelectMoss={() => void selectCompanion('moss')} />
       <Card className="border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">Today’s journey</CardTitle></CardHeader>
         <CardContent className="space-y-5">
@@ -173,7 +207,8 @@ export function Pomodoro({ userId }: { userId: string }) {
       </Card>
       </div>
     </section>
-    <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)} />
+    <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)}
+      selected={selection.value} saving={savingSelection} onSelect={selected => void selectCompanion(selected)} />
     </>
   )
 }

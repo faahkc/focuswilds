@@ -1,10 +1,78 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { companionProgress } from '../src/lib/companion.ts'
+import { createClient } from '@supabase/supabase-js'
+import { companionProgress, loadSelectedCompanion, saveSelectedCompanion } from '../src/lib/companion.ts'
 
 test('a new companion starts at Level 1 and gains 25 EXP per saved focus session', () => {
   assert.deepEqual(companionProgress(0), { totalXp: 0, level: 1, levelXp: 0 })
   assert.deepEqual(companionProgress(1), { totalXp: 25, level: 1, levelXp: 25 })
+})
+
+const userId = '00000000-0000-4000-8000-000000000001'
+const otherId = '00000000-0000-4000-8000-000000000002'
+const client = fetch => createClient('https://example.supabase.co', 'test-public-key', {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  global: { fetch },
+})
+
+test('selection survives a new client, switches back to Moss, and stays scoped to the account', async () => {
+  const rows = new Map()
+  const fetch = async (input, options) => {
+    const url = new URL(input)
+    assert.equal(url.pathname, '/rest/v1/companion_preferences')
+    if (options.method === 'POST') {
+      assert.equal(url.searchParams.get('on_conflict'), 'user_id')
+      const row = JSON.parse(options.body)
+      rows.set(row.user_id, row)
+      return Response.json({ selected_companion: row.selected_companion })
+    }
+    const account = url.searchParams.get('user_id')?.slice(3)
+    const row = rows.get(account)
+    return Response.json(row ? [{ selected_companion: row.selected_companion }] : [])
+  }
+  const first = client(fetch)
+  assert.equal(await loadSelectedCompanion(first, userId), 'moss')
+  assert.equal(await saveSelectedCompanion(first, userId, 'rabbit'), 'rabbit')
+  const second = client(fetch)
+  assert.equal(await loadSelectedCompanion(second, userId), 'rabbit')
+  assert.equal(await loadSelectedCompanion(second, otherId), 'moss')
+  await saveSelectedCompanion(second, userId, 'moss')
+  assert.equal(await loadSelectedCompanion(first, userId), 'moss')
+  assert.equal(rows.size, 1)
+})
+
+test('failed or invalid preference loads do not silently reset the companion', async () => {
+  const denied = client(async () => Response.json({ message: 'RLS denied', code: '42501' }, { status: 403 }))
+  await assert.rejects(loadSelectedCompanion(denied, userId), { code: '42501' })
+  const invalid = client(async () => Response.json([{ selected_companion: 'unknown' }]))
+  await assert.rejects(loadSelectedCompanion(invalid, userId), /Unknown companion/)
+})
+
+test('selection writes require a valid companion and server confirmation', async () => {
+  const denied = client(async () => Response.json({ message: 'Not discovered', code: '42501' }, { status: 403 }))
+  await assert.rejects(saveSelectedCompanion(denied, userId, 'bird'), { code: '42501' })
+  await assert.rejects(saveSelectedCompanion(denied, userId, 'unknown'), /Unknown companion/)
+  const wrong = client(async () => Response.json({ selected_companion: 'moss' }))
+  await assert.rejects(saveSelectedCompanion(wrong, userId, 'rabbit'), /not saved/)
+})
+
+test('retrying an uncertain selection writes the same preference without changing EXP', async () => {
+  let selected = 'moss'
+  let calls = 0
+  const api = client(async (_input, options) => {
+    if (options.method === 'POST') {
+      selected = JSON.parse(options.body).selected_companion
+      if (++calls === 1) throw new Error('Response lost after commit')
+      return Response.json({ selected_companion: selected })
+    }
+    return Response.json([{ selected_companion: selected }])
+  })
+  const progress = companionProgress(5)
+  await assert.rejects(saveSelectedCompanion(api, userId, 'squirrel'))
+  assert.equal(await loadSelectedCompanion(api, userId), 'squirrel')
+  await saveSelectedCompanion(api, userId, 'squirrel')
+  assert.deepEqual(companionProgress(5), progress)
+  assert.equal(calls, 2)
 })
 
 test('level boundaries reset the EXP bar without losing total experience', () => {

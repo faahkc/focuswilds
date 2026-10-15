@@ -2,6 +2,26 @@
 
 Requirements: Node.js 24, npm, and a Git clone.
 
+## Firebase migration: local emulators
+
+Install Java 21 or later and reopen your terminal after installation. Run:
+
+```sh
+npm run emulators
+```
+
+Open `http://127.0.0.1:4000` for the local Emulator UI. Auth uses port 9099 and Firestore uses port 8085, both bound to loopback. The command explicitly selects `demo-focuswilds`, a simulated project, and requires no Firebase login, billing account, or production credentials. The first run downloads emulator binaries; database operations stay local. Stop with Ctrl+C; local test data is disposable and is not exported automatically.
+
+```sh
+npm run test:emulators
+```
+
+This starts disposable emulators, checks local Auth and denied Firestore reads/writes, and shuts them down. Run it with the interactive emulators stopped to avoid port conflicts. The smoke check refuses unexpected project IDs or emulator endpoints.
+
+Firestore rules currently deny all access. This step prepares infrastructure only: the website is not connected to Firebase yet. Supabase is disabled in Vite development to prevent cloud requests while migrating; the existing production build still uses Supabase. Do not deploy Firebase rules or import real data at this stage. Once the Firebase client is added, development must connect to these emulators before any Auth or Firestore operation and must never fall back to cloud services when emulators are unavailable.
+
+The installed Firebase CLI has npm audit advisories in its development dependency tree (5 moderate, 3 high at setup). It is not bundled into the website. Keep emulators local; do not feed untrusted projects to the CLI. No forced dependency downgrades or overrides were applied.
+
 ```sh
 npm ci
 npm run dev

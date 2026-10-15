@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { getAuthRedirect } from '@/lib/auth-config'
 
-export function AuthPanel() {
+export function AuthPanel({ onSessionChange }: { onSessionChange: (session: Session | null) => void }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(Boolean(supabase))
   const [busy, setBusy] = useState(false)
@@ -20,12 +20,14 @@ export function AuthPanel() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (active) {
         setSession(nextSession)
+        onSessionChange(nextSession)
         setLoading(false)
       }
     })
     void supabase.auth.getSession().then(({ data, error: sessionError }) => {
       if (!active) return
       setSession(data.session)
+      onSessionChange(data.session)
       if (sessionError) setError('Could not restore your session. Please sign in again.')
       setLoading(false)
     }).catch(() => {
@@ -35,7 +37,7 @@ export function AuthPanel() {
       }
     })
     return () => { active = false; subscription.unsubscribe() }
-  }, [])
+  }, [onSessionChange])
 
   async function signIn() {
     if (!supabase) return

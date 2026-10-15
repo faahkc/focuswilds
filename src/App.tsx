@@ -1,17 +1,22 @@
+import { useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
+import { Pomodoro } from '@/components/pomodoro'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null)
   return (
     <main className="min-h-screen bg-[#14251f] px-6 py-10 text-[#f4eddc] sm:py-16">
       <div className="mx-auto max-w-5xl">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6">
           <span className="font-serif text-2xl tracking-wide">Focuswilds</span>
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{__APP_VERSION__}</Badge>
-          <AuthPanel />
+          <AuthPanel onSessionChange={setSession} />
         </header>
+        {session ? <Pomodoro key={session.user.id} userId={session.user.id} /> : <>
         <section className="max-w-3xl py-20 sm:py-28">
           <p className="mb-6 text-xs tracking-[0.25em] text-[#e8c782] uppercase">A little focus. A new discovery.</p>
           <h1 className="font-serif text-5xl leading-tight sm:text-7xl">Your focus grows<br />a living world.</h1>
@@ -32,7 +37,9 @@ export default function App() {
             <CardContent className="leading-relaxed text-[#c3cec1]">Meet new creatures and watch your collection grow alongside your progress.</CardContent>
           </Card>
         </section>
-        <footer className="mt-16 border-t border-white/15 pt-6 text-sm text-[#c3cec1]">The adventure is taking shape. Gameplay and cloud saves are coming later.</footer>
+        <p className="mt-6 text-sm text-[#c3cec1]">Sign in with GitHub to start focusing and save your progress.</p>
+        </>}
+        <footer className="mt-16 border-t border-white/15 pt-6 text-sm text-[#c3cec1]">One focused session at a time. Companions and discoveries are coming later.</footer>
       </div>
     </main>
   )

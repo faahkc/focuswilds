@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { nextVersion } from './version.mjs'
+import { nextVersion } from '../scripts/version.mjs'
 
 test('patch increments and explicit releases reset lower fields', () => {
   assert.equal(nextVersion('0.1.3', 'patch'), '0.1.4')
@@ -38,7 +38,7 @@ test('real hook synchronizes versions, preserves retries/releases and rejects pa
     git('-c', 'core.hooksPath=/dev/null', 'commit', '--quiet', '-m', 'baseline')
     mkdirSync(join(dir, 'scripts'))
     mkdirSync(join(dir, '.githooks'))
-    copyFileSync(new URL('./version.mjs', import.meta.url), join(dir, 'scripts/version.mjs'))
+    copyFileSync(new URL('../scripts/version.mjs', import.meta.url), join(dir, 'scripts/version.mjs'))
     copyFileSync(new URL('../.githooks/pre-commit', import.meta.url), join(dir, '.githooks/pre-commit'))
     git('add', '.')
     git('update-index', '--chmod=+x', '.githooks/pre-commit')

@@ -28,3 +28,11 @@ export async function loadProgress(client: SupabaseClient, userId: string, start
     if (!data || data.length < 1000) return { sessions, minutes: Math.floor(seconds / 60) }
   }
 }
+
+export async function loadCompletedFocusCount(client: SupabaseClient, userId: string) {
+  const { count, error } = await client.from('focus_sessions').select('id', { count: 'exact', head: true })
+    .eq('user_id', userId).eq('session_type', 'focus').eq('status', 'completed')
+  if (error) throw error
+  if (count === null) throw new Error('Completed focus count was not returned')
+  return count
+}

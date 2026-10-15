@@ -26,4 +26,4 @@ Follow your daily progress, revisit familiar companions, and pick up your journe
 
 ---
 
-*Currently taking shape. GitHub sign-in, a 25/5 focus timer, and daily cloud progress are implemented. Companions, discoveries, and the adventure described above are still the vision. Cloud progress uses the existing owner-only Supabase table described in [Development](docs/DEVELOPMENT.md#focus-sessions).*
+*Currently taking shape. GitHub sign-in, a 25/5 focus timer, daily cloud progress, and a starter companion with EXP and levels are implemented. Catching creatures, evolution, and discoveries are still the vision. Cloud progress uses the existing owner-only Supabase table described in [Development](docs/DEVELOPMENT.md#focus-sessions).*

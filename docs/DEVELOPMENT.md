@@ -20,7 +20,7 @@ This starts disposable emulators, checks local Auth and denied Firestore reads/w
 
 Firestore rules currently deny all access. This step prepares infrastructure only: the website is not connected to Firebase yet. Supabase is disabled in Vite development to prevent cloud requests while migrating; the existing production build still uses Supabase. Do not deploy Firebase rules or import real data at this stage. Once the Firebase client is added, development must connect to these emulators before any Auth or Firestore operation and must never fall back to cloud services when emulators are unavailable.
 
-The installed Firebase CLI has npm audit advisories in its development dependency tree (5 moderate, 3 high at setup). It is not bundled into the website. Keep emulators local; do not feed untrusted projects to the CLI. No forced dependency downgrades or overrides were applied.
+The installed Firebase CLI has 7 npm audit findings in its development dependency tree (4 moderate, 3 high after security updates). The lockfile now resolves optional RE2 to patched 1.27.0; npm skips it on this machine's Node 24.13.0 because it requires Node 24.15.0+ (or supported 22/26 versions). Superstatic supports running without optional RE2, and Auth/Firestore emulator checks pass. Remaining root dependencies are `braces` (no published patch), `@opentelemetry/core` (fixed in 2.8.0+, but Pub/Sub requires 1.x), and `uuid` (fixed in 11.1.1+, but gaxios requires 9.x). These dependencies are not bundled into the website. Keep emulators local; do not feed untrusted projects to the CLI. No forced dependency downgrades or incompatible overrides were applied. Recheck when Firebase CLI updates its dependency ranges.
 
 ```sh
 npm ci

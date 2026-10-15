@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
+import { FocusHistory } from '@/components/focus-history'
 import { creatures, type DiscoveryJournal as Journal } from '@/lib/discoveries'
 import { loadSelectedCompanion, saveSelectedCompanion, type CompanionId } from '@/lib/companion'
 import { supabase } from '@/lib/supabase'
@@ -221,6 +222,7 @@ export function Pomodoro({ userId }: { userId: string }) {
     </section>
     <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)}
       selected={selection.value} saving={savingSelection} onSelect={selected => void selectCompanion(selected)} />
+    <FocusHistory userId={userId} todayStart={start} refresh={refresh} />
     </>
   )
 }

@@ -60,6 +60,10 @@ The active timer and one pending save are kept in sessionStorage under the accou
 
 Completed sessions use a stable UUID and `ON CONFLICT DO NOTHING` via Supabase upsert, so retrying a save or reloading while a request is in flight does not double-count. A failed save stays pending, offers Retry, and blocks the next focus session until saved; the break remains usable. Load failures are shown separately from zero progress. If browser storage is unavailable, the UI warns that reload recovery is unavailable. Client clocks and completed sessions are not protected against deliberate manipulation; server-verified rewards should be added before introducing competitive or valuable rewards.
 
+### Focus history
+
+The history card offers 7 days, 30 days, and All time, with period totals and a daily table. Bounded periods include today and use local calendar midnights, including daylight-saving changes. Records are grouped by local completion date and use their recorded durations. Only completed focus sessions for the account are queried; breaks and unsaved sessions are excluded. Days without sessions are omitted, and the table scrolls for long histories. Results are paginated past the API row limit. Switching ranges only changes the query and never deletes older records or affects EXP/discoveries. History refreshes after a save, on returning to the page, at local midnight, or manually. Failed loads show Retry without partial totals. No schema change is required.
+
 ### Starter companion
 
 Moss is the default starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level. EXP and levels belong to the account's journey and stay unchanged when switching companions.

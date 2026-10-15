@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { User } from 'firebase/auth'
 import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
+import { FocusJourney } from '@/components/focus-journey'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -15,13 +16,7 @@ export default function App() {
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{__APP_VERSION__}</Badge>
           <AuthPanel onSessionChange={setSession} />
         </header>
-        {session ? <Card className="mt-10 border-white/15 bg-white/5 text-inherit">
-          <CardHeader><CardTitle>Signed in successfully</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-[#c3cec1]">
-            <p>Your account is connected. Focus sessions will return after your saved progress has been migrated.</p>
-            <p className="text-sm">Account ID: <code className="break-all select-all">{session.uid}</code></p>
-          </CardContent>
-        </Card> : <>
+        {session ? <FocusJourney key={session.uid} userId={session.uid} /> : <>
         <section className="max-w-3xl py-20 sm:py-28">
           <p className="mb-6 text-xs tracking-[0.25em] text-[#e8c782] uppercase">A little focus. A new discovery.</p>
           <h1 className="font-serif text-5xl leading-tight sm:text-7xl">Your focus grows<br />a living world.</h1>

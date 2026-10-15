@@ -1,4 +1,5 @@
 import { DEFAULT_FOCUS_TITLE, normalizeFocusTitle } from './focus-title.ts'
+import { dayKey } from './account.ts'
 
 export const FOCUS_MS = 25 * 60 * 1000
 export const BREAK_MS = 5 * 60 * 1000
@@ -53,10 +54,8 @@ export function resetTimer(timer: Timer, now: number): Timer {
 }
 
 export function todayBounds(now: number) {
-  const start = new Date(now)
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 1)
+  const start = new Date(`${dayKey(now)}T00:00:00+07:00`)
+  const end = new Date(start.getTime() + 86400000)
   return { start: start.toISOString(), end: end.toISOString() }
 }
 

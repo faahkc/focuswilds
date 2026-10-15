@@ -1,140 +1,226 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createClient } from '@supabase/supabase-js'
-import { saveFocus, loadProgress, loadCompletedFocusCount, loadDiscoveryJournal } from '../src/lib/focus-sessions.ts'
+import { OWNER_UID, SOURCE_OWNER_ID, dayKey, userPath } from '../src/lib/account.ts'
+import { emptyProfile, parseBackup, parseProfile, parseSession } from '../src/lib/focus-data.ts'
+import { importBackup, loadOverview, loadSessionPage, loadHistoryDays, saveFocus, saveSelectedCompanion } from '../src/lib/focus-sessions.ts'
+import { fakeStore } from './fake-focus-store.mjs'
 
-const userId = '00000000-0000-4000-8000-000000000001'
-const session = {
-  id: '00000000-0000-4000-8000-000000000002',
-  startedAt: '2026-10-15T08:00:00.000Z',
-  completedAt: '2026-10-15T08:25:00.000Z',
-  title: 'อ่านหนังสือ',
-}
-const client = fetch => createClient('https://example.supabase.co', 'test-public-key', {
-  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-  global: { fetch },
+const base = userPath(OWNER_UID)
+const progress = `${base}/state/progress`
+const row = (number = 1, completedAt = '2026-10-15T08:00:00.000Z') => ({
+  id: `00000000-0000-4000-8000-${number.toString(16).padStart(12, '0')}`,
+  title: 'Focus session', startedAt: new Date(Date.parse(completedAt) - 1500000).toISOString(), completedAt, seconds: 1500,
+})
+const completed = value => ({ id: value.id, title: value.title, startedAt: value.startedAt, completedAt: value.completedAt })
+const rawBackup = (rows, selected = 'moss') => JSON.stringify({
+  focus_sessions: rows.map(value => ({ user_id: SOURCE_OWNER_ID, id: value.id, title: value.title, started_at: value.startedAt, finished_at: value.completedAt, duration_seconds: value.seconds, session_type: 'focus', status: 'completed' })),
+  companion_preferences: [{ user_id: SOURCE_OWNER_ID, selected_companion: selected }],
+})
+const readyStore = () => fakeStore([[progress, { ...emptyProfile(), ready: true }]])
+
+test('overview costs two document reads and never scans history', async () => {
+  const store = readyStore()
+  const result = await loadOverview(store, OWNER_UID, '2026-10-15')
+  assert.equal(result.profile.sessions, 0)
+  assert.deepEqual(result.day, { day: '2026-10-15', sessions: 0, seconds: 0 })
+  assert.equal(store.calls.get.length, 2)
+  assert.equal(store.calls.list.length, 0)
+  assert.equal(store.calls.writes.length, 0)
 })
 
-test('a lost save response can be retried with the same ID and without updating old data', async () => {
-  const rows = new Map()
-  let attempts = 0
-  const api = client(async (input, options) => {
-    const url = new URL(input)
-    if (options.method === 'HEAD') return new Response(null, { headers: { 'Content-Range': `*/${rows.size}` } })
-    if (options.method === 'GET') return Response.json([...rows.values()].map(row => ({ id: row.id, finished_at: row.finished_at })))
-    assert.equal(url.searchParams.get('on_conflict'), 'id')
-    assert.match(new Headers(options.headers).get('prefer'), /resolution=ignore-duplicates/)
-    const row = JSON.parse(options.body)
-    assert.equal(row.user_id, userId)
-    assert.equal(row.status, 'completed')
-    assert.equal(row.session_type, 'focus')
-    assert.equal(row.remaining_seconds, 0)
-    assert.equal(row.duration_seconds, 1500)
-    assert.equal(row.started_at, session.startedAt)
-    assert.equal(row.finished_at, session.completedAt)
-    assert.equal(row.title, session.title)
-    if (!rows.has(row.id)) rows.set(row.id, row)
-    if (++attempts === 1) throw new Error('Response lost after database commit')
-    return new Response(null, { status: 201 })
-  })
-  assert.equal(await loadCompletedFocusCount(api, userId), 0)
-  assert.deepEqual(await loadDiscoveryJournal(api, userId), { encounters: [0, 0, 0], latest: null })
-  await assert.rejects(saveFocus(api, userId, session))
-  await saveFocus(api, userId, session)
-  assert.equal(attempts, 2)
-  assert.equal(rows.size, 1)
-  assert.equal(await loadCompletedFocusCount(api, userId), 1)
-  assert.equal(await loadCompletedFocusCount(api, userId), 1)
-  const journal = await loadDiscoveryJournal(api, userId)
-  assert.deepEqual(journal.encounters, [0, 0, 1])
-  assert.deepEqual(journal.latest, { id: session.id, finishedAt: session.completedAt })
-  assert.deepEqual(await loadDiscoveryJournal(api, userId), journal)
+test('a save atomically writes session, day and summary; duplicate retries do not award twice', async () => {
+  const store = readyStore()
+  const first = await saveFocus(store, OWNER_UID, completed(row()))
+  assert.equal(first.profile.sessions, 1)
+  assert.equal(first.profile.seconds, 1500)
+  assert.equal(first.profile.revision, 1)
+  assert.equal(first.day.sessions, 1)
+  assert.deepEqual(first.profile.encounters, [0, 1, 0])
+  assert.equal(store.calls.get.length, 3)
+  assert.equal(store.calls.writes.length, 3)
+  store.calls.writes.length = 0
+  const second = await saveFocus(store, OWNER_UID, completed(row()))
+  assert.deepEqual(second, first)
+  assert.equal(store.calls.writes.length, 0)
+  assert.equal(store.calls.list.length, 0)
 })
 
-test('daily totals include existing variable-duration focus sessions across API pages', async () => {
-  let calls = 0
-  const api = client(async input => {
-    const url = new URL(input)
-    assert.equal(url.searchParams.get('user_id'), `eq.${userId}`)
-    assert.equal(url.searchParams.get('status'), 'eq.completed')
-    assert.equal(url.searchParams.get('session_type'), 'eq.focus')
-    assert.deepEqual(url.searchParams.getAll('finished_at'), ['gte.2026-10-15T00:00:00Z', 'lt.2026-10-16T00:00:00Z'])
-    assert.equal(url.searchParams.get('offset'), String(calls * 1000))
-    const rows = calls++ === 0 ? Array.from({ length: 1000 }, () => ({ duration_seconds: 600 }))
-      : [{ duration_seconds: 60 }, { duration_seconds: 120 }]
-    return Response.json(rows)
-  })
-  assert.deepEqual(await loadProgress(api, userId, '2026-10-15T00:00:00Z', '2026-10-16T00:00:00Z'), {
-    sessions: 1002, minutes: 10003,
-  })
-  assert.equal(calls, 2)
+test('an uncertain commit and simultaneous duplicate callers preserve exactly one reward', async () => {
+  const store = readyStore()
+  store.loseResponse = true
+  await assert.rejects(saveFocus(store, OWNER_UID, completed(row())), /Response lost/)
+  const [a, b] = await Promise.all([saveFocus(store, OWNER_UID, completed(row())), saveFocus(store, OWNER_UID, completed(row()))])
+  assert.equal(a.profile.sessions, 1)
+  assert.deepEqual(a, b)
+  assert.equal(store.calls.transactions, 2)
 })
 
-test('permission and network failures stay errors rather than appearing saved or empty', async () => {
-  const denied = client(async () => Response.json({ message: 'RLS denied', code: '42501' }, { status: 403 }))
-  await assert.rejects(saveFocus(denied, userId, session), { code: '42501' })
-  await assert.rejects(loadProgress(denied, userId, session.startedAt, session.completedAt), { code: '42501' })
-  await assert.rejects(loadCompletedFocusCount(denied, userId), { code: '42501' })
-  await assert.rejects(loadDiscoveryJournal(denied, userId), { code: '42501' })
-  const offline = client(async () => { throw new Error('Offline') })
-  await assert.rejects(loadProgress(offline, userId, session.startedAt, session.completedAt))
+test('failed transactions, wrong accounts and invalid data never turn into empty or saved progress', async () => {
+  const store = readyStore()
+  store.failTransaction = 1
+  await assert.rejects(saveFocus(store, OWNER_UID, completed(row())), /Disconnected/)
+  assert.equal(store.calls.writes.length, 0)
+  assert.throws(() => loadOverview(store, 'another-account', '2026-10-15'), /not allowed/)
+  assert.throws(() => saveFocus(store, OWNER_UID, { ...completed(row()), id: '../other' }), /Invalid/)
+  assert.throws(() => parseSession({ ...row(), seconds: -1 }), /Invalid/)
+  assert.throws(() => parseProfile({ ...emptyProfile(), encounters: [1, 0, 0] }), /Invalid/)
+  await assert.rejects(saveFocus(fakeStore(), OWNER_UID, completed(row())), /Invalid/)
 })
 
-test('the journal reads saved focus history for the account across API pages', async () => {
-  let calls = 0
-  const api = client(async input => {
-    const params = new URL(input).searchParams
-    assert.equal(params.get('user_id'), `eq.${userId}`)
-    assert.equal(params.get('status'), 'eq.completed')
-    assert.equal(params.get('session_type'), 'eq.focus')
-    assert.equal(params.has('finished_at'), false)
-    assert.equal(params.get('order'), 'finished_at.desc,id.asc')
-    assert.equal(params.get('offset'), String(calls * 1000))
-    const offset = calls++ * 1000
-    return Response.json(Array.from({ length: offset === 0 ? 1000 : 2 }, (_, index) => ({
-      id: `00000000-0000-4000-8000-${(offset + index).toString(16).padStart(12, '0')}`,
-      finished_at: session.completedAt,
-    })))
-  })
-  const journal = await loadDiscoveryJournal(api, userId)
-  assert.deepEqual(journal.encounters, [334, 334, 334])
-  assert.deepEqual(journal.latest, { id: '00000000-0000-4000-8000-000000000000', finishedAt: session.completedAt })
-  assert.equal(calls, 2)
+test('companion selection validates discoveries and unchanged choices write nothing', async () => {
+  const store = readyStore()
+  await assert.rejects(saveSelectedCompanion(store, OWNER_UID, 'rabbit'), /not been discovered/)
+  await saveFocus(store, OWNER_UID, completed(row()))
+  store.calls.writes.length = 0
+  const selected = await saveSelectedCompanion(store, OWNER_UID, 'bird')
+  assert.equal(selected.selected, 'bird')
+  assert.equal(selected.sessions, 1)
+  assert.equal(selected.revision, 2)
+  assert.deepEqual(store.calls.writes, [progress])
+  store.calls.writes.length = 0
+  assert.deepEqual(await saveSelectedCompanion(store, OWNER_UID, 'bird'), selected)
+  assert.equal(store.calls.writes.length, 0)
+  await assert.rejects(saveSelectedCompanion(store, OWNER_UID, 'unknown'), /Unknown companion/)
 })
 
-test('a failed later journal page does not return a partial collection', async () => {
-  let calls = 0
-  const api = client(async () => calls++ === 0
-    ? Response.json(Array.from({ length: 1000 }, () => ({ id: session.id, finished_at: session.completedAt })))
-    : Response.json({ message: 'Load failed', code: '42501' }, { status: 403 }))
-  await assert.rejects(loadDiscoveryJournal(api, userId), { code: '42501' })
+test('history requests bounded cursor pages and does not scan beyond the requested page', async () => {
+  const rows = Array.from({ length: 51 }, (_, index) => row(index + 1))
+  const store = fakeStore(rows.map(value => [`${base}/sessions/${value.id}`, value]))
+  const first = await loadSessionPage(store, OWNER_UID, 'all', Date.parse('2026-10-15T08:00:00Z'))
+  const second = await loadSessionPage(store, OWNER_UID, 'all', Date.parse('2026-10-15T08:00:00Z'), first.cursor)
+  const third = await loadSessionPage(store, OWNER_UID, 'all', Date.parse('2026-10-15T08:00:00Z'), second.cursor)
+  assert.equal(first.entries.length, 25)
+  assert.equal(second.entries.length, 25)
+  assert.equal(third.entries.length, 1)
+  assert.equal(third.cursor, null)
+  assert.equal(new Set([...first.entries, ...second.entries, ...third.entries].map(value => value.id)).size, 51)
+  assert.equal(store.calls.list.length, 3)
+  assert.ok(store.calls.list.every(call => call.options.limit === 25))
+  assert.equal(store.calls.get.length, 0)
 })
 
-test('companion EXP counts only this account’s completed focus sessions across all dates', async () => {
-  const rows = [
-    { user_id: userId, session_type: 'focus', status: 'completed', finished_at: '2026-01-01T00:00:00Z' },
-    { user_id: userId, session_type: 'focus', status: 'completed', finished_at: session.completedAt },
-    { user_id: userId, session_type: 'short_break', status: 'completed' },
-    { user_id: userId, session_type: 'long_break', status: 'completed' },
-    { user_id: userId, session_type: 'focus', status: 'cancelled' },
-    { user_id: userId, session_type: 'focus', status: 'running' },
-    { user_id: userId, session_type: 'focus', status: 'paused' },
-    { user_id: session.id, session_type: 'focus', status: 'completed' },
-  ]
-  const api = client(async (input, options) => {
-    assert.equal(options.method, 'HEAD')
-    const params = new URL(input).searchParams
-    assert.equal(params.has('finished_at'), false)
-    const matching = rows.filter(row => ['user_id', 'session_type', 'status']
-      .every(key => params.get(key) === `eq.${row[key]}`))
-    return new Response(null, { headers: { 'Content-Range': `*/${matching.length}` } })
-  })
-  assert.equal(await loadCompletedFocusCount(api, userId), 2)
+test('period totals query only bounded day summaries, while all-time days are paginated', async () => {
+  const store = readyStore()
+  for (const period of [7, 30, 'all']) {
+    await loadHistoryDays(store, OWNER_UID, period, Date.parse('2026-10-15T08:00:00Z'))
+    const { path, options } = store.calls.list.at(-1)
+    assert.equal(path, `${base}/days`)
+    assert.equal(options.limit, period === 'all' ? 25 : period)
+    assert.equal(options.end, '2026-10-16')
+  }
+  assert.equal(store.calls.list[0].options.start, '2026-10-09')
 })
 
-test('the companion uses an exact count beyond the row limit and rejects missing counts', async () => {
-  const api = client(async () => new Response(null, { headers: { 'Content-Range': '*/1501' } }))
-  assert.equal(await loadCompletedFocusCount(api, userId), 1501)
-  const missing = client(async () => new Response(null))
-  await assert.rejects(loadCompletedFocusCount(missing, userId), /count was not returned/)
+test('backup preview validates ownership, preserves titles/durations and detects conflicting IDs', async () => {
+  const text = rawBackup([{ ...row(), title: 'อ่านหนังสือ 🐦', seconds: 600 }, row(2)])
+  const backup = await parseBackup(text)
+  assert.equal(backup.summary.seconds, 2100)
+  assert.equal(backup.sessions[0].title, 'อ่านหนังสือ 🐦')
+  assert.equal(backup.fingerprint, (await parseBackup(text)).fingerprint)
+  assert.equal((await parseBackup(rawBackup([row(), row()]))).sessions.length, 1)
+  await assert.rejects(parseBackup(rawBackup([row(), { ...row(), title: 'different' }])), /Conflicting duplicate/)
+  await assert.rejects(parseBackup(text.replaceAll(SOURCE_OWNER_ID, 'another-account')), /another account/)
+  await assert.rejects(parseBackup(rawBackup([row()], 'rabbit')), /undiscovered/)
+  await assert.rejects(parseBackup('{}'), /original JSON/)
+})
+
+test('imports are bounded, resumable, idempotent and verify the final summary before enabling the timer', async () => {
+  const store = fakeStore()
+  const backup = await parseBackup(rawBackup(Array.from({ length: 26 }, (_, index) => row(index + 1))))
+  store.failTransaction = 2
+  await assert.rejects(importBackup(store, OWNER_UID, backup, () => {}), /Disconnected/)
+  assert.equal(store.data.get(progress).sessions, 25)
+  assert.equal(store.data.get(progress).ready, false)
+  await assert.rejects(saveFocus(store, OWNER_UID, completed(row(100))), /Import saved/)
+  store.failTransaction = 0
+  const restored = await importBackup(store, OWNER_UID, backup, () => {})
+  assert.equal(restored.sessions, 26)
+  assert.equal(restored.seconds, 26 * 1500)
+  assert.equal(restored.ready, true)
+  assert.equal(store.data.get(`${base}/days/2026-10-15`).sessions, 26)
+  store.calls.writes.length = 0
+  await importBackup(store, OWNER_UID, backup, () => {})
+  assert.equal(store.calls.writes.length, 0)
+  await assert.rejects(importBackup(store, OWNER_UID, await parseBackup(rawBackup([row(100)])), () => {}), /different import/)
+})
+
+test('lost import responses resume safely and empty backups initialize once', async () => {
+  const store = fakeStore()
+  const backup = await parseBackup(rawBackup([row()], 'bird'))
+  store.loseResponse = true
+  await assert.rejects(importBackup(store, OWNER_UID, backup, () => {}), /Response lost/)
+  const result = await importBackup(store, OWNER_UID, backup, () => {})
+  assert.equal(result.sessions, 1)
+  assert.equal(result.selected, 'bird')
+  const empty = await importBackup(fakeStore(), OWNER_UID, await parseBackup(rawBackup([])), () => {})
+  assert.equal(empty.ready, true)
+  assert.equal(empty.sessions, 0)
+})
+
+test('late saves retain their original completion day and do not reset current-day progress', async () => {
+  const store = readyStore()
+  await saveFocus(store, OWNER_UID, completed(row(1, '2026-10-14T16:59:59Z')))
+  await saveFocus(store, OWNER_UID, completed(row(2, '2026-10-14T17:00:00Z')))
+  assert.equal((await loadOverview(store, OWNER_UID, '2026-10-14')).day.sessions, 1)
+  assert.equal((await loadOverview(store, OWNER_UID, '2026-10-15')).day.sessions, 1)
+  assert.equal(dayKey('2026-10-14T17:00:00Z'), '2026-10-15')
+})
+
+test('conflicting payloads cannot silently reuse a pending or committed UUID', async () => {
+  const store = readyStore()
+  const first = saveFocus(store, OWNER_UID, completed(row()))
+  assert.throws(() => saveFocus(store, OWNER_UID, { ...completed(row()), title: 'different' }), /Conflicting pending/)
+  await first
+  await assert.rejects(saveFocus(store, OWNER_UID, { ...completed(row()), title: 'different' }), /conflicts/)
+  assert.equal(store.data.get(progress).sessions, 1)
+})
+
+test('import chunks have a predictable maximum document budget even across distinct days', async () => {
+  const store = fakeStore()
+  const rows = Array.from({ length: 26 }, (_, index) => row(index + 1, new Date(Date.parse('2026-09-01T08:00:00Z') + index * 86400000).toISOString()))
+  await importBackup(store, OWNER_UID, await parseBackup(rawBackup(rows)), () => {})
+  assert.deepEqual(store.calls.batches, [{ reads: 51, writes: 51 }, { reads: 3, writes: 3 }])
+  assert.equal(store.calls.get.length, 55)
+})
+
+test('local validation rejects bad backup titles and incomplete rows before importing', async () => {
+  await assert.rejects(parseBackup(rawBackup([{ ...row(), title: 'x'.repeat(121) }])), /Invalid backup title/)
+  const backup = JSON.parse(rawBackup([row()]))
+  backup.focus_sessions[0].started_at = 'not-a-date'
+  await assert.rejects(parseBackup(JSON.stringify(backup)), /Invalid focus session/)
+  const ignored = JSON.parse(rawBackup([row()]))
+  ignored.focus_sessions[0].status = 'paused'
+  assert.equal((await parseBackup(JSON.stringify(ignored))).skipped, 1)
+})
+
+test('orphaned/conflicting data cannot enable an import with incorrect totals', async () => {
+  const value = row()
+  const store = fakeStore([[`${base}/sessions/${value.id}`, value]])
+  await assert.rejects(importBackup(store, OWNER_UID, await parseBackup(rawBackup([value])), () => {}), /summary does not match/)
+  assert.equal(store.data.has(progress), false)
+  assert.equal(store.calls.writes.length, 0)
+})
+
+test('overview caching coalesces repeated mounts and refresh remains explicit', async () => {
+  const store = readyStore()
+  const [first, second] = await Promise.all([loadOverview(store, OWNER_UID, '2026-10-15'), loadOverview(store, OWNER_UID, '2026-10-15')])
+  assert.deepEqual(first, second)
+  assert.equal(store.calls.get.length, 2)
+  await loadOverview(store, OWNER_UID, '2026-10-15')
+  assert.equal(store.calls.get.length, 2)
+  await loadOverview(store, OWNER_UID, '2026-10-15', true)
+  assert.equal(store.calls.get.length, 4)
+  await saveFocus(store, OWNER_UID, completed(row()))
+  assert.equal((await loadOverview(store, OWNER_UID, '2026-10-15')).profile.sessions, 1)
+  assert.equal(store.calls.get.length, 9)
+})
+
+test('Windows UTF-8 BOM backups and variable-duration records round-trip without extra rewards', async () => {
+  const backup = await parseBackup('\uFEFF' + rawBackup([{ ...row(), seconds: 600, title: 'อ่านหนังสือ 🐦' }], 'bird'))
+  const store = fakeStore()
+  const profile = await importBackup(store, OWNER_UID, backup, () => {})
+  assert.equal(profile.sessions, 1)
+  assert.equal(profile.seconds, 600)
+  assert.equal(profile.selected, 'bird')
+  assert.equal(store.data.get(`${base}/sessions/${row().id}`).title, 'อ่านหนังสือ 🐦')
 })

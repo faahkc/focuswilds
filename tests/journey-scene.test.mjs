@@ -15,16 +15,76 @@ function component(file, dependencies = {}) {
   return module.exports
 }
 const pixel = component('pixel-companion')
-const { JourneyScene } = component('journey-scene', {
+test('game windows close with Escape and restore focus to the opening control', () => {
+  const previousDocument = globalThis.document
+  const previousHTMLElement = globalThis.HTMLElement
+  let effect
+  let shown = 0
+  let closed = 0
+  let focused = 0
+  let cancelled = 0
+  class Element { focus() { focused++ } }
+  try {
+    globalThis.HTMLElement = Element
+    globalThis.document = { activeElement: new Element() }
+    const { GameWindow } = component('game-window', {
+      react: { ...React, useEffect: callback => { effect = callback }, useRef: () => ({ current: { showModal: () => shown++, close: () => closed++ } }) },
+      '@/components/ui/button': { Button: () => null },
+    })
+    const dialog = GameWindow({ title: 'Creature journal', open: true, onClose: () => cancelled++, children: 'Saved discoveries' })
+    assert.equal(dialog.type, 'dialog')
+    assert.equal(dialog.props['aria-label'], 'Creature journal')
+    const cleanup = effect()
+    assert.equal(shown, 1)
+    dialog.props.onCancel()
+    assert.equal(cancelled, 1)
+    cleanup()
+    assert.equal(closed, 1)
+    assert.equal(focused, 1)
+  } finally {
+    globalThis.document = previousDocument
+    globalThis.HTMLElement = previousHTMLElement
+  }
+})
+const sceneDependencies = {
   '@/components/pixel-companion': pixel,
   '@/components/ui/button': { Button: ({ children, variant: _variant, size: _size, ...props }) => React.createElement('button', props, children) },
   '@/lib/companion': require('../src/lib/companion.ts'),
   '@/assets/woodland.webp': 'woodland.webp',
+}
+const { JourneyScene } = component('journey-scene', sceneDependencies)
+
+test('motion toggles without a running timer and reports device reduced motion honestly', () => {
+  let motion = true
+  let reduced = false
+  let toggle
+  const { JourneyScene: Scene } = component('journey-scene', {
+    ...sceneDependencies,
+    react: { ...React, useState: () => [motion, update => { motion = update(motion) }], useSyncExternalStore: () => reduced },
+    '@/components/ui/button': { Button: ({ children, onClick, variant: _variant, size: _size, ...props }) => {
+      toggle = onClick
+      return React.createElement('button', props, children)
+    } },
+  })
+  const render = () => renderToStaticMarkup(React.createElement(Scene, { phase: 'focus', selected: 'moss', sessions: 0 }))
+  assert(render().includes('is-moving'))
+  toggle()
+  let html = render()
+  assert(!html.includes('is-moving'))
+  assert(html.includes('Motion off'))
+  toggle()
+  assert(render().includes('is-moving'))
+  reduced = true
+  html = render()
+  assert(!html.includes('is-moving'))
+  assert(html.includes('Motion reduced'))
+  assert(html.includes('aria-pressed="false"'))
+  assert(html.includes('disabled=""'))
 })
 
 test('focus and rest reuse one deferred scene with the selected companion and phase-specific ambience', () => {
   for (const phase of ['focus', 'break']) {
-    const html = renderToStaticMarkup(React.createElement(JourneyScene, { phase, running: true, selected: 'bird', sessions: 16 }))
+    const html = renderToStaticMarkup(React.createElement(JourneyScene, { phase, selected: 'bird', sessions: 16 }))
     assert(html.includes('src="woodland.webp"'))
     assert(html.includes('loading="lazy"'))
     assert(html.includes('aria-label="Dawn Finch"'))
@@ -32,8 +92,8 @@ test('focus and rest reuse one deferred scene with the selected companion and ph
     assert.equal(html.includes('journey-fire'), phase === 'break')
     assert(html.includes('aria-pressed="true"'))
   }
-  const paused = renderToStaticMarkup(React.createElement(JourneyScene, { phase: 'focus', running: false, selected: 'moss', sessions: 16 }))
-  assert(!paused.includes('is-moving'))
+  const paused = renderToStaticMarkup(React.createElement(JourneyScene, { phase: 'focus', selected: 'moss', sessions: 16 }))
+  assert(paused.includes('is-moving'))
   assert(paused.includes('aria-label="Mossgrove"'))
 })
 

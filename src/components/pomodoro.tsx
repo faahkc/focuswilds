@@ -5,6 +5,8 @@ import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
 import { FocusHistory } from '@/components/focus-history'
 import { JourneyScene } from '@/components/journey-scene'
+import { GameWindow } from '@/components/game-window'
+import { GameIcon } from '@/components/game-icon'
 import { DEFAULT_FOCUS_TITLE, MAX_FOCUS_TITLE_LENGTH } from '@/lib/focus-title'
 import { SOURCE_OWNER_ID, dayKey } from '@/lib/account'
 import type { CompanionId } from '@/lib/companion'
@@ -14,6 +16,8 @@ import { loadOverview, saveFocus, saveSelectedCompanion } from '@/lib/focus-sess
 import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer, dailyGoalProgress, DAILY_FOCUS_GOAL, FOCUS_MS } from '@/lib/pomodoro'
 
 export function Pomodoro({ userId, initialOverview }: { userId: string; initialOverview: { profile: Profile; day: DayProgress } }) {
+  const [activeWindow, setWindow] = useState<'companion' | 'journal' | 'history' | 'help' | null>(null)
+  const [visitedWindows, setVisitedWindows] = useState<NonNullable<typeof activeWindow>[]>([])
   const storageKey = 'focuswilds:timer:' + userId
   const [storageError, setStorageError] = useState('')
   const [timer, setTimer] = useState(() => {
@@ -127,21 +131,25 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
   }
 
   return (<>
-    <JourneyScene phase={timer.phase} running={timer.deadline !== null} selected={selection.value} sessions={overview.profile.sessions} />
-    <section id="journey" aria-label="Focus timer" className="grid gap-6 py-12 sm:grid-cols-[2fr_1fr]">
-      <Card className="border-white/15 bg-white/5 text-inherit">
+    <nav className="wilds-toolbar" aria-label="Journey menu"><div><p className="wilds-kicker">Your expedition</p><h1 className="font-serif text-2xl">Back to the wilds.</h1></div><div className="wilds-menu">
+      {(['companion', 'journal', 'history', 'help'] as const).map(name => <Button key={name} variant="secondary" onClick={() => { setVisitedWindows(current => current.includes(name) ? current : [...current, name]); setWindow(name) }} aria-haspopup="dialog" aria-label={name === 'companion' ? 'Companion and progress' : name === 'journal' ? 'Creature journal' : name === 'history' ? 'Focus history' : 'Timer guide'} title={name === 'companion' ? 'Companion and progress' : name === 'journal' ? 'Creature journal' : name === 'history' ? 'Focus history' : 'Timer guide'}><GameIcon name={name} /><span className="wilds-menu-label">{name === 'companion' ? 'Companion' : name === 'journal' ? 'Creatures' : name === 'history' ? 'History' : 'Guide'}</span></Button>)}
+    </div></nav>
+    <div className="wilds-board">
+    <JourneyScene phase={timer.phase} selected={selection.value} sessions={overview.profile.sessions} />
+    <section id="journey" aria-label="Focus timer" className="wilds-panels">
+      <Card className="wilds-timer border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">{isFocus ? 'Time to focus' : 'Rest at camp'}</CardTitle></CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-[#c3cec1]">{isFocus ? 'One quiet stretch of work. Your journey starts here.' : 'Your focus session is complete. Stretch, get water, and rest.'}</p>
+          <p className="wilds-timer-note text-[#c3cec1]">{isFocus ? 'One quiet stretch of work. Your journey starts here.' : 'Your focus session is complete. Stretch, get water, and rest.'}</p>
           {isFocus ? <div className="space-y-2">
             <label htmlFor="focus-title" className="block text-sm">What will you focus on?</label>
             <input id="focus-title" type="text" value={timer.title} maxLength={MAX_FOCUS_TITLE_LENGTH} placeholder={DEFAULT_FOCUS_TITLE}
               disabled={timer.startedAt !== null || Boolean(pending)}
               onChange={event => { const title = event.target.value; setTimer(current => ({ ...current, title })) }}
               aria-describedby="focus-title-hint" className="w-full rounded-lg border border-white/25 bg-[#14251f] px-3 py-2 text-base text-inherit focus-visible:outline-2 focus-visible:outline-[#e8c782] disabled:opacity-70" />
-            <p id="focus-title-hint" className="text-sm text-[#c3cec1]">Optional, up to {MAX_FOCUS_TITLE_LENGTH} characters. Blank names use “{DEFAULT_FOCUS_TITLE}”. The name stays fixed once you start.</p>
+            <p id="focus-title-hint" className="sr-only">Optional, up to {MAX_FOCUS_TITLE_LENGTH} characters. Blank names use “{DEFAULT_FOCUS_TITLE}”. The name stays fixed once you start.</p>
           </div> : <p className="break-words text-sm text-[#e8c782]">Completed: {timer.title}</p>}
-          <p role="timer" aria-label={`${isFocus ? 'Focus' : 'Break'} time remaining`} className="font-mono text-7xl tabular-nums sm:text-8xl">{time}</p>
+          <p role="timer" aria-label={`${isFocus ? 'Focus' : 'Break'} time remaining`} className="wilds-clock font-serif text-7xl tabular-nums sm:text-8xl">{time}</p>
           <div className="flex flex-wrap gap-3">
             <Button size="lg" onClick={toggle} disabled={isFocus && Boolean(pending)} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">
               {timer.deadline !== null ? 'Pause' : `Start ${isFocus ? 'focus' : 'break'}`}
@@ -152,7 +160,7 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
               setTimer(current => resetTimer(current, timestamp))
             }}>Reset {isFocus ? 'focus' : 'break'}</Button>
           </div>
-          <p className="text-sm text-[#c3cec1]">25 minutes of focus, then a 5-minute break. Each phase starts when you are ready. Reset discards unfinished time.</p>
+          <p className="wilds-timer-note text-sm text-[#c3cec1]">25 minutes of focus, then a 5-minute break. Each phase starts when you are ready. Reset discards unfinished time.</p>
           <p role="status" className="text-sm text-[#e8c782]">{pending ? (saveError ? 'One focus session is waiting to save.' : 'Saving your focus session…') : isFocus ? 'Only completed focus sessions count toward your progress.' : 'Focus complete. Your progress is saved.'}</p>
           {saveError && <div role="alert" className="space-y-3 text-sm text-[#ffc3ab]">
             <p>{saveError}</p>
@@ -161,13 +169,17 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
           {storageError && <p role="alert" className="text-sm text-[#ffc3ab]">{storageError}</p>}
         </CardContent>
       </Card>
-      <div className="space-y-6">
+    </section>
+    </div>
+    {visitedWindows.map(name => <GameWindow key={name} open={activeWindow === name} title={name === 'companion' ? 'Companion & progress' : name === 'journal' ? 'Creature journal' : name === 'history' ? 'Focus history' : 'Timer guide'} onClose={() => setWindow(null)}>
+    {name === 'companion' && <>
+      <div className="wilds-progress-panels">
       <CompanionCard completedSessions={companion?.sessions ?? null} error={companion?.error ?? ''} onRetry={() => { setSelectionSaveError(''); setRefresh(value => value + 1) }}
         selected={selection.value} selectionError={selectionSaveError || selection.error} saving={savingSelection} onSelectMoss={() => void selectCompanion('moss')} />
       <Card className="border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">Today’s journey</CardTitle></CardHeader>
         <CardContent className="space-y-5">
-          <dl className="space-y-5">
+          <dl className="wilds-totals">
             <div><dt className="text-sm text-[#c3cec1]">Focus sessions</dt><dd className="mt-1 text-4xl">{today && !loadError ? today.sessions : '—'}</dd></div>
             <div><dt className="text-sm text-[#c3cec1]">Minutes focused</dt><dd className="mt-1 text-4xl">{today && !loadError ? today.minutes : '—'}</dd></div>
           </dl>
@@ -189,10 +201,12 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
         </CardContent>
       </Card>
       </div>
-    </section>
-    <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)}
-      selected={selection.value} saving={savingSelection} onSelect={selected => void selectCompanion(selected)} />
-    <FocusHistory userId={userId} todayStart={start} profile={overview.profile} />
+    </>}
+    {name === 'journal' && <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)}
+      selected={selection.value} saving={savingSelection} onSelect={selected => void selectCompanion(selected)} />}
+    {name === 'history' && <FocusHistory userId={userId} todayStart={start} profile={overview.profile} />}
+    {name === 'help' && <div className="space-y-5"><p>25 minutes of focus, then a 5-minute break. Each phase starts when you are ready.</p><p>Pause keeps your remaining time. Reset discards unfinished time. Only completed focus sessions earn progress.</p><p>Give your session an optional name, up to {MAX_FOCUS_TITLE_LENGTH} characters. Blank names use “{DEFAULT_FOCUS_TITLE}”. The name stays fixed once you start.</p><p>Motion can be switched off in the scene. Your device’s reduced-motion setting is respected.</p></div>}
+    </GameWindow>)}
     </>
   )
 }

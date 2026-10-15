@@ -21,7 +21,7 @@ export function CompanionCard({ completedSessions, error, onRetry, selected, sel
     <Card className="border-white/15 bg-white/5 text-inherit">
       <CardHeader><CardTitle className="font-serif text-2xl">Your companion</CardTitle></CardHeader>
       <CardContent className="space-y-4">
-        {selected && (selected !== 'moss' || form) && <div className="mx-auto h-36 w-32"><PixelCompanion selected={selected} evolved={form?.evolved} /></div>}
+        {selected && (selected !== 'moss' || form) && <div className="wilds-companion-portrait mx-auto h-36 w-32"><PixelCompanion selected={selected} evolved={form?.evolved} /></div>}
         <div className="text-center">
           <h2 className="font-serif text-2xl">{selected === 'moss' ? form?.name ?? 'Your companion' : creature?.name ?? 'Your companion'}</h2>
           <p className="text-sm text-[#c3cec1]">{selected === 'moss' ? form?.description : creature?.description}</p>

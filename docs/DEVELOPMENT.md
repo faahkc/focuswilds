@@ -4,7 +4,13 @@ Requirements: Node.js 24, npm, and a Git clone.
 
 ## Firebase migration
 
-Use mock data for routine unit tests. Run live Firebase integration checks manually with a small, bounded number of operations; no polling, unbounded retries, or automatic production test loops. The application is not connected to Firebase yet. Supabase remains disabled in Vite development during migration; production still uses the existing client.
+Use mock data for routine unit tests. Run live Firebase integration checks manually with a small, bounded number of operations; no polling, unbounded retries, or automatic production test loops. Firebase GitHub sign-in is connected; Firestore is not initialized or queried. Focus sessions remain unavailable until the data migration is complete, so Firebase user IDs never reach the old Supabase data client.
+
+The public Firebase web config is in `src/lib/firebase.ts`; OAuth client secrets stay in the Firebase console. Enable GitHub in Authentication, use `https://focuswilds.firebaseapp.com/__/auth/handler` as the GitHub OAuth callback, and authorize `faahkc.github.io`. For local sign-in checks, explicitly add `localhost` in Firebase Authentication authorized domains. Only session-scoped auth persistence is enabled; closing the tab clears the session.
+
+Manual check: click Sign in with GitHub, authorize the new OAuth app, verify the account ID on the success card, reload to confirm session restoration, then sign out and verify the landing page returns. Check cancellation and blocked popups only once each. Leave Firestore Rules denied during this step. Routine `npm test` does not connect to Firebase.
+
+The Firebase SDK pins its Node-only gRPC dependency to the vulnerable 1.9.x line. A scoped npm override selects patched gRPC 1.14.6+ within the same major; remove it when Firebase updates its dependency range. The browser auth flow does not use gRPC.
 
 ```sh
 npm ci
@@ -46,7 +52,7 @@ Commits made through GitHub's web UI, merges created by GitHub, and commits made
 
 ## Cloud data
 
-Copy `.env.example` to `.env.local` and set the project URL and publishable key. GitHub OAuth sign-in and local sign-out are implemented. Enable the GitHub provider in Supabase and allow both `https://faahkc.github.io/focuswilds/` and `http://localhost:5173/focuswilds/` as redirect URLs. OAuth uses PKCE and returns to the app root, so no server callback route is needed on Pages.
+The following describes the legacy data implementation retained until import into Firestore is verified. Its UI is temporarily disconnected. Firebase authentication setup is described above; do not configure Supabase OAuth for the current website.
 
 Authentication tokens and the PKCE verifier are stored in sessionStorage for the current browser tab. Reloading the tab preserves the session; a new browser session may require signing in again. Login does not restrict signup to one account.
 
@@ -96,7 +102,7 @@ Run `tests/companion-preferences.test.sql` in SQL Editor to test actual grants a
 
 Choose Travel with a discovered creature in the journal, or Travel with Moss on the companion card to return to the starter. The portrait, name, and description update only after the server confirms the selection. The same preference reloads on another device or after returning to the page. A missing preference defaults to Moss; failed loads show an error and disable initial selection rather than overwriting an existing preference. Save failures keep the last confirmed selection and offer reload or another attempt. Reload after an uncertain response retrieves whatever the server committed. Concurrent devices use the last successful write; no live subscription is added.
 
-For deployment, set repository Actions Variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The workflow injects them at build time. These values are public frontend configuration, not secrets. Never substitute database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
+The current deployment uses the public Firebase configuration in `src/lib/firebase.ts`; no Supabase Actions Variables are needed. Never commit database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
 
 ## GitHub Pages
 

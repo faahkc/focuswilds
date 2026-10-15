@@ -26,4 +26,4 @@ Follow your daily progress, revisit familiar companions, and pick up your journe
 
 ---
 
-*Currently taking shape. GitHub sign-in, a named 25/5 focus timer, daily cloud progress with a four-session goal, 7-day/30-day/all-time focus history with individual session names, shared companion EXP and levels, a three-species discovery journal, cloud-saved companion selection, and Moss's evolution at Level 5 are implemented. Catching creatures and other evolutions are still the vision. Cloud setup and required migrations are described in [Development](docs/DEVELOPMENT.md#cloud-data).*
+*Firebase migration in progress. GitHub sign-in now uses Firebase. The existing named 25/5 timer, history, companion progress, discoveries, and preferences are temporarily unavailable until their data is migrated. Catching creatures and other evolutions remain the vision. Setup and migration status are described in [Development](docs/DEVELOPMENT.md#firebase-migration).*

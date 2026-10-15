@@ -80,11 +80,11 @@ export function HistoryView({ userId, todayStart, profile }: { userId: string; t
   const [period, setPeriod] = useState<HistoryPeriod>(7)
   const [revision, setRevision] = useState(0)
   return <div className="space-y-5">
-        <div role="group" aria-label="History period" className="flex flex-wrap gap-3">
-          {([7, 30, 'all'] as const).map(value => <Button key={value} variant={period === value ? 'default' : 'secondary'} aria-pressed={period === value} onClick={() => setPeriod(value)}>{value === 'all' ? 'All time' : `${value} days`}</Button>)}
-        </div>
-        <p className="text-sm text-[#c3cec1]">Periods include today in Thailand time (Asia/Bangkok). Older records stay saved. Days without saved sessions are omitted.</p>
-        <HistoryContent key={`${period}:${todayStart}:${revision}`} userId={userId} todayStart={todayStart} period={period} profile={profile} />
-        <Button variant="secondary" onClick={() => setRevision(value => value + 1)}>Refresh history</Button>
+    <div role="group" aria-label="History period" className="flex flex-wrap gap-3">
+      {([7, 30, 'all'] as const).map(value => <Button key={value} variant={period === value ? 'default' : 'secondary'} aria-pressed={period === value} onClick={() => setPeriod(value)}>{value === 'all' ? 'All time' : `${value} days`}</Button>)}
+    </div>
+    <p className="text-sm text-[#c3cec1]">Periods include today in Thailand time (Asia/Bangkok). Older records stay saved. Days without saved sessions are omitted.</p>
+    <HistoryContent key={`${period}:${todayStart}:${revision}`} userId={userId} todayStart={todayStart} period={period} profile={profile} />
+    <Button variant="secondary" onClick={() => setRevision(value => value + 1)}>Refresh history</Button>
   </div>
 }

@@ -11,7 +11,7 @@ export function FocusHistory({ userId, todayStart, profile }: { userId: string; 
     <CardHeader><CardTitle className="font-serif text-2xl">Focus history</CardTitle></CardHeader>
     <CardContent>
       {!open ? <Button variant="secondary" onClick={() => setOpen(true)}>Open history</Button> : (
-        <Suspense fallback={<p role="status">Loading history?</p>}>
+        <Suspense fallback={<p role="status">Loading history...</p>}>
           <HistoryView userId={userId} todayStart={todayStart} profile={profile} />
         </Suspense>
       )}

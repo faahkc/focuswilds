@@ -1,4 +1,3 @@
-import { SOURCE_OWNER_ID, dayKey } from './account.ts'
 import { isCompanionId, type CompanionId } from './companion.ts'
 import { encounterIndex } from './discoveries.ts'
 import { normalizeFocusTitle } from './focus-title.ts'
@@ -26,9 +25,6 @@ export function parseSession(value: unknown): FocusSession {
   return { id: row.id.toLowerCase(), title: normalizeFocusTitle(row.title), startedAt: new Date(row.startedAt).toISOString(), completedAt: new Date(row.completedAt).toISOString(), seconds: row.seconds }
 }
 
-export function emptyProfile(): Profile {
-  return { version: 1, revision: 0, ready: false, sessions: 0, seconds: 0, encounters: [0, 0, 0], latest: null, selected: 'moss', migration: null }
-}
 
 export function parseProfile(value: unknown): Profile {
   const row = record(value)
@@ -68,37 +64,3 @@ export function addSession(profile: Profile, day: DayProgress, row: FocusSession
   day.sessions += 1
   day.seconds += row.seconds
 }
-
-export async function parseBackup(text: string) {
-  const backup = record(JSON.parse(text.replace(/^\uFEFF/, '')))
-  if (!Array.isArray(backup.focus_sessions) || !Array.isArray(backup.companion_preferences)) throw new Error('Choose the original JSON backup file')
-  const rows = new Map<string, FocusSession>()
-  let skipped = 0
-  for (const value of backup.focus_sessions) {
-    const row = record(value)
-    if (row.user_id !== SOURCE_OWNER_ID) throw new Error('Backup belongs to another account')
-    if (!['focus', 'short_break', 'long_break'].includes(String(row.session_type))
-      || !['running', 'paused', 'completed', 'cancelled'].includes(String(row.status))) throw new Error('Invalid backup session status')
-    if (row.session_type !== 'focus' || row.status !== 'completed') { skipped += 1; continue }
-    if (row.title != null && (typeof row.title !== 'string' || [...row.title].length > 120)) throw new Error('Invalid backup title')
-    const session = parseSession({ id: row.id, title: normalizeFocusTitle(row.title), startedAt: row.started_at, completedAt: row.finished_at, seconds: row.duration_seconds })
-    const existing = rows.get(session.id)
-    if (existing && JSON.stringify(existing) !== JSON.stringify(session)) throw new Error('Conflicting duplicate session IDs in backup')
-    rows.set(session.id, session)
-  }
-  let selected: CompanionId = 'moss'
-  if (backup.companion_preferences.length > 1) throw new Error('Backup contains multiple companion preferences')
-  for (const value of backup.companion_preferences) {
-    const preference = record(value)
-    if (preference.user_id !== SOURCE_OWNER_ID || !isCompanionId(preference.selected_companion)) throw new Error('Invalid backup companion preference')
-    selected = preference.selected_companion
-  }
-  const sessions = [...rows.values()].sort((a, b) => a.id.localeCompare(b.id))
-  const summary = emptyProfile()
-  for (const session of sessions) addSession(summary, { day: dayKey(session.completedAt), sessions: 0, seconds: 0 }, session)
-  if (selected !== 'moss' && !summary.encounters[['rabbit', 'bird', 'squirrel'].indexOf(selected)]) throw new Error('Backup selects an undiscovered companion')
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ sessions, selected })))
-  const fingerprint = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
-  return { sessions, selected, skipped, fingerprint, summary }
-}
-export type Backup = Awaited<ReturnType<typeof parseBackup>>

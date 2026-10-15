@@ -62,6 +62,8 @@ Completed sessions use a stable UUID and `ON CONFLICT DO NOTHING` via Supabase u
 
 Moss is the default starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level. EXP and levels belong to the account's journey and stay unchanged when switching companions.
 
+At Level 5 (400 total EXP, or 16 saved completed focus sessions), Moss automatically evolves into Mossgrove. Its portrait, name, and description change, and the card shows the remaining saved sessions before evolution. This form derives from the existing journey level; it needs no database migration, extra reward, or confirmation button. The saved selection remains `moss`, so switching away and back or loading another device restores the correct form. Existing historical sessions count. Loading/error states do not assume an unevolved form. Only Moss has an evolution in this version; deleting saved focus history can reduce the level and derived form.
+
 Companion progress comes from an exact all-time count of the account's completed focus sessions, using the existing RLS-protected table. It does not reset at midnight and needs no new table or migration. Breaks, cancelled/unfinished sessions, and pending unsaved sessions do not contribute. Retrying or reloading does not award extra EXP because the count uses saved rows rather than a separate reward balance. Progress refreshes after saving, on returning to the page, or through Refresh progress. Loading failures show an error with Retry rather than resetting the companion to Level 1.
 
 ### Discovery journal

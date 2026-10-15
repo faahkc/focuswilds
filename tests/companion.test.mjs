@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createClient } from '@supabase/supabase-js'
-import { companionProgress, loadSelectedCompanion, saveSelectedCompanion } from '../src/lib/companion.ts'
+import { companionProgress, mossForm, MOSS_EVOLUTION_LEVEL, loadSelectedCompanion, saveSelectedCompanion } from '../src/lib/companion.ts'
 
 test('a new companion starts at Level 1 and gains 25 EXP per saved focus session', () => {
   assert.deepEqual(companionProgress(0), { totalXp: 0, level: 1, levelXp: 0 })
@@ -80,4 +80,32 @@ test('level boundaries reset the EXP bar without losing total experience', () =>
   assert.deepEqual(companionProgress(4), { totalXp: 100, level: 2, levelXp: 0 })
   assert.deepEqual(companionProgress(5), { totalXp: 125, level: 2, levelXp: 25 })
   assert.deepEqual(companionProgress(8), { totalXp: 200, level: 3, levelXp: 0 })
+})
+
+test('Moss evolves exactly at Level 5 from sixteen saved focus sessions', () => {
+  assert.equal(MOSS_EVOLUTION_LEVEL, 5)
+  for (const sessions of [0, 1, 15]) {
+    const form = mossForm(companionProgress(sessions).level)
+    assert.equal(form.name, 'Moss')
+    assert.equal(form.evolved, false)
+  }
+  for (const sessions of [16, 17, 100]) {
+    const form = mossForm(companionProgress(sessions).level)
+    assert.equal(form.name, 'Mossgrove')
+    assert.equal(form.evolved, true)
+  }
+  assert.deepEqual(companionProgress(16), { totalXp: 400, level: 5, levelXp: 0 })
+})
+
+test('an evolved Moss keeps its saved identity and form when switching away and back', async () => {
+  let selected = 'moss'
+  const api = client(async (_input, options) => {
+    if (options.method === 'POST') selected = JSON.parse(options.body).selected_companion
+    return Response.json(options.method === 'POST' ? { selected_companion: selected } : [{ selected_companion: selected }])
+  })
+  const level = companionProgress(16).level
+  await saveSelectedCompanion(api, userId, 'bird')
+  await saveSelectedCompanion(api, userId, 'moss')
+  assert.equal(await loadSelectedCompanion(api, userId), 'moss')
+  assert.equal(mossForm(level).name, 'Mossgrove')
 })

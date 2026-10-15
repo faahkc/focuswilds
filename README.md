@@ -26,4 +26,4 @@ Follow your daily progress, revisit familiar companions, and pick up your journe
 
 ---
 
-*Currently taking shape. GitHub sign-in, a 25/5 focus timer, daily cloud progress, shared companion EXP and levels, a three-species discovery journal, and cloud-saved companion selection are implemented. Catching creatures and evolution are still the vision. Cloud progress and the required companion-selection migration are described in [Development](docs/DEVELOPMENT.md#cloud-data).*
+*Currently taking shape. GitHub sign-in, a 25/5 focus timer, daily cloud progress, shared companion EXP and levels, a three-species discovery journal, cloud-saved companion selection, and Moss's evolution at Level 5 are implemented. Catching creatures and other evolutions are still the vision. Cloud progress and the required companion-selection migration are described in [Development](docs/DEVELOPMENT.md#cloud-data).*

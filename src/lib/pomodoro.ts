@@ -1,5 +1,10 @@
 export const FOCUS_MS = 25 * 60 * 1000
 export const BREAK_MS = 5 * 60 * 1000
+export const DAILY_FOCUS_GOAL = 4
+
+export function dailyGoalProgress(savedSessions: number) {
+  return { completed: Math.min(savedSessions, DAILY_FOCUS_GOAL), remaining: Math.max(DAILY_FOCUS_GOAL - savedSessions, 0) }
+}
 
 export type CompletedFocus = { id: string; startedAt: string; completedAt: string }
 export type Timer = {

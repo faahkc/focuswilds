@@ -7,7 +7,7 @@ import { creatures, type DiscoveryJournal as Journal } from '@/lib/discoveries'
 import { loadSelectedCompanion, saveSelectedCompanion, type CompanionId } from '@/lib/companion'
 import { supabase } from '@/lib/supabase'
 import { loadCompletedFocusCount, loadDiscoveryJournal, loadProgress, saveFocus } from '@/lib/focus-sessions'
-import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer } from '@/lib/pomodoro'
+import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer, dailyGoalProgress, DAILY_FOCUS_GOAL, FOCUS_MS } from '@/lib/pomodoro'
 
 export function Pomodoro({ userId }: { userId: string }) {
   const storageKey = `focuswilds:timer:${userId}`
@@ -30,6 +30,7 @@ export function Pomodoro({ userId }: { userId: string }) {
   const { start, end } = todayBounds(now)
   const today = progress?.day === start ? progress : null
   const loadError = today?.error ?? ''
+  const goal = today && !loadError ? dailyGoalProgress(today.sessions) : null
 
   useEffect(() => {
     const tick = () => {
@@ -199,6 +200,17 @@ export function Pomodoro({ userId }: { userId: string }) {
             <div><dt className="text-sm text-[#c3cec1]">Focus sessions</dt><dd className="mt-1 text-4xl">{today && !loadError ? today.sessions : '—'}</dd></div>
             <div><dt className="text-sm text-[#c3cec1]">Minutes focused</dt><dd className="mt-1 text-4xl">{today && !loadError ? today.minutes : '—'}</dd></div>
           </dl>
+          <div className="space-y-2">
+            <h2 className="font-serif text-xl">Daily goal</h2>
+            <p className="text-sm text-[#c3cec1]">{DAILY_FOCUS_GOAL} focus sessions · {DAILY_FOCUS_GOAL * FOCUS_MS / 60000} minutes</p>
+            {goal && <>
+              <p className="text-sm">{goal.completed} / {DAILY_FOCUS_GOAL} saved focus sessions</p>
+              <progress aria-label="Daily focus goal" value={goal.completed} max={DAILY_FOCUS_GOAL} className="h-3 w-full accent-[#e8c782]" />
+              <p role="status" className="text-sm text-[#e8c782]">{goal.remaining === 0
+                ? 'Daily goal complete. Well done! More focus is optional; rest when you need to.'
+                : `${goal.remaining} more saved ${goal.remaining === 1 ? 'session' : 'sessions'} to reach today’s goal.`}</p>
+            </>}
+          </div>
           <p className="text-sm text-[#c3cec1]">Saved to your account. Today follows this device’s local timezone. Your active timer stays in this tab across reloads.</p>
           {!today && <p role="status" className="text-sm">Loading progress…</p>}
           {loadError && <p role="alert" className="text-sm text-[#ffc3ab]">{loadError}</p>}

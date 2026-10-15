@@ -2,25 +2,9 @@
 
 Requirements: Node.js 24, npm, and a Git clone.
 
-## Firebase migration: local emulators
+## Firebase migration
 
-Install Java 21 or later and reopen your terminal after installation. Run:
-
-```sh
-npm run emulators
-```
-
-Open `http://127.0.0.1:4000` for the local Emulator UI. Auth uses port 9099 and Firestore uses port 8085, both bound to loopback. The command explicitly selects `demo-focuswilds`, a simulated project, and requires no Firebase login, billing account, or production credentials. The first run downloads emulator binaries; database operations stay local. Stop with Ctrl+C; local test data is disposable and is not exported automatically.
-
-```sh
-npm run test:emulators
-```
-
-This starts disposable emulators, checks local Auth and denied Firestore reads/writes, and shuts them down. Run it with the interactive emulators stopped to avoid port conflicts. The smoke check refuses unexpected project IDs or emulator endpoints.
-
-Firestore rules currently deny all access. This step prepares infrastructure only: the website is not connected to Firebase yet. Supabase is disabled in Vite development to prevent cloud requests while migrating; the existing production build still uses Supabase. Do not deploy Firebase rules or import real data at this stage. Once the Firebase client is added, development must connect to these emulators before any Auth or Firestore operation and must never fall back to cloud services when emulators are unavailable.
-
-The installed Firebase CLI has 7 npm audit findings in its development dependency tree (4 moderate, 3 high after security updates). The lockfile now resolves optional RE2 to patched 1.27.0; npm skips it on this machine's Node 24.13.0 because it requires Node 24.15.0+ (or supported 22/26 versions). Superstatic supports running without optional RE2, and Auth/Firestore emulator checks pass. Remaining root dependencies are `braces` (no published patch), `@opentelemetry/core` (fixed in 2.8.0+, but Pub/Sub requires 1.x), and `uuid` (fixed in 11.1.1+, but gaxios requires 9.x). These dependencies are not bundled into the website. Keep emulators local; do not feed untrusted projects to the CLI. No forced dependency downgrades or incompatible overrides were applied. Recheck when Firebase CLI updates its dependency ranges.
+Use mock data for routine unit tests. Run live Firebase integration checks manually with a small, bounded number of operations; no polling, unbounded retries, or automatic production test loops. The application is not connected to Firebase yet. Supabase remains disabled in Vite development during migration; production still uses the existing client.
 
 ```sh
 npm ci

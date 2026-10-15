@@ -33,6 +33,7 @@ Take the first option that fully works:
 - Keep README focused on the product concept and user experience. Do not include specific backend providers, configuration, migration/restore steps, or implementation details; put necessary technical guidance in docs/DEVELOPMENT.md.
 - Keep visual references, inspiration titles, and private design discussions out of repository files, commit messages, and public UI copy.
 - Design desktop layouts for wide screens and phone layouts for portrait use. Preserve accessibility zoom, reduced-motion support, and timer state during rotation. Installation as a web app is a product goal; do not claim PWA support before it exists.
+- Keep editable inputs, textareas, and selects at least 16px on phones to avoid focus zoom in Safari; do not disable viewport zoom.
 - Follow the existing project structure and coding conventions.
 - Use the package manager indicated by the project's lockfile.
 - Use the project's existing build, lint, and test commands when available.

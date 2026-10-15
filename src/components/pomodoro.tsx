@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CompanionCard } from '@/components/companion-card'
 import { supabase } from '@/lib/supabase'
-import { loadProgress, saveFocus } from '@/lib/focus-sessions'
+import { loadCompletedFocusCount, loadProgress, saveFocus } from '@/lib/focus-sessions'
 import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer } from '@/lib/pomodoro'
 
 export function Pomodoro({ userId }: { userId: string }) {
@@ -15,6 +16,7 @@ export function Pomodoro({ userId }: { userId: string }) {
   })
   const [now, setNow] = useState(Date.now)
   const [progress, setProgress] = useState<{ day: string; sessions: number; minutes: number; error: string } | null>(null)
+  const [companion, setCompanion] = useState<{ sessions: number; error: string } | null>(null)
   const [saveError, setSaveError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [retry, setRetry] = useState(0)
@@ -66,6 +68,20 @@ export function Pomodoro({ userId }: { userId: string }) {
     })()
     return () => { active = false }
   }, [userId, start, end, refresh])
+
+  useEffect(() => {
+    if (!supabase) return
+    let active = true
+    void (async () => {
+      try {
+        const sessions = await loadCompletedFocusCount(supabase!, userId)
+        if (active) setCompanion({ sessions, error: '' })
+      } catch {
+        if (active) setCompanion({ sessions: 0, error: 'Could not load your companion’s EXP. Please check your connection and retry.' })
+      }
+    })()
+    return () => { active = false }
+  }, [userId, refresh])
 
   const pending = timer.pending
   useEffect(() => {
@@ -123,6 +139,8 @@ export function Pomodoro({ userId }: { userId: string }) {
           {storageError && <p role="alert" className="text-sm text-[#ffc3ab]">{storageError}</p>}
         </CardContent>
       </Card>
+      <div className="space-y-6">
+      <CompanionCard completedSessions={companion?.sessions ?? null} error={companion?.error ?? ''} onRetry={() => setRefresh(value => value + 1)} />
       <Card className="border-white/15 bg-white/5 text-inherit">
         <CardHeader><CardTitle className="font-serif text-2xl">Today’s journey</CardTitle></CardHeader>
         <CardContent className="space-y-5">
@@ -136,6 +154,7 @@ export function Pomodoro({ userId }: { userId: string }) {
           <Button variant="secondary" onClick={() => setRefresh(value => value + 1)}>Refresh progress</Button>
         </CardContent>
       </Card>
+      </div>
     </section>
   )
 }

@@ -58,6 +58,12 @@ The active timer and one pending save are kept in sessionStorage under the accou
 
 Completed sessions use a stable UUID and `ON CONFLICT DO NOTHING` via Supabase upsert, so retrying a save or reloading while a request is in flight does not double-count. A failed save stays pending, offers Retry, and blocks the next focus session until saved; the break remains usable. Load failures are shown separately from zero progress. If browser storage is unavailable, the UI warns that reload recovery is unavailable. Client clocks and completed sessions are not protected against deliberate manipulation; server-verified rewards should be added before introducing competitive or valuable rewards.
 
+### Starter companion
+
+Moss is the fixed starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level.
+
+Companion progress comes from an exact all-time count of the account's completed focus sessions, using the existing RLS-protected table. It does not reset at midnight and needs no new table or migration. Breaks, cancelled/unfinished sessions, and pending unsaved sessions do not contribute. Retrying or reloading does not award extra EXP because the count uses saved rows rather than a separate reward balance. Progress refreshes after saving, on returning to the page, or through Refresh progress. Loading failures show an error with Retry rather than resetting the companion to Level 1.
+
 For deployment, set repository Actions Variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The workflow injects them at build time. These values are public frontend configuration, not secrets. Never substitute database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
 
 ## GitHub Pages

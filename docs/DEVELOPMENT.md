@@ -2,7 +2,7 @@
 
 Requirements: Node.js 24, npm, and a Git clone.
 
-## Firebase migration
+## Firebase setup
 
 GitHub Auth and Firestore Lite use the public configuration in src/lib/firebase.ts. OAuth client secrets stay in the Firebase console. Enable GitHub Authentication, set the GitHub callback to https://focuswilds.firebaseapp.com/__/auth/handler, and authorize faahkc.github.io (plus localhost for local testing). Session persistence stays scoped to the current tab.
 
@@ -26,7 +26,7 @@ npm run build
 npm run preview
 ```
 
-React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP. Tests live in `tests/`; `npm test` runs the JavaScript tests, while SQL tests run in SQL Editor. Development scripts remain in `scripts/` and database migrations in `migrations/`.
+React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP. Tests live in `tests/`; `npm test` runs the offline JavaScript tests. Development scripts remain in `scripts/`.
 
 ## Application version
 
@@ -86,7 +86,7 @@ The importer includes completed focus records and skips breaks/unfinished record
 
 For N sessions, a fresh import has one initial progress read plus one progress read, up to 25 session reads and up to 25 distinct day reads per transaction chunk. Writes are new sessions, touched day summaries and one progress document per chunk. Chunk retries can add reads. The import is an explicit one-time operation, stops on error, and never runs in the background. If another device has already added new sessions after import, confirming the updated overview costs two additional reads.
 
-Do not delete the source database or backup until live verification passes. Legacy SQL files remain temporarily for that verification; they are not used by the application. Git history is preserved.
+The owner confirmed restored totals, history and companion persistence on 2026-10-15. The owner explicitly skipped the live completion test for a new focus round; it remains unverified. Obsolete SQL files and local environment entries have been removed. Git history and the original JSON backup are preserved. No remote source database was deleted.
 
 ### Bounded live verification
 

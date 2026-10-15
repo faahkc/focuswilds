@@ -38,6 +38,12 @@ npm run preview
 
 React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP. Tests live in `tests/`; `npm test` runs the offline JavaScript tests. Development scripts remain in `scripts/`.
 
+## Website loading and cache
+
+The journey and Firestore Lite code load after sign-in. The history view loads only after Open history; its existing bounded queries remain unchanged. React lazy imports cache loaded modules for the page lifetime. Loading states are announced with role=status. This reduces initial transfer, not necessarily the total bytes when every feature is opened.
+
+Vite keeps content hashes in JavaScript and CSS filenames so unchanged assets retain their URLs. GitHub Pages was checked on 2026-10-15: HTML and JavaScript returned Cache-Control: max-age=600; JavaScript also returned ETag and Last-Modified. Browser cache can reuse fresh assets and revalidate expired ones. Cache headers are managed by GitHub Pages, not this Vite config. Do not add unsupported header files or a service worker merely to hide the bundle warning; stale app code can interfere with authentication and schema changes. No cloud prefetch, polling, or extra document reads were introduced.
+
 ## Application version
 
 ```sh

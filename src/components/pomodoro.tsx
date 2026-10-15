@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
 import { FocusHistory } from '@/components/focus-history'
+import { DEFAULT_FOCUS_TITLE, MAX_FOCUS_TITLE_LENGTH } from '@/lib/focus-title'
 import { creatures, type DiscoveryJournal as Journal } from '@/lib/discoveries'
 import { loadSelectedCompanion, saveSelectedCompanion, type CompanionId } from '@/lib/companion'
 import { supabase } from '@/lib/supabase'
@@ -171,6 +172,14 @@ export function Pomodoro({ userId }: { userId: string }) {
         <CardHeader><CardTitle className="font-serif text-2xl">{isFocus ? 'Time to focus' : 'Rest at camp'}</CardTitle></CardHeader>
         <CardContent className="space-y-6">
           <p className="text-[#c3cec1]">{isFocus ? 'One quiet stretch of work. Your journey starts here.' : 'Your focus session is complete. Stretch, get water, and rest.'}</p>
+          {isFocus ? <div className="space-y-2">
+            <label htmlFor="focus-title" className="block text-sm">What will you focus on?</label>
+            <input id="focus-title" type="text" value={timer.title} maxLength={MAX_FOCUS_TITLE_LENGTH} placeholder={DEFAULT_FOCUS_TITLE}
+              disabled={timer.startedAt !== null || Boolean(pending)}
+              onChange={event => { const title = event.target.value; setTimer(current => ({ ...current, title })) }}
+              aria-describedby="focus-title-hint" className="w-full rounded-lg border border-white/25 bg-[#14251f] px-3 py-2 text-inherit focus-visible:outline-2 focus-visible:outline-[#e8c782] disabled:opacity-70" />
+            <p id="focus-title-hint" className="text-sm text-[#c3cec1]">Optional, up to {MAX_FOCUS_TITLE_LENGTH} characters. Blank names use “{DEFAULT_FOCUS_TITLE}”. The name stays fixed once you start.</p>
+          </div> : <p className="break-words text-sm text-[#e8c782]">Completed: {timer.title}</p>}
           <p role="timer" aria-label={`${isFocus ? 'Focus' : 'Break'} time remaining`} className="font-mono text-7xl tabular-nums sm:text-8xl">{time}</p>
           <div className="flex flex-wrap gap-3">
             <Button size="lg" onClick={toggle} disabled={isFocus && Boolean(pending)} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">

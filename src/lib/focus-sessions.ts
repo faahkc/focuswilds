@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { CompletedFocus } from './pomodoro'
 import { encounterIndex, type DiscoveryJournal } from './discoveries.ts'
 import { historyRange, summarizeHistory, type HistoryPeriod, type HistorySession } from './history.ts'
+import { normalizeFocusTitle } from './focus-title.ts'
 
 export async function saveFocus(client: SupabaseClient, userId: string, session: CompletedFocus) {
   const { error } = await client.from('focus_sessions').upsert({
@@ -14,6 +15,7 @@ export async function saveFocus(client: SupabaseClient, userId: string, session:
     started_at: session.startedAt,
     ends_at: session.completedAt,
     finished_at: session.completedAt,
+    title: normalizeFocusTitle(session.title),
   }, { onConflict: 'id', ignoreDuplicates: true })
   if (error) throw error
 }
@@ -58,7 +60,7 @@ export async function loadFocusHistory(client: SupabaseClient, userId: string, p
   const { start, end } = historyRange(period, now)
   const rows: HistorySession[] = []
   for (let offset = 0; ; offset += 1000) {
-    let query = client.from('focus_sessions').select('finished_at,duration_seconds')
+    let query = client.from('focus_sessions').select('id,title,finished_at,duration_seconds')
       .eq('user_id', userId).eq('session_type', 'focus').eq('status', 'completed').lt('finished_at', end)
     if (start !== null) query = query.gte('finished_at', start)
     const { data, error } = await query.order('finished_at', { ascending: false }).order('id').range(offset, offset + 999)

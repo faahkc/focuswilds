@@ -22,7 +22,7 @@ test('deadline follows elapsed time after background throttling and reload', () 
   assert.equal(completed.phase, 'break')
   assert.equal(completed.remainingMs, BREAK_MS)
   assert.equal(completed.deadline, null)
-  assert.deepEqual(completed.pending, { id: otherId, startedAt: new Date(now).toISOString(), completedAt: new Date(now + FOCUS_MS).toISOString() })
+  assert.deepEqual(completed.pending, { id: otherId, startedAt: new Date(now).toISOString(), completedAt: new Date(now + FOCUS_MS).toISOString(), title: 'Focus session' })
   assert.equal(advance(completed, now + FOCUS_MS * 4), completed)
 })
 
@@ -97,4 +97,28 @@ test('daily bounds follow local midnight, including daylight-saving changes', ()
     if (original === undefined) delete process.env.TZ
     else process.env.TZ = original
   }
+})
+
+test('a named focus session keeps its title through pause, reload, completion, and pending retry', () => {
+  const running = toggleTimer({ ...newTimer(id), title: '  อ่านหนังสือ  ' }, now, otherId)
+  const paused = toggleTimer(running, now + 60_000, id)
+  const restored = restoreTimer(JSON.stringify(paused), id)
+  assert.equal(restored.title, 'อ่านหนังสือ')
+  const resumed = toggleTimer(restored, now + 120_000, id)
+  const completed = advance(resumed, resumed.deadline)
+  assert.equal(completed.pending.title, 'อ่านหนังสือ')
+  assert.equal(restoreTimer(JSON.stringify(completed), id).pending.title, 'อ่านหนังสือ')
+})
+
+test('legacy timers and pending saves gain the default title without losing progress', () => {
+  const running = toggleTimer(newTimer(id), now, otherId)
+  const completed = advance(running, running.deadline)
+  delete running.title
+  delete completed.title
+  delete completed.pending.title
+  assert.equal(restoreTimer(JSON.stringify(running), id).deadline, running.deadline)
+  const restored = restoreTimer(JSON.stringify(completed), id)
+  assert.equal(restored.pending.id, otherId)
+  assert.equal(restored.pending.title, 'Focus session')
+  assert.equal(restored.title, 'Focus session')
 })

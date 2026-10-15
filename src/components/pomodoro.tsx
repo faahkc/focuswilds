@@ -1,37 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanionCard } from '@/components/companion-card'
 import { DiscoveryJournal } from '@/components/discovery-journal'
 import { FocusHistory } from '@/components/focus-history'
 import { DEFAULT_FOCUS_TITLE, MAX_FOCUS_TITLE_LENGTH } from '@/lib/focus-title'
-import { creatures, type DiscoveryJournal as Journal } from '@/lib/discoveries'
-import { loadSelectedCompanion, saveSelectedCompanion, type CompanionId } from '@/lib/companion'
-import { supabase } from '@/lib/supabase'
-import { loadCompletedFocusCount, loadDiscoveryJournal, loadProgress, saveFocus } from '@/lib/focus-sessions'
+import { SOURCE_OWNER_ID, dayKey } from '@/lib/account'
+import type { CompanionId } from '@/lib/companion'
+import type { DayProgress, Profile } from '@/lib/focus-data'
+import { focusStore } from '@/lib/firestore-store'
+import { loadOverview, saveFocus, saveSelectedCompanion } from '@/lib/focus-sessions'
 import { advance, remaining, resetTimer, restoreTimer, todayBounds, toggleTimer, dailyGoalProgress, DAILY_FOCUS_GOAL, FOCUS_MS } from '@/lib/pomodoro'
 
-export function Pomodoro({ userId }: { userId: string }) {
-  const storageKey = `focuswilds:timer:${userId}`
+export function Pomodoro({ userId, initialOverview }: { userId: string; initialOverview: { profile: Profile; day: DayProgress } }) {
+  const storageKey = 'focuswilds:timer:' + userId
   const [storageError, setStorageError] = useState('')
   const [timer, setTimer] = useState(() => {
     let raw = null
-    try { raw = sessionStorage.getItem(storageKey) } catch { /* Storage status is reported by the persistence effect. */ }
+    try { raw = sessionStorage.getItem(storageKey) ?? sessionStorage.getItem('focuswilds:timer:' + SOURCE_OWNER_ID) } catch { /* Report storage failures in the persistence effect. */ }
     return advance(restoreTimer(raw, crypto.randomUUID()), Date.now())
   })
+  const [overview, setOverview] = useState(initialOverview)
   const [now, setNow] = useState(Date.now)
-  const [progress, setProgress] = useState<{ day: string; sessions: number; minutes: number; error: string } | null>(null)
-  const [companion, setCompanion] = useState<{ sessions: number; error: string } | null>(null)
-  const [journal, setJournal] = useState<{ data: Journal | null; error: string } | null>(null)
-  const [selection, setSelection] = useState<{ value: CompanionId | null; error: string }>({ value: null, error: '' })
+  const [loadError, setLoadError] = useState('')
   const [savingSelection, setSavingSelection] = useState(false)
   const [selectionSaveError, setSelectionSaveError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [retry, setRetry] = useState(0)
-  const { start, end } = todayBounds(now)
-  const today = progress?.day === start ? progress : null
-  const loadError = today?.error ?? ''
+  const day = dayKey(now)
+  const { start } = todayBounds(now)
+  const previousLoad = useRef({ day: initialOverview.day.day, refresh: 0 })
+  const loadVersion = useRef(0)
+  const today = overview.day.day === day ? { sessions: overview.day.sessions, minutes: Math.floor(overview.day.seconds / 60) } : null
+  const companion = { sessions: overview.profile.sessions, error: loadError }
+  const journal = { data: { encounters: overview.profile.encounters, latest: overview.profile.latest }, error: loadError }
+  const selection = { value: overview.profile.selected, error: loadError }
   const goal = today && !loadError ? dailyGoalProgress(today.sessions) : null
 
   useEffect(() => {
@@ -40,16 +44,13 @@ export function Pomodoro({ userId }: { userId: string }) {
       setNow(timestamp)
       setTimer(current => advance(current, timestamp))
     }
-    const sync = () => { tick(); setRefresh(value => value + 1) }
-    const onVisible = () => { if (document.visibilityState === 'visible') sync() }
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
     const interval = window.setInterval(tick, 1000)
-    window.addEventListener('focus', sync)
-    window.addEventListener('online', sync)
+    window.addEventListener('focus', tick)
     document.addEventListener('visibilitychange', onVisible)
     return () => {
       clearInterval(interval)
-      window.removeEventListener('focus', sync)
-      window.removeEventListener('online', sync)
+      window.removeEventListener('focus', tick)
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [])
@@ -57,101 +58,59 @@ export function Pomodoro({ userId }: { userId: string }) {
   useEffect(() => {
     try {
       sessionStorage.setItem(storageKey, JSON.stringify(timer))
-      // oxlint-disable-next-line react/set-state-in-effect -- Report the outcome of writing to external browser storage.
+      // oxlint-disable-next-line react/set-state-in-effect -- Report the external storage write result.
       setStorageError('')
     } catch {
-      // oxlint-disable-next-line react/set-state-in-effect -- Storage failures must be visible before the user reloads.
+      // oxlint-disable-next-line react/set-state-in-effect -- Surface reload recovery failures.
       setStorageError('This browser cannot preserve your timer. Keep this page open until your focus session is saved.')
     }
   }, [storageKey, timer])
 
   useEffect(() => {
-    if (!supabase) return
+    if (previousLoad.current.day === day && previousLoad.current.refresh === refresh) return
+    const version = ++loadVersion.current
     let active = true
-    void (async () => {
-      try {
-        const result = await loadProgress(supabase!, userId, start, end)
-        if (active) setProgress({ day: start, ...result, error: '' })
-      } catch {
-        if (active) setProgress({ day: start, sessions: 0, minutes: 0, error: 'Could not load today’s progress. Check your connection and database setup, then retry.' })
+    void loadOverview(focusStore, userId, day, true).then(value => {
+      if (active && version === loadVersion.current) {
+        if (!value.profile?.ready) throw new Error('Saved progress is not ready')
+        previousLoad.current = { day, refresh }
+        const profile = value.profile
+        setOverview(current => ({ profile: profile.revision >= current.profile.revision ? profile : current.profile, day: value.day }))
+        setLoadError('')
       }
-    })()
+    }).catch(() => { if (active && version === loadVersion.current) setLoadError('Could not refresh progress. Check your connection and retry.') })
     return () => { active = false }
-  }, [userId, start, end, refresh])
-
-  useEffect(() => {
-    if (!supabase) return
-    let active = true
-    void (async () => {
-      try {
-        const sessions = await loadCompletedFocusCount(supabase!, userId)
-        if (active) setCompanion({ sessions, error: '' })
-      } catch {
-        if (active) setCompanion({ sessions: 0, error: 'Could not load your companion’s EXP. Please check your connection and retry.' })
-      }
-    })()
-    return () => { active = false }
-  }, [userId, refresh])
-
-  useEffect(() => {
-    if (!supabase) return
-    let active = true
-    void (async () => {
-      try {
-        const data = await loadDiscoveryJournal(supabase!, userId)
-        if (active) setJournal({ data, error: '' })
-      } catch {
-        if (active) setJournal({ data: null, error: 'Could not load your discoveries. Check your connection and retry.' })
-      }
-    })()
-    return () => { active = false }
-  }, [userId, refresh])
-
-  useEffect(() => {
-    if (!supabase || savingSelection) return
-    let active = true
-    void (async () => {
-      try {
-        const value = await loadSelectedCompanion(supabase!, userId)
-        if (active) setSelection({ value, error: '' })
-      } catch {
-        if (active) setSelection(current => ({ ...current, error: 'Could not load your selected companion. Check your connection and reload the selection.' }))
-      }
-    })()
-    return () => { active = false }
-  }, [userId, refresh, savingSelection])
+  }, [userId, day, refresh])
 
   async function selectCompanion(selected: CompanionId) {
-    if (!supabase || savingSelection || selection.value === null) return
-    if (selected !== 'moss' && !journal?.data?.encounters[creatures.findIndex(creature => creature.icon === selected)]) return
+    if (savingSelection || selected === selection.value) return
     setSavingSelection(true)
     setSelectionSaveError('')
     try {
-      const value = await saveSelectedCompanion(supabase, userId, selected)
-      setSelection({ value, error: '' })
+      const profile = await saveSelectedCompanion(focusStore, userId, selected)
+      loadVersion.current += 1
+      setOverview(current => ({ ...current, profile: profile.revision >= current.profile.revision ? profile : current.profile }))
     } catch {
-      setSelectionSaveError('Could not confirm your selection was saved. Reload the selection or try choosing again when connected.')
-    } finally {
-      setSavingSelection(false)
-    }
+      setSelectionSaveError('Could not confirm your selection was saved. Refresh progress or choose again when connected.')
+    } finally { setSavingSelection(false) }
   }
 
   const pending = timer.pending
   useEffect(() => {
-    if (!pending || !supabase) return
+    if (!pending) return
     let active = true
-    void (async () => {
-      try {
-        await saveFocus(supabase!, userId, pending)
-        if (active) {
-          setSaveError('')
-          setTimer(current => current.pending?.id === pending.id ? { ...current, pending: null } : current)
-          setRefresh(value => value + 1)
-        }
-      } catch {
-        if (active) setSaveError('Your completed session is waiting to save. Check your connection and account permissions, keep this tab open, and retry.')
+    void saveFocus(focusStore, userId, pending).then(value => {
+      if (active) {
+        loadVersion.current += 1
+        setOverview(current => ({
+          profile: value.profile.revision >= current.profile.revision ? value.profile : current.profile,
+          day: value.day.day === dayKey(Date.now()) && (current.day.day !== value.day.day || value.day.sessions >= current.day.sessions) ? value.day : current.day,
+        }))
+        setSaveError('')
+        setTimer(current => current.pending?.id === pending.id ? { ...current, pending: null } : current)
+        if (value.day.day !== dayKey(Date.now())) setRefresh(value => value + 1)
       }
-    })()
+    }).catch(() => { if (active) setSaveError('Your completed session is waiting to save. Keep this tab open, check your connection, and retry.') })
     return () => { active = false }
   }, [pending, userId, retry])
 
@@ -231,7 +190,7 @@ export function Pomodoro({ userId }: { userId: string }) {
     </section>
     <DiscoveryJournal journal={journal?.data ?? null} error={journal?.error ?? ''} onRetry={() => setRefresh(value => value + 1)}
       selected={selection.value} saving={savingSelection} onSelect={selected => void selectCompanion(selected)} />
-    <FocusHistory userId={userId} todayStart={start} refresh={refresh} />
+    <FocusHistory userId={userId} todayStart={start} profile={overview.profile} />
     </>
   )
 }

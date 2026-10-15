@@ -4,13 +4,13 @@ Requirements: Node.js 24, npm, and a Git clone.
 
 ## Firebase migration
 
-Use mock data for routine unit tests. Run live Firebase integration checks manually with a small, bounded number of operations; no polling, unbounded retries, or automatic production test loops. Firebase GitHub sign-in is connected; Firestore is not initialized or queried. Focus sessions remain unavailable until the data migration is complete, so Firebase user IDs never reach the old Supabase data client.
+GitHub Auth and Firestore Lite use the public configuration in src/lib/firebase.ts. OAuth client secrets stay in the Firebase console. Enable GitHub Authentication, set the GitHub callback to https://focuswilds.firebaseapp.com/__/auth/handler, and authorize faahkc.github.io (plus localhost for local testing). Session persistence stays scoped to the current tab.
 
-The public Firebase web config is in `src/lib/firebase.ts`; OAuth client secrets stay in the Firebase console. Enable GitHub in Authentication, use `https://focuswilds.firebaseapp.com/__/auth/handler` as the GitHub OAuth callback, and authorize `faahkc.github.io`. For local sign-in checks, explicitly add `localhost` in Firebase Authentication authorized domains. Only session-scoped auth persistence is enabled; closing the tab clears the session.
+Only the owner UID in src/lib/account.ts is allowed. Publish the contents of firestore.rules in the Firebase console before using this version: it restricts access to the owner, validates basic document shapes, keeps saved sessions immutable, and rejects session queries without a limit of at most 25 (daily summaries: 30). All unlisted paths and deletes are denied. The rules do not prove focus duration or independently recompute rewards; this is a personal app, not a competitive reward system.
 
-Manual check: click Sign in with GitHub, authorize the new OAuth app, verify the account ID on the success card, reload to confirm session restoration, then sign out and verify the landing page returns. Check cancellation and blocked popups only once each. Leave Firestore Rules denied during this step. Routine `npm test` does not connect to Firebase.
+Routine tests use an in-memory store. The npm test command preloads tests/offline.mjs to block fetch and outbound SDK sockets before tests run. Do not disable it. No Emulator, Firebase CLI or Java is required. Live integration checks are manual and bounded; never put real Firebase calls into the routine test suite.
 
-The Firebase SDK pins its Node-only gRPC dependency to the vulnerable 1.9.x line. A scoped npm override selects patched gRPC 1.14.6+ within the same major; remove it when Firebase updates its dependency range. The browser auth flow does not use gRPC.
+The Firebase SDK pins its Node-only gRPC dependency to vulnerable 1.9.x. A scoped npm override selects patched gRPC 1.14.6+ within the same major; remove it when Firebase updates its dependency range. The browser uses Firestore Lite and does not use gRPC.
 
 ```sh
 npm ci
@@ -52,58 +52,48 @@ Commits made through GitHub's web UI, merges created by GitHub, and commits made
 
 ## Cloud data
 
-The following describes the legacy data implementation retained until import into Firestore is verified. Its UI is temporarily disconnected. Firebase authentication setup is described above; do not configure Supabase OAuth for the current website.
+Paths live under users/OWNER_UID:
 
-Authentication tokens and the PKCE verifier are stored in sessionStorage for the current browser tab. Reloading the tab preserves the session; a new browser session may require signing in again. Login does not restrict signup to one account.
+- state/progress: schema version, monotonic revision, ready flag, session/second totals, encounter counts, latest discovery, selected companion, and resumable import metadata.
+- days/YYYY-MM-DD: daily session/second totals in Asia/Bangkok. The same timezone is used on all devices, including imported records.
+- sessions/UUID: immutable ID, title, start/completion times, and recorded seconds. UUIDs, titles and variable durations from the backup are preserved; every completed focus session still awards 25 EXP.
 
-### Focus sessions
+The timer runs locally and survives reload in sessionStorage. Old tab timers are recovered using the known source account ID. No cloud write occurs per tick, title edit, pause, reset, or break. Only completed focus sessions are saved. Progress revisions prevent delayed responses from rolling EXP or companion selection backwards in the UI.
 
-The app uses the existing Supabase `public.focus_sessions` table: UUID `id` (primary key), `user_id` referencing `auth.users`, `session_type`, `status`, `duration_seconds`, `remaining_seconds`, `started_at`, `ends_at`, and `finished_at`. Completed focus sessions are inserted with `session_type = 'focus'`, `status = 'completed'`, 1500 seconds, and zero remaining time. Daily totals filter on `finished_at` and include existing completed focus sessions at their recorded durations. Results are paginated to avoid the API's 1000-row default limit.
+### Quota budget
 
-No schema migration is required for the current database. Its existing RLS policy `owner_only` restricts reads and writes to the configured owner's account; other GitHub accounts can sign in but cannot save progress. The application does not change database grants, existing rows, or policies. Keep RLS enabled; client-side user filters are not a substitute for [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security). Keep future SQL migrations in `migrations/` and commit them to Git; credentials and local caches stay untracked.
+Normal successful operations before SDK conflict retries (overview reads are skipped when the same account/day is already cached in memory):
 
-After signing in, start a 25-minute focus session, pause/resume it, or reset unfinished time. Completing focus prepares a 5-minute break; neither phase starts automatically. Deadlines use wall-clock time so background throttling does not slow the timer. A completed focus session retains its scheduled completion timestamp, even if the browser wakes later. Today's saved count and minutes use the viewing device's local timezone and refresh at midnight, on returning to the page, or manually.
+| Action | Document reads | Document writes |
+| --- | --- | --- |
+| Open journey / manually refresh progress / new Thailand day | 2 | 0 |
+| Finish a new focus session | 3 | 3 |
+| Retry an already saved session | 3 | 0 |
+| Change companion | 1 | 1 (0 if unchanged) |
+| Open 7/30-day history | At most 7/30 day documents | 0 |
+| Open all-time daily history / load older days | At most 25 day documents per page | 0 |
+| View individual sessions / load more | At most 25 session documents per page | 0 |
 
-Today's journey includes a fixed daily goal of four saved completed focus sessions (100 minutes for the standard 25-minute timer). The progress bar fills at four and stays full if the user continues, while the daily session and minute totals remain uncapped. Historical variable-duration sessions count as sessions, rather than converting minutes into extra sessions. The goal follows the same local-day boundaries and cloud refresh as daily totals; failed loads do not show a zero or completed goal. Breaks, resets, and pending unsaved sessions do not count. Completion shows encouragement without extra EXP or rewards, and the next local day starts a fresh goal without changing all-time EXP or discoveries. No new schema or migration is needed.
+An empty query still has a minimum read charge. Transaction conflicts retry at most 3 times and can consume additional reads. These numbers describe app document operations, not a guarantee of the final billing meter; index reads or other service overhead can apply. No polling, realtime database listeners, visibility/focus refetch, automatic history scans, or automatic network retry loops are used. Concurrent identical reads and saves are coalesced. Overview results remain cached for the current account/day until an explicit refresh, successful write, or page reload; component remounts reuse them. Transaction results update the UI without a follow-up read. Changes from another device require Refresh progress / Refresh history or reloading the app.
 
-The active timer and one pending save are kept in sessionStorage under the account ID, so reloading this tab resumes them. Cloud progress is available across devices; active timers are not synchronized across tabs or devices. Closing the tab can discard an unfinished timer or unsaved session. Signing out hides that account's timer; signing back in in the same tab restores it. No account's progress is shown to another signed-in user. Existing running/paused database rows are not resumed or changed by this timer.
+History stays closed until requested. Each selected-period view remains in memory while open; changing periods or refreshing explicitly issues a new bounded query. All-time totals come from the progress document, never from counting every session. Summary tables and session pages load separately. A full page offers Load more; an extra empty query may be needed to learn there is no next page.
 
-Completed sessions use a stable UUID and `ON CONFLICT DO NOTHING` via Supabase upsert, so retrying a save or reloading while a request is in flight does not double-count. A failed save stays pending, offers Retry, and blocks the next focus session until saved; the break remains usable. Load failures are shown separately from zero progress. If browser storage is unavailable, the UI warns that reload recovery is unavailable. Client clocks and completed sessions are not protected against deliberate manipulation; server-verified rewards should be added before introducing competitive or valuable rewards.
+### Restore the backup
 
-### Focus session names
+Keep the original JSON backup outside Git. After signing in, choose it on Restore your journey. File parsing, owner checks, duplicate/conflict checks, title/duration validation, discovery checks, totals, and SHA-256 fingerprinting are local; preview performs no cloud writes. Files over 20 MB are rejected locally for browser memory safety; keep such a backup and arrange a separate import rather than truncating it.
 
-Run `migrations/202610150002_focus_session_titles.sql` once in SQL Editor. It adds a non-null `title` column with the default `Focus session` for old records and clients that omit the field. The database rejects blank/whitespace-only names and names longer than 120 characters, without changing existing RLS or totals. Run `tests/focus-session-titles.test.sql` to verify defaults, Thai/Unicode names, and invalid inputs; all test writes roll back.
+The importer includes completed focus records and skips breaks/unfinished records. It preserves the selected discovered companion and derives EXP/discoveries using the unchanged UUID mapping. Import chunks contain at most 25 sessions. Each chunk atomically writes new sessions, affected daily summaries and progress metadata. Previously completed chunks are skipped on resume, conflicting records or a different file are rejected, and ready stays false until final totals match the locally validated backup. Lost commit responses are safe to retry using the same file.
 
-Before starting focus, enter an optional name. Blank input uses `Focus session`; names are trimmed and limited to 120 Unicode characters. The field locks after starting, including while paused. Reset an unfinished focus session to edit its name. Names survive tab reloads and pending-save retries; legacy stored timers/pending saves receive the default without losing their progress. The next focus session starts with the default name. History's View individual sessions section shows the saved name, completion time, and duration within the selected period, while daily totals remain unchanged. Names are rendered as text, not HTML.
+For N sessions, a fresh import has one initial progress read plus one progress read, up to 25 session reads and up to 25 distinct day reads per transaction chunk. Writes are new sessions, touched day summaries and one progress document per chunk. Chunk retries can add reads. The import is an explicit one-time operation, stops on error, and never runs in the background. If another device has already added new sessions after import, confirming the updated overview costs two additional reads.
 
-### Focus history
+Do not delete the source database or backup until live verification passes. Legacy SQL files remain temporarily for that verification; they are not used by the application. Git history is preserved.
 
-The history card offers 7 days, 30 days, and All time, with period totals and a daily table. Bounded periods include today and use local calendar midnights, including daylight-saving changes. Records are grouped by local completion date and use their recorded durations. Only completed focus sessions for the account are queried; breaks and unsaved sessions are excluded. Days without sessions are omitted, and the table scrolls for long histories. Results are paginated past the API row limit. Switching ranges only changes the query and never deletes older records or affects EXP/discoveries. History refreshes after a save, on returning to the page, at local midnight, or manually. Failed loads show Retry without partial totals. No schema change is required.
+### Bounded live verification
 
-### Starter companion
+1. Publish firestore.rules. Sign in and preview the backup; compare session count, minutes, EXP and companion before importing.
+2. Import once. Compare restored totals, title/history samples and companion against the preview. Reload once to confirm cloud persistence.
+3. Open history once; check 7-day/30-day/all-time totals and one 25-row page as applicable. Do not loop refreshes.
+4. Complete one real focus round. Verify +1 session, +25 EXP, +25 minutes and one discovery. Refresh once to confirm, then test changing to one unlocked companion.
+5. If a write is uncertain, use the existing Retry action; do not create replacement sessions or reimport a different file. Keep the source backup until all checks pass.
 
-Moss is the default starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level. EXP and levels belong to the account's journey and stay unchanged when switching companions.
-
-At Level 5 (400 total EXP, or 16 saved completed focus sessions), Moss automatically evolves into Mossgrove. Its portrait, name, and description change, and the card shows the remaining saved sessions before evolution. This form derives from the existing journey level; it needs no database migration, extra reward, or confirmation button. The saved selection remains `moss`, so switching away and back or loading another device restores the correct form. Existing historical sessions count. Loading/error states do not assume an unevolved form. Only Moss has an evolution in this version; deleting saved focus history can reduce the level and derived form.
-
-Companion progress comes from an exact all-time count of the account's completed focus sessions, using the existing RLS-protected table. It does not reset at midnight and needs no new table or migration. Breaks, cancelled/unfinished sessions, and pending unsaved sessions do not contribute. Retrying or reloading does not award extra EXP because the count uses saved rows rather than a separate reward balance. Progress refreshes after saving, on returning to the page, or through Refresh progress. Loading failures show an error with Retry rather than resetting the companion to Level 1.
-
-### Discovery journal
-
-Each saved completed focus session reveals one of three species: Fern Hare, Dawn Finch, or Amber Squirrel. Discoveries are added automatically; repeats increase that species' encounter count. The journal shows the latest saved encounter and hides undiscovered species. Discovered creatures can be chosen as the travelling companion; catching is not implemented.
-
-Species derive deterministically from the final eight hexadecimal digits of the saved session UUID, modulo 3. The journal loads the account's completed focus sessions, including historical ones, in paginated completion order with UUID ordering as a stable tie-breaker. Reloading, retrying a save, or using another device reconstructs the same journal without extra tables or browser reward storage. Breaks and unfinished sessions are filtered out. Failed journal loads show Retry rather than an empty or partial collection. The mapping is fixed; persist discovery records before changing the species order or mapping. This is a simple noncompetitive discovery system, not a server-verified random reward.
-
-### Companion selection
-
-Run `migrations/202610150001_companion_preferences.sql` once in the existing project's SQL Editor. This creates `companion_preferences` with one selected companion per account, without changing existing focus sessions or their owner-only policies. Its RLS policy allows authenticated users to read/write only their own preference; writes additionally require Moss or a species discovered in that account's completed focus history. The database applies the same unsigned hexadecimal modulo-3 mapping as the browser. Anonymous access and deletion are not granted. The migration includes mapping assertions.
-
-Run `tests/companion-preferences.test.sql` in SQL Editor to test actual grants and RLS, using the most recent account with a completed focus session. It tests selecting Moss and a discovered species, cross-account read/write isolation, and rejection of an undiscovered species. Test writes are rolled back.
-
-Choose Travel with a discovered creature in the journal, or Travel with Moss on the companion card to return to the starter. The portrait, name, and description update only after the server confirms the selection. The same preference reloads on another device or after returning to the page. A missing preference defaults to Moss; failed loads show an error and disable initial selection rather than overwriting an existing preference. Save failures keep the last confirmed selection and offer reload or another attempt. Reload after an uncertain response retrieves whatever the server committed. Concurrent devices use the last successful write; no live subscription is added.
-
-The current deployment uses the public Firebase configuration in `src/lib/firebase.ts`; no Supabase Actions Variables are needed. Never commit database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
-
-## GitHub Pages
-
-The workflow builds and tests pushes to `main`, then deploys `dist`. In repository Settings > Pages, select GitHub Actions as the source. Repository permissions may require the owner to enable Pages first. The base path is `/focuswilds/`.
+Firebase Spark remains without Billing. No images, analytics, functions or file uploads use Firebase; the selected backup is parsed locally and only validated session/preferences data is written. Images and animations remain website assets on GitHub Pages.

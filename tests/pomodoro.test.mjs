@@ -83,7 +83,7 @@ test('restore validates browser storage and preserves pending saves', () => {
   assert.deepEqual(restoreTimer(JSON.stringify(pending), otherId), pending)
 })
 
-test('daily bounds follow local midnight, including daylight-saving changes', () => {
+test('daily bounds use Thailand midnight consistently across device timezones', () => {
   const original = process.env.TZ
   try {
     process.env.TZ = 'Asia/Bangkok'
@@ -92,7 +92,7 @@ test('daily bounds follow local midnight, including daylight-saving changes', ()
     })
     process.env.TZ = 'America/New_York'
     const bounds = todayBounds(Date.parse('2026-03-08T12:00:00Z'))
-    assert.equal(Date.parse(bounds.end) - Date.parse(bounds.start), 23 * 60 * 60_000)
+    assert.equal(Date.parse(bounds.end) - Date.parse(bounds.start), 24 * 60 * 60_000)
   } finally {
     if (original === undefined) delete process.env.TZ
     else process.env.TZ = original

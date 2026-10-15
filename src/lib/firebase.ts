@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { browserPopupRedirectResolver, browserSessionPersistence, initializeAuth } from 'firebase/auth'
 
 // Public web configuration; authorization is enforced by Firebase Auth and Firestore Rules.
-const app = initializeApp({
+export const app = initializeApp({
   apiKey: 'AIzaSyBuxWvVfIAvRNW4bL5amwy7eoTmeS7OH6c',
   authDomain: 'focuswilds.firebaseapp.com',
   projectId: 'focuswilds',

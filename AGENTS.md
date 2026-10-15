@@ -41,6 +41,15 @@ Take the first option that fully works:
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, the calibration real hardware needs, anything the user asked for.
 
+## Data quota requirements
+
+- Keep Firebase on Spark without Billing. Routine tests use an in-memory store, never production services; no Emulator or Firebase CLI dependency. Keep the network-blocking preload on `npm test` enabled.
+- Use summary documents for EXP, discoveries and daily totals. Never rebuild progress by scanning session history during normal use.
+- Load history only on demand with cursor pages of at most 25 sessions. Bound daily-summary queries to 30 documents; paginate all-time days.
+- No realtime database listeners, polling, refetch on focus/visibility, or unbounded retries. Deduplicate simultaneous reads. Reuse transaction results instead of rereading after writes.
+- Completed sessions and summary updates must commit atomically and idempotently. Import backups in bounded resumable chunks after local validation. Do not reset or overwrite existing user progress during import.
+- Use the account timezone Asia/Bangkok consistently across devices. Document actual read/write budgets and any change that increases them.
+
 ## Git history and commits
 
 - Use npm. Validate implementation changes with `npm test`, `npm run lint`, and `npm run build` as appropriate.

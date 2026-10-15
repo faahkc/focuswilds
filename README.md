@@ -26,4 +26,4 @@ Follow your daily progress, revisit familiar companions, and pick up your journe
 
 ---
 
-*Firebase migration in progress. GitHub sign-in now uses Firebase. The existing named 25/5 timer, history, companion progress, discoveries, and preferences are temporarily unavailable until their data is migrated. Catching creatures and other evolutions remain the vision. Setup and migration status are described in [Development](docs/DEVELOPMENT.md#firebase-migration).*
+*GitHub sign-in and focus data use Firebase. Restore the saved JSON backup once to resume the named 25/5 timer, daily goal, companion progress, discoveries, and preferences. Progress uses compact summaries; history loads on demand in pages. Catching creatures and other evolutions remain the vision. Setup and migration are described in [Development](docs/DEVELOPMENT.md#firebase-migration).*

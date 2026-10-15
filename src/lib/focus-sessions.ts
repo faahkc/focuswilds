@@ -1,14 +1,13 @@
 import { dayKey, userPath } from './account.ts'
 import { creatures } from './discoveries.ts'
 import { isCompanionId, type CompanionId } from './companion.ts'
-import { addSession, emptyProfile, parseDay, parseProfile, parseSession, type Backup, type DayProgress, type FocusSession, type Profile } from './focus-data.ts'
+import { addSession, parseDay, parseProfile, parseSession, type DayProgress, type FocusSession, type Profile } from './focus-data.ts'
 import type { Cursor, FocusStore, Transaction } from './focus-store.ts'
 import { historyRange, type HistoryPeriod } from './history.ts'
 import type { CompletedFocus } from './pomodoro.ts'
 import { normalizeFocusTitle } from './focus-title.ts'
 
 export const PAGE_SIZE = 25
-export const IMPORT_CHUNK_SIZE = 25
 const progressPath = (userId: string) => `${userPath(userId)}/state/progress`
 
 type Overview = { profile: Profile | null; day: DayProgress }
@@ -33,7 +32,7 @@ async function writeRows(tx: Transaction, base: string, profile: Profile, rows: 
   const stored = await Promise.all(rows.map(row => tx.get(`${base}/sessions/${row.id}`)))
   const fresh = rows.filter((row, index) => {
     if (stored[index] === null) return true
-    if (JSON.stringify(parseSession(stored[index])) !== JSON.stringify(row)) throw new Error('Existing session conflicts with imported data')
+    if (JSON.stringify(parseSession(stored[index])) !== JSON.stringify(row)) throw new Error('Existing session conflicts with saved data')
     return false
   })
   const keys = [...new Set(rows.map(row => dayKey(row.completedAt)))]
@@ -53,7 +52,7 @@ async function saveCompleted(store: FocusStore, userId: string, row: FocusSessio
   const base = userPath(userId)
   const result = await store.transaction(async tx => {
     const profile = parseProfile(await tx.get(progressPath(userId)))
-    if (!profile.ready) throw new Error('Import saved progress before starting a session')
+    if (!profile.ready) throw new Error('Saved progress is not ready')
     const result = await writeRows(tx, base, profile, [row])
     if (result.fresh) { profile.revision += 1; tx.set(progressPath(userId), profile) }
     return { profile, day: result.days.get(dayKey(row.completedAt))! }
@@ -80,7 +79,7 @@ export async function saveSelectedCompanion(store: FocusStore, userId: string, s
   if (!isCompanionId(selected)) throw new Error('Unknown companion')
   const result = await store.transaction(async tx => {
     const profile = parseProfile(await tx.get(progressPath(userId)))
-    if (!profile.ready) throw new Error('Import is not complete')
+    if (!profile.ready) throw new Error('Saved progress is not ready')
     if (selected !== 'moss' && !profile.encounters[creatures.findIndex(creature => creature.icon === selected)]) throw new Error('Companion has not been discovered')
     if (profile.selected !== selected) { profile.selected = selected; profile.revision += 1; tx.set(progressPath(userId), profile) }
     return profile
@@ -106,39 +105,4 @@ export async function loadSessionPage(store: FocusStore, userId: string, period:
     if (session.id !== row.id) throw new Error('Invalid history session ID')
     return session
   }), cursor: page.rows.length === PAGE_SIZE ? page.cursor : null }
-}
-
-export async function importBackup(store: FocusStore, userId: string, backup: Backup, onProgress: (processed: number) => void) {
-  const base = userPath(userId)
-  const initial = await store.get(progressPath(userId))
-  let result = initial === null ? emptyProfile() : parseProfile(initial)
-  if (initial !== null && result.migration?.fingerprint !== backup.fingerprint) throw new Error('A different import or existing account is already present')
-  if (result.ready) { overviews.delete(store); onProgress(result.migration!.processed); return result }
-  for (let offset = result.migration?.processed ?? 0; offset < Math.max(backup.sessions.length, 1); offset += IMPORT_CHUNK_SIZE) {
-    const rows = backup.sessions.slice(offset, offset + IMPORT_CHUNK_SIZE)
-    const end = offset + rows.length
-    const profile = await store.transaction(async tx => {
-      const value = await tx.get(progressPath(userId))
-      const current = value === null ? emptyProfile() : parseProfile(value)
-      if (value !== null && current.migration?.fingerprint !== backup.fingerprint) throw new Error('A different import or existing account is already present')
-      if (current.migration && current.migration.processed >= end) return current
-      if (current.migration && current.migration.processed !== offset) throw new Error('Import progress changed. Retry with the same backup')
-      await writeRows(tx, base, current, rows)
-      current.migration = { fingerprint: backup.fingerprint, processed: end, total: backup.sessions.length }
-      current.ready = end === backup.sessions.length
-      if (current.ready) {
-        if (current.sessions !== backup.summary.sessions || current.seconds !== backup.summary.seconds
-          || current.encounters.some((count, index) => count !== backup.summary.encounters[index])
-          || current.latest?.id !== backup.summary.latest?.id || current.latest?.finishedAt !== backup.summary.latest?.finishedAt) throw new Error('Import summary does not match backup')
-        current.selected = backup.selected
-      }
-      current.revision += 1
-      tx.set(progressPath(userId), current)
-      return current
-    })
-    onProgress(profile.migration!.processed)
-    overviews.delete(store)
-    result = profile
-  }
-  return result
 }

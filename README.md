@@ -23,7 +23,3 @@ Discoveries wait until you are ready. Missing a day does not undo your progress.
 Picture wooded paths, lantern-lit camps, drifting mist, and little creatures brought to life in pixel art. Layered scenery and warm light make each stop feel like a small place you could stay awhile.
 
 Follow your daily progress, revisit familiar companions, and pick up your journey from another device. Whether today holds one good session or several, it leaves a mark on your world.
-
----
-
-*GitHub sign-in and focus data use Firebase. Restore the saved JSON backup once to resume the named 25/5 timer, daily goal, companion progress, discoveries, and preferences. Progress uses compact summaries; history loads on demand in pages. Catching creatures and other evolutions remain the vision. Setup and migration are described in [Development](docs/DEVELOPMENT.md#firebase-migration).*

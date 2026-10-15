@@ -88,22 +88,15 @@ An empty query still has a minimum read charge. Transaction conflicts retry at m
 
 History stays closed until requested. Each selected-period view remains in memory while open; changing periods or refreshing explicitly issues a new bounded query. All-time totals come from the progress document, never from counting every session. Summary tables and session pages load separately. A full page offers Load more; an extra empty query may be needed to learn there is no next page.
 
-### Restore the backup
+### Saved progress
 
-Keep the original JSON backup outside Git. After signing in, choose it on Restore your journey. File parsing, owner checks, duplicate/conflict checks, title/duration validation, discovery checks, totals, and SHA-256 fingerprinting are local; preview performs no cloud writes. Files over 20 MB are rejected locally for browser memory safety; keep such a backup and arrange a separate import rather than truncating it.
-
-The importer includes completed focus records and skips breaks/unfinished records. It preserves the selected discovered companion and derives EXP/discoveries using the unchanged UUID mapping. Import chunks contain at most 25 sessions. Each chunk atomically writes new sessions, affected daily summaries and progress metadata. Previously completed chunks are skipped on resume, conflicting records or a different file are rejected, and ready stays false until final totals match the locally validated backup. Lost commit responses are safe to retry using the same file.
-
-For N sessions, a fresh import has one initial progress read plus one progress read, up to 25 session reads and up to 25 distinct day reads per transaction chunk. Writes are new sessions, touched day summaries and one progress document per chunk. Chunk retries can add reads. The import is an explicit one-time operation, stops on error, and never runs in the background. If another device has already added new sessions after import, confirming the updated overview costs two additional reads.
-
-The owner confirmed restored totals, history and companion persistence on 2026-10-15. The owner explicitly skipped the live completion test for a new focus round; it remains unverified. Obsolete SQL files and local environment entries have been removed. Git history and the original JSON backup are preserved. No remote source database was deleted.
+The one-time migration is complete. The application loads existing Firebase progress directly; there is no backup upload or restore screen. Missing or incomplete progress shows an error without initializing, resetting or overwriting cloud data. Existing migration metadata remains readable for compatibility. Keep the original JSON backup outside Git; normal use does not require it.
 
 ### Bounded live verification
 
-1. Publish firestore.rules. Sign in and preview the backup; compare session count, minutes, EXP and companion before importing.
-2. Import once. Compare restored totals, title/history samples and companion against the preview. Reload once to confirm cloud persistence.
-3. Open history once; check 7-day/30-day/all-time totals and one 25-row page as applicable. Do not loop refreshes.
-4. Complete one real focus round. Verify +1 session, +25 EXP, +25 minutes and one discovery. Refresh once to confirm, then test changing to one unlocked companion.
-5. If a write is uncertain, use the existing Retry action; do not create replacement sessions or reimport a different file. Keep the source backup until all checks pass.
+1. Sign in and compare saved totals and companion. Reload once to confirm persistence.
+2. Open history once and check the selected period and one session page as applicable. Do not loop refreshes.
+3. Complete one real focus round. Verify +1 session, +25 EXP, +25 minutes and one discovery. This live completion check was previously skipped by the owner.
+4. If a write is uncertain, use the existing Retry action; do not create replacement sessions.
 
-Firebase Spark remains without Billing. No images, analytics, functions or file uploads use Firebase; the selected backup is parsed locally and only validated session/preferences data is written. Images and animations remain website assets on GitHub Pages.
+Firebase Spark remains without Billing. No images, analytics, functions or file uploads use Firebase. Images and animations remain website assets on GitHub Pages.

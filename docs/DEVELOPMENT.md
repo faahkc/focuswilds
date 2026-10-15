@@ -60,15 +60,23 @@ Completed sessions use a stable UUID and `ON CONFLICT DO NOTHING` via Supabase u
 
 ### Starter companion
 
-Moss is the fixed starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level.
+Moss is the default starter companion, drawn as a simple SVG. Each saved completed focus session earns 25 EXP, including existing historical focus sessions regardless of their duration. Level starts at 1 and increases every 100 EXP. The EXP bar shows progress within the current level. EXP and levels belong to the account's journey and stay unchanged when switching companions.
 
 Companion progress comes from an exact all-time count of the account's completed focus sessions, using the existing RLS-protected table. It does not reset at midnight and needs no new table or migration. Breaks, cancelled/unfinished sessions, and pending unsaved sessions do not contribute. Retrying or reloading does not award extra EXP because the count uses saved rows rather than a separate reward balance. Progress refreshes after saving, on returning to the page, or through Refresh progress. Loading failures show an error with Retry rather than resetting the companion to Level 1.
 
 ### Discovery journal
 
-Each saved completed focus session reveals one of three species: Fern Hare, Dawn Finch, or Amber Squirrel. Discoveries are added automatically; repeats increase that species' encounter count. The journal shows the latest saved encounter and hides undiscovered species. Moss remains the travelling companion; catching and choosing creatures are not implemented.
+Each saved completed focus session reveals one of three species: Fern Hare, Dawn Finch, or Amber Squirrel. Discoveries are added automatically; repeats increase that species' encounter count. The journal shows the latest saved encounter and hides undiscovered species. Discovered creatures can be chosen as the travelling companion; catching is not implemented.
 
 Species derive deterministically from the final eight hexadecimal digits of the saved session UUID, modulo 3. The journal loads the account's completed focus sessions, including historical ones, in paginated completion order with UUID ordering as a stable tie-breaker. Reloading, retrying a save, or using another device reconstructs the same journal without extra tables or browser reward storage. Breaks and unfinished sessions are filtered out. Failed journal loads show Retry rather than an empty or partial collection. The mapping is fixed; persist discovery records before changing the species order or mapping. This is a simple noncompetitive discovery system, not a server-verified random reward.
+
+### Companion selection
+
+Run `migrations/202610150001_companion_preferences.sql` once in the existing project's SQL Editor. This creates `companion_preferences` with one selected companion per account, without changing existing focus sessions or their owner-only policies. Its RLS policy allows authenticated users to read/write only their own preference; writes additionally require Moss or a species discovered in that account's completed focus history. The database applies the same unsigned hexadecimal modulo-3 mapping as the browser. Anonymous access and deletion are not granted. The migration includes mapping assertions.
+
+Run `scripts/companion-preferences.test.sql` in SQL Editor to test actual grants and RLS, using the most recent account with a completed focus session. It tests selecting Moss and a discovered species, cross-account read/write isolation, and rejection of an undiscovered species. Test writes are rolled back.
+
+Choose Travel with a discovered creature in the journal, or Travel with Moss on the companion card to return to the starter. The portrait, name, and description update only after the server confirms the selection. The same preference reloads on another device or after returning to the page. A missing preference defaults to Moss; failed loads show an error and disable initial selection rather than overwriting an existing preference. Save failures keep the last confirmed selection and offer reload or another attempt. Reload after an uncertain response retrieves whatever the server committed. Concurrent devices use the last successful write; no live subscription is added.
 
 For deployment, set repository Actions Variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The workflow injects them at build time. These values are public frontend configuration, not secrets. Never substitute database passwords, OAuth client secrets, or service-role keys. `.env.local` must stay ignored and untracked.
 

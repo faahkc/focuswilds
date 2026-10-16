@@ -194,7 +194,7 @@ export function Pomodoro({ userId, initialOverview }: { userId: string; initialO
                 : `${goal.remaining} more saved ${goal.remaining === 1 ? 'session' : 'sessions'} to reach today’s goal.`}</p>
             </>}
           </div>
-          <p className="text-sm text-[#c3cec1]">Saved to your account. Today follows this device’s local timezone. Your active timer stays in this tab across reloads.</p>
+          <p className="text-sm text-[#c3cec1]">Saved to your account. Daily totals follow Asia/Bangkok time. Your active timer stays in this tab across reloads.</p>
           {!today && <p role="status" className="text-sm">Loading progress…</p>}
           {loadError && <p role="alert" className="text-sm text-[#ffc3ab]">{loadError}</p>}
           <Button variant="secondary" onClick={() => setRefresh(value => value + 1)}>Refresh progress</Button>

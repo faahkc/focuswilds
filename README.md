@@ -1,25 +1,11 @@
 # Focuswilds
 
-*Your focus grows a living world.*
+*ตราบใดที่แสงไฟยังไม่ดับ เรายังมีที่ให้กลับไป*
 
-Beyond the next task, a trail winds into the wilds. A small companion waits beside your pack. There is no rush to reach the horizon. Every stretch of focused work takes you a little farther; every break gives you both a place to rest.
+โลกที่มนุษย์เคยรู้จักเหลือเพียงซาก สิ่งมีชีวิตที่เคยอยู่ในตำนานและเรื่องเล่าโบราณก้าวออกจากความมืด ถนนที่เคยเชื่อมเมืองกลายเป็นทางร้าง และเสียงเรียกจากชายป่าอาจไม่ได้เป็นของมนุษย์อีกต่อไป
 
-Focuswilds is a Pomodoro adventure built around that rhythm: make time for what matters, then return to a world that grows with you.
+หลังกำแพงป้อมชายแดนเก่า ผู้รอดชีวิตกลุ่มเล็ก ๆ จุดไฟขึ้นอีกครั้ง ระหว่างก้อนหินแตกร้าวมีที่ให้นอนพัก มีมือที่คอยช่วยเหลือ และมีความหวังว่าพรุ่งนี้จะยังได้ยินเสียงคนรอบกองไฟ
 
-## A little progress. A new discovery.
+Focuswilds คือพื้นที่สำหรับสมาธิท่ามกลางโลกที่มืดมน ช่วงเวลาที่ตั้งใจให้กับสิ่งตรงหน้าคือส่วนเล็ก ๆ ของการประคองชีวิตให้เดินต่อ ไม่มีใครจำเป็นต้องกอบกู้โลกทั้งใบในวันเดียว บางวัน การรักษาแสงไฟดวงหนึ่งไว้ก็เพียงพอแล้ว
 
-Finish a focus session and see where the trail has led. Something might be moving in the grass. You might uncover a useful item, reach a quiet clearing, or meet a creature you have never seen before.
-
-Catch new companions, choose who travels beside you, and watch them gain experience, learn, and evolve. Fill your journal with discoveries and build a collection that tells the story of your time in the wilds.
-
-## Rest belongs to the journey
-
-When it is time to pause, your companions settle into camp. Let them recover while you step away, stretch, or get some water. Returning rested helps your bonds grow, too.
-
-Discoveries wait until you are ready. Missing a day does not undo your progress. The adventure should give you a reason to begin, and room to stop.
-
-## A world worth returning to
-
-Picture wooded paths, lantern-lit camps, drifting mist, and little creatures brought to life in pixel art. Layered scenery and warm light make each stop feel like a small place you could stay awhile.
-
-Follow your daily progress, revisit familiar companions, and pick up your journey from another device. Whether today holds one good session or several, it leaves a mark on your world.
+นอกกำแพงยังมีหมอก ซากหมู่บ้าน และเรื่องราวที่ไม่มีใครรู้ว่าจริงเพียงใด แต่เมื่อเหนื่อยล้า คุณกลับมาพักได้เสมอ โลกภายนอกอาจไม่อ่อนโยน ทว่าแสงอุ่นในที่พักพิงยังมีไว้สำหรับคุณ

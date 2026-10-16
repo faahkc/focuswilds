@@ -7,7 +7,7 @@
 - ทำแล้ว: ใช้ GNU Unifont ทั้ง UI พร้อมใบอนุญาต แปลส่วนบัญชีและข้อผิดพลาดเป็นไทย ตั้งภาษาเอกสารเป็น `th` ปุ่มหน้าแรกใช้ “เข้าสู่ที่พักพิง” และสถานะรอ “รอสักครู่…”
 - ยังใช้ระบบเดิม: ตัวจับเวลา 25/5 นาที ประวัติ EXP เพื่อนสิ่งมีชีวิต และฉากป่า ข้อความส่วนนี้ยังเป็นอังกฤษ
 - ยังไม่ทำ: งานในป้อม ผู้รอดชีวิต ทีมสำรวจ HP อุปกรณ์ คลังจำกัด การกู้ของ สมุดตำนาน และฉากป้อมใหม่
-- ยังไม่ได้ล้างข้อมูลเดิมหรือแก้ README เป็นคำบรรยายโลกใหม่
+- README และ metadata เป็นคำบรรยายโลกใหม่แล้ว แต่ยังไม่ได้ล้างข้อมูลเดิม
 
 ระบบใหม่จะเริ่มจากศูนย์ ไม่แปลงประวัติ เวลา EXP หรือความก้าวหน้าเดิม แต่การอนุมัติเริ่มใหม่ยังไม่ใช่การล้างข้อมูลที่เกิดขึ้นแล้ว ต้องมี schema ใหม่และขั้นตอนล้างข้อมูลเก่าแบบจำกัดขนาดและรันซ้ำได้อย่างปลอดภัยก่อนเปิดใช้ ห้ามให้ขั้นตอนล้างข้อมูลเก่าลบข้อมูลของระบบใหม่
 
@@ -74,7 +74,7 @@ Motion off and the device reduced-motion preference stop both CSS and WebGL anim
 
 Visual verification on 2026-10-16 used isolated Edge with intercepted authentication and an in-memory store; external requests were blocked. Desktop 1280×720 / 1440×900 and portrait 390×844 / 320×568 layouts fit the viewport. Pixel comparisons confirmed animation, Motion off and reduced-motion behavior. Timer countdown continued through a guide dialog; Escape restored focus. The main scene was checked in focus and rest. New rendering on physical Safari remains unverified. The separate graphics chunk increases the signed-in JavaScript download; the production build can still report a chunk-size warning.
 
-The subsequent GNU Unifont/account translation check verified loaded font and login bounds at 1280×720, 390×844 and 320×568, and reviewed a phone screenshot. It did not repeat the earlier signed-in scene checks with the new font or test real OAuth sign-in. The later button wording changes passed lint/build; their exact wording has not had a separate visual check. Physical-device Thai mark placement and long Thai paragraphs remain to be verified during the full UI replacement.
+The subsequent GNU Unifont/account translation check verified loaded font and login bounds at 1280×720, 390×844 and 320×568, and reviewed a phone screenshot. It did not repeat the earlier signed-in scene checks with the new font or test real OAuth sign-in. A later cleanup fixed account styling that still depended on the old English accessibility label: styles now use `.wilds-account`, independently of the translated label. Browser checks confirmed the current shelter button fits those three viewport sizes with its intended font size, 48px minimum height and arrow decoration. Physical-device Thai mark placement and long Thai paragraphs remain to be verified during the full UI replacement.
 
 Playwright screenshots and console logs belong in ignored `.playwright-mcp/`. Remove artifacts once they are no longer needed after verification; retain files still used for diagnosis or open in the user's editor. Do not commit temporary screenshots, full-resolution unused originals, font conversion tools or downloaded full fonts. Commit deletions of tracked assets that no longer have callers.
 

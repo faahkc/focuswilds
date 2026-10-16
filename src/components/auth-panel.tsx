@@ -41,7 +41,7 @@ export function AuthPanel({ onSessionChange }: { onSessionChange: (user: User | 
           <span className="max-w-48 truncate text-sm">{user.displayName || user.email || 'เข้าสู่ระบบแล้ว'}</span>
           <Button disabled={busy} onClick={() => void updateAccount()} variant="secondary">{busy ? 'กำลังออกจากระบบ…' : 'ออกจากระบบ'}</Button>
         </div>
-      ) : <Button disabled={busy} onClick={() => void updateAccount()} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">{busy ? 'กำลังเชื่อมต่อ…' : 'เข้าสู่ระบบด้วย GitHub'}</Button>}
+      ) : <Button disabled={busy} onClick={() => void updateAccount()} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">{busy ? 'กำลังเข้าสู่ป้อม…' : 'เข้าสู่ป้อม'}</Button>}
       {error && <p role="alert" className="max-w-sm text-sm text-[#ffc3ab]">{error}</p>}
     </section>
   )

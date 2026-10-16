@@ -55,7 +55,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - No realtime database listeners, polling, refetch on focus/visibility, or unbounded retries. Deduplicate simultaneous reads. Reuse transaction results instead of rereading after writes.
 - Completed sessions and summary updates must commit atomically and idempotently. Import backups in bounded resumable chunks after local validation. Do not reset or overwrite existing user progress during import.
 - Use the account timezone Asia/Bangkok consistently across devices. Document actual read/write budgets and any change that increases them.
-- Keep initial scene assets within 500 kB; reuse compressed scene images and small sprites. Load artwork after sign-in, avoid GIF/video loops and cloud-backed asset requests, and do not commit unused full-resolution originals.
+- Keep initial scene assets within 500 kB; reuse compressed scene images and small sprites. The login title screen may load the shared compressed background before sign-in; load the animated journey after sign-in. Avoid GIF/video loops and cloud-backed asset requests, and do not commit unused full-resolution originals.
 
 ## Git history and commits
 

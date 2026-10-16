@@ -1,22 +1,22 @@
 # Focuswilds Implementation Plan
 
-This document records approved requirements, not a list of fully implemented features. The README and this plan stay in English; Thai is the primary application UI language.
+This document records approved requirements, not a list of fully implemented features. The README and this plan stay in English. The replacement application supports English and Thai, with English as the default.
 
 ## Checkpoint — 2026-10-17
 
 Development is paused at the owner's request. Wait for the owner to resume before implementing more gameplay.
 
-Completed and pushed through `4a218a2` (v0.1.43):
+Completed and pushed through `3efa04a` (v0.1.44), before this checkpoint update:
 
 - Recorded the requirements, applied a Thai/Latin GNU Unifont subset throughout the UI, included its license, and removed the previous font assets.
 - Translated account controls and errors into Thai. The login button enters the shelter; its busy state asks the user to wait. Account CSS no longer depends on an English accessibility label.
-- Updated the README narrative and page metadata for the new world, and separated shipped behavior from planned work in DEVELOPMENT.md. This documentation correction restores the README and implementation plan to English.
+- Updated the README narrative and page metadata for the new world, and separated shipped behavior from planned work in DEVELOPMENT.md. Restored the README and implementation plan to English.
 - Removed unused chart/sidebar CSS variables, corrected timezone copy, and confirmed that the remaining tracked assets have callers.
 - Offline tests, lint, build, and diff checks passed. Login checks at 1280×720, 390×844, and 320×568 found no overflow.
 
 Resume at delivery step 2: inspect current code, define the domain model/schema and trial balance values, then write in-memory tests for survivors, jobs, focus, storage, inventory, and exploration outcomes before connecting persistence/UI. The owner has authorized routine balance and implementation decisions without further questions for each value.
 
-Remaining work includes the gameplay loop, fort artwork and human characters, Thai signed-in UI, configurable focus duration, new persistence and read/write budgets, the legacy data reset, and deletion of legacy code/assets once replaced. The existing 25/5-minute journey still runs; production data has not been reset.
+Remaining work includes the gameplay loop, fort artwork and human characters, bilingual UI with English defaults, signed-in Settings with Firestore language persistence, configurable focus duration, new persistence and read/write budgets, the legacy data reset, and deletion of legacy code/assets once replaced. The existing 25/5-minute journey still runs; production data has not been reset. Current account copy and page metadata remain Thai until bilingual UI implementation; Settings does not exist yet.
 
 Remaining verification includes Thai marks and long text on physical devices, signed-in layouts with the new font, offline/multiple-tab recovery, and idempotent outcomes. The existing graphics chunk warning remains. Do not claim that the new game or PWA support is ready.
 
@@ -28,8 +28,21 @@ Use English commit subjects and descriptive bodies with validation details, with
 - An abandoned border fort is a safe shelter. No fort attacks, deaths, or resource losses caused by absence from the app.
 - Pixel characters in scenes with depth, muted colors, deep shadows, and warm firelight. Begin with European folklore.
 - Show the fort exterior before login and the inner campfire courtyard afterward. The landing screen contains only the title and login.
-- Use GNU Unifont with its license. Thai is the primary UI language; check vowels, tone marks, and long text on phones.
+- Use GNU Unifont with its license for both English and Thai. Default to English; check Thai vowels, tone marks, and long text on phones.
 - Keep the main experience within one viewport. Open secondary information in icon dialogs without unmounting the timer. Preserve zoom and reduced-motion support.
+
+## Languages and signed-in Settings
+
+- Support English (`en`) and Thai (`th`) across menus, account messages, events, items, skills, journal entries, and accessibility labels. Keep translated strings separate from logic and use stable IDs for game data.
+- Default to English when an account has no saved language. The logged-out screen uses English; Settings is available only after login as a game-style icon dialog.
+- Persist the selected language in the account's Cloud Firestore data, using the existing Firebase Spark project without Billing. Local storage alone does not satisfy account persistence.
+- Load the preference with account data and reuse it in memory. Reopening Settings must not read Firestore again. Write only when the saved language changes.
+- Apply the saved preference when signing in on another device. Without listeners or polling, an already open device picks up remote changes through an explicit refresh or the next account load.
+- Validate supported language codes at application and rules boundaries. Add preference operations to the documented read/write budget when the schema is defined; do not assume they are free.
+- Show loading/save failures with retry. Do not report a preference as saved before the write succeeds, and do not silently overwrite an unread preference after a load failure.
+- Switching language must preserve the mounted timer, jobs, exploration state, and progress. Update document language, dates, and accessible labels consistently.
+- Test default English, both translations, persistence, invalid values, failed saves, repeated Settings opens, and switching during an active timer using the offline store.
+- README and this implementation plan remain English. Thai is an application language option, not a requirement to translate repository documents.
 
 ## Focus and production
 
@@ -97,9 +110,9 @@ Use English commit subjects and descriptive bodies with validation details, with
 ## Delivery order
 
 1. Record the plan, replace the font, and begin Thai account UI while preserving the current journey. Completed; README narrative also updated.
-2. Build the new domain model/schema with in-memory tests for survivors, jobs, focus, storage, inventory, and exploration outcomes.
+2. Build the new domain model/schema with in-memory tests for survivors, jobs, focus, storage, inventory, exploration outcomes, and account language preferences.
 3. Connect persistence and one complete playable area. Verify atomicity, idempotency, and recovery.
-4. Complete the Thai UI, fort scenes, and assets. Verify desktop, phone, zoom, and reduced motion.
+4. Complete the English/Thai UI, English defaults, signed-in Settings, fort scenes, and assets. Verify persisted language, timer continuity, desktop, phone, zoom, and reduced motion.
 5. Reset legacy data, remove replaced code/assets, review README and development documentation, run relevant checks, commit, and push.
 
 Choose trial HP, storage capacity, costs, production durations, and initial content during implementation. Do not add hunger, disease, stress, or fort politics in the first version.

@@ -24,6 +24,12 @@
 
 Requirements: Node.js 24, npm, and a Git clone.
 
+## Planned bilingual Settings
+
+The replacement app will support English (`en`, default) and Thai (`th`). Settings is available only after sign-in, through an icon dialog, and stores the preference in the account's Cloud Firestore data on the existing Spark project without Billing. The current Thai account text is an interim implementation; English defaults, Settings, and preference persistence are not shipped yet.
+
+Load language with account data, reuse the loaded value when reopening Settings, and write only on a saved-value change. Saved preferences apply across devices on account load or explicit refresh; no listener, polling, or focus refetch is introduced. Report failed reads/writes and allow retry without claiming a successful save or overwriting an unread preference. Validate `en`/`th` in application code and rules, and document actual read/write costs with the new schema. Language changes must preserve the mounted timer and game state. Test these cases offline, including English defaults and save failures. README and IMPLEMENTATION_PLAN.md stay English.
+
 Validate dependency changes with `npm ci` in a clean directory and the Linux CI build. Preserve lockfile metadata for bundled optional dependencies; an existing `node_modules` tree can hide an incomplete lockfile. Missing bundled dependency entries can stop deployment before tests run.
 
 ## Firebase setup

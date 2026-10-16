@@ -1,8 +1,14 @@
-Copyright 2022–2024 Helena Zhang (helenazhang.com).
+GNU Unifont 17.0.05; Thai/Latin/punctuation subset in WOFF2.
+Source: https://unifoundry.com/unifont/
 
-This Font Software is licensed under the SIL Open Font License, Version 1.1.
-This license is copied below, and is also available with a FAQ at:
-https://openfontlicense.org
+Copyright © 1998-2026 Roman Czyborra, Paul Hardy, Qianqian Fang, Andrew Miller, Johnnie Weaver, David Corbett, Ælla Chiana Moskopp, Rebecca Bettencourt, Ho-Seok Ee, et al.
+
+Dual license: SIL Open Font License version 1.1, and GNU GPL version 2 or later with the GNU Font Embedding Exception.
+
+https://gnu.org/licenses/gpl.html, https://scripts.sil.org/OFL
+
+The SIL Open Font License version 1.1 is copied below, and is also
+available with a FAQ at http://scripts.sil.org/OFL.
 
 
 -----------------------------------------------------------

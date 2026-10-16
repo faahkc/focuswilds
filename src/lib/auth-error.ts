@@ -3,18 +3,18 @@ export function authErrorMessage(error: unknown) {
   switch (code) {
     case 'auth/popup-closed-by-user':
     case 'auth/cancelled-popup-request':
-      return 'GitHub sign-in was cancelled. Please try again.'
+      return 'ยกเลิกการเข้าสู่ระบบด้วย GitHub แล้ว โปรดลองอีกครั้ง'
     case 'auth/popup-blocked':
-      return 'Allow pop-ups for this website, then try signing in again.'
+      return 'โปรดอนุญาตหน้าต่างป๊อปอัปสำหรับเว็บไซต์นี้ แล้วลองเข้าสู่ระบบอีกครั้ง'
     case 'auth/unauthorized-domain':
-      return 'This website domain is not authorized for sign-in yet.'
+      return 'โดเมนเว็บไซต์นี้ยังไม่ได้รับอนุญาตให้เข้าสู่ระบบ'
     case 'auth/operation-not-allowed':
-      return 'GitHub sign-in is not enabled in Firebase yet.'
+      return 'ยังไม่ได้เปิดใช้งานการเข้าสู่ระบบด้วย GitHub'
     case 'auth/network-request-failed':
-      return 'Could not connect. Check your connection and try again.'
+      return 'เชื่อมต่อไม่ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง'
     case 'auth/too-many-requests':
-      return 'Too many sign-in attempts. Please wait before trying again.'
+      return 'พยายามเข้าสู่ระบบหลายครั้งเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง'
     default:
-      return 'Could not complete the account action. Please try again.'
+      return 'ดำเนินการกับบัญชีไม่ได้ โปรดลองอีกครั้ง'
   }
 }

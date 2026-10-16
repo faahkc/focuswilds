@@ -1,85 +1,105 @@
-# แผนปรับ Focuswilds
+# Focuswilds Implementation Plan
 
-เอกสารนี้เป็นข้อกำหนดที่อนุมัติแล้ว ไม่ใช่รายการความสามารถที่เปิดใช้งานครบแล้ว
+This document records approved requirements, not a list of fully implemented features. The README and this plan stay in English; Thai is the primary application UI language.
 
-## ทิศทาง
+## Checkpoint — 2026-10-17
 
-- แอปโฟกัสผสมการบริหารที่พักพิงและสำรวจเอาชีวิตรอด โลกยุคกลางล่มสลายจากสิ่งมีชีวิตในตำนาน
-- ป้อมชายแดนร้างเป็นที่พักพิงปลอดภัย ไม่มีการโจมตีป้อม ไม่มีการตายหรือเสียทรัพยากรจากการไม่ได้เปิดแอป
-- ภาพตัวละครพิกเซล ฉากมีความลึก สีหม่น เงาเข้ม แสงไฟอุ่น เริ่มจากคติชนยุโรป
-- หน้า login มองภายนอกป้อม หลัง login เข้าลานกองไฟ หน้าแรกมีชื่อและ login เท่านั้น
-- ใช้ GNU Unifont พร้อมใบอนุญาต ภาษาไทยเป็นหลัก ตรวจสระ วรรณยุกต์ และข้อความยาวบนมือถือ
-- หน้าหลักอยู่ในหนึ่ง viewport ข้อมูลอื่นเปิดผ่าน icon dialogs โดยไม่ unmount ตัวจับเวลา รองรับ zoom และ reduced motion
+Development is paused at the owner's request. Wait for the owner to resume before implementing more gameplay.
 
-## โฟกัสและการผลิต
+Completed and pushed through `4a218a2` (v0.1.43):
 
-- ค่าเริ่มต้น 15 นาที ตัวเลือก 5 / 15 / 25 นาที และกำหนดเอง
-- ความคืบหน้าตามเวลาที่ทำจริง สะสมข้ามรอบได้ หยุดก่อนครบยังได้งาน แต่ไม่นับรอบสำเร็จ
-- ทุกคนทำงานพร้อมกันได้ คนละหนึ่งงาน ไม่มีเหตุการณ์บังคับให้ตอบระหว่างโฟกัส
-- ผลิต ซ่อม และขยายอาคารใช้วัสดุกับเวลาโฟกัส พักฟื้นและสวนผลิตเสบียงพื้นฐานใช้เวลาอย่างเดียว
-- จัดทีม ใส่อุปกรณ์ มอบหมายงาน และเลือกเหตุการณ์ทำทันที การสำรวจใช้ทรัพยากรที่เตรียมไว้
-- เสบียงใช้เฉพาะสำรวจ หมดแล้วไปต่อไม่ได้ แต่กลับอย่างปลอดภัยได้เสมอ
+- Recorded the requirements, applied a Thai/Latin GNU Unifont subset throughout the UI, included its license, and removed the previous font assets.
+- Translated account controls and errors into Thai. The login button enters the shelter; its busy state asks the user to wait. Account CSS no longer depends on an English accessibility label.
+- Updated the README narrative and page metadata for the new world, and separated shipped behavior from planned work in DEVELOPMENT.md. This documentation correction restores the README and implementation plan to English.
+- Removed unused chart/sidebar CSS variables, corrected timezone copy, and confirmed that the remaining tracked assets have callers.
+- Offline tests, lint, build, and diff checks passed. Login checks at 1280×720, 390×844, and 320×568 found no overflow.
 
-## คนและอุปกรณ์
+Resume at delivery step 2: inspect current code, define the domain model/schema and trial balance values, then write in-memory tests for survivors, jobs, focus, storage, inventory, and exploration outcomes before connecting persistence/UI. The owner has authorized routine balance and implementation decisions without further questions for each value.
 
-- เริ่ม 5 คน ที่พักรองรับ 8 คน ขยายด้วยวัสดุกับเวลาโฟกัส
-- ทีมสำรวจสูงสุด 3 คน แต่ละคนมี HP และความสามารถแบกต่างกัน
-- อุปกรณ์ต่อคน: อาวุธ 1 เครื่องแต่งกายหรือเกราะ 1 ของใช้ 1 แยกจากกระเป๋า
-- ทักษะเฉพาะตัว 1 เปลี่ยนไม่ได้ ทักษะทั่วไป 1 ฝึกเปลี่ยนที่ป้อมด้วยเวลาโฟกัส
-- ประสบการณ์สำรวจเพิ่ม HP และประสิทธิภาพทักษะเล็กน้อย ไม่เพิ่มช่องทักษะ การเตรียมตัวและความรู้ยังสำคัญกว่าเลเวล
-- อาวุธและเกราะเสื่อมจากใช้งานหรือเหตุการณ์ หมดความทนทานใช้ไม่ได้จนซ่อม ไม่พังหายถาวร
-- เปลี่ยนของใช้กับกระเป๋าได้ระหว่างเหตุการณ์ เปลี่ยนไม่ได้หลังยืนยันลงมือ
+Remaining work includes the gameplay loop, fort artwork and human characters, Thai signed-in UI, configurable focus duration, new persistence and read/write budgets, the legacy data reset, and deletion of legacy code/assets once replaced. The existing 25/5-minute journey still runs; production data has not been reset.
 
-## สำรวจและความเสี่ยง
+Remaining verification includes Thai marks and long text on physical devices, signed-in layouts with the new font, offline/multiple-tab recovery, and idempotent outcomes. The existing graphics chunk warning remains. Do not claim that the new game or PWA support is ready.
 
-- ฉากพร้อมตัวเลือก ต่อสู้แบบเลือกวิธีรับมือแล้วสรุปผล ไม่ใช้เทิร์น
-- เลือกผู้ลงมือ ใช้ทักษะและอุปกรณ์คนนั้น หากกระทบทั้งทีมต้องแจ้งก่อน
-- ไอคอนพร้อมข้อความบอกเสียงดัง เงียบ หรือไม่ทราบผล แสดงต้นทุนและความเสี่ยงที่ทราบ ไม่พึ่งสีอย่างเดียว
-- สุ่มในขอบเขตที่แจ้ง เตือนโอกาสตาย ข้อมูลหรือทักษะช่วยเปิดเผยผลที่ยังไม่ทราบ เสียงดังไม่จำเป็นต้องเป็นทางเลือกผิด
-- พื้นที่ต่ำ / กลาง / สูง ใช้จำนวนเหตุการณ์ทดลอง 2–3 / 3–5 / 5–7 ความเสี่ยงขึ้นกับชนิดภัยและความเสียหายด้วย
-- ข้อมูลจากการสำรวจปลดล็อกพื้นที่ใหม่ ระดับสูงมีโอกาสได้ของ วัสดุ แบบแปลน และทักษะผู้รอดชีวิตดีขึ้น ไม่รับประกัน
-- เลือกกลับระหว่างเหตุการณ์แล้วถึงป้อมปลอดภัยทันที
-- สมุดบันทึกตำนานเก็บพฤติกรรม จุดอ่อน วิธีรับมือ และเบาะแส แยกยืนยันแล้วกับคำบอกเล่า
+Use English commit subjects and descriptive bodies with validation details, without inspiration titles or private design discussions. Inspect staged diffs, use the version hook, and push after checks pass. Clean unused Playwright artifacts while retaining logs still open in the editor.
 
-## กระเป๋า คลัง และการช่วยคน
+## Direction
 
-- กระเป๋ารวมทีมสูงสุด 10 ช่อง ช่องใช้งานขึ้นกับผู้ร่วมทีม ของใหญ่กินหลายช่อง ของบางชนิดรวมกองได้
-- คลังป้อมจำกัดและขยายได้ด้วยวัสดุกับเวลา ใช้วัสดุจากคลังเพื่อขยายได้โดยตรง เลือกทิ้งของได้
-- ของที่คลังรับไม่ไหวฝากในพื้นที่ บันทึกจุดเพื่อส่งทีมไปขนภายหลัง ไม่มีการหายตามเวลานอกแอป
-- ก่อนเดินทางและกลับแสดงพื้นที่ว่าง การขนกลับต้องพอทั้งกระเป๋าและคลัง
-- ผู้ที่ช่วยไม่กินช่อง แต่การพยุงลดความสามารถขนของของคนช่วย แสดงผลและจัดของก่อนยืนยัน
-- เห็นเพียงเบาะแสทักษะก่อนช่วย เปิดเผยครบถึงป้อม ยังไม่ร่วมต่อสู้หรือใช้ทักษะระหว่างเดินทาง
-- ช่วยแล้วเลือกไปต่อหรือกลับได้ นับผู้ที่กำลังพากลับด้วยเพื่อไม่เกินที่พัก
-- ที่พักเต็มช่วยกลับไม่ได้ บันทึกตำแหน่งให้กลับไปช่วยหลังขยายได้ คนรอไม่ตายจากเวลานอกแอป
+- A focus app with shelter management and survival exploration, set in a medieval world devastated by mythical creatures.
+- An abandoned border fort is a safe shelter. No fort attacks, deaths, or resource losses caused by absence from the app.
+- Pixel characters in scenes with depth, muted colors, deep shadows, and warm firelight. Begin with European folklore.
+- Show the fort exterior before login and the inner campfire courtyard afterward. The landing screen contains only the title and login.
+- Use GNU Unifont with its license. Thai is the primary UI language; check vowels, tone marks, and long text on phones.
+- Keep the main experience within one viewport. Open secondary information in icon dialogs without unmounting the timer. Preserve zoom and reduced-motion support.
 
-## บาดเจ็บ ตาย และกู้คืน
+## Focus and production
 
-- เหตุการณ์ลด HP ถึง 0 ตายถาวร กลับป้อมไม่ฟื้นเอง ใช้ยาหรือพักฟื้นด้วยเวลาโฟกัส
-- มีคนตายเลือกไปต่อหรือกลับได้ ความจุลดต้องจัดของ อุปกรณ์คนตายเก็บได้เมื่อช่องพอ ไม่พอต้องเลือกทิ้ง
-- ทีมตายหมดทิ้งของที่จุดเสียชีวิต ส่งทีมใหม่ไปกู้ได้ คนตายไม่ฟื้น ผู้ที่ช่วยมาติดค้างให้ช่วยใหม่ได้
-- ถ้าคนทั้งหมดตาย มีผู้รอดชีวิตใหม่มาถึง ป้อมและความรู้ยังอยู่ ป้องกันเกมติดทางตัน
-- แผนที่แสดงจุดฝากของ กู้ของ และคนที่รอ การกลับไปมีความเสี่ยงตามพื้นที่
-- บันทึกผลถาวรทันที เปิดใหม่ผลเดิมไม่สุ่มซ้ำ ปิดหน้าไม่เดินเหตุการณ์ต่อเอง
+- Default to 15 minutes, with 5 / 15 / 25-minute presets and custom duration.
+- Progress follows actual focused time and carries across sessions. Stopping early retains work progress but does not count as a completed session.
+- All assigned survivors work concurrently, one job per person. No mandatory interactions during focus.
+- Production, repairs, and building upgrades require materials and focus time. Recovery and basic garden provisions require time only.
+- Team setup, equipment changes, job assignment, and event decisions are immediate. Exploration consumes prepared resources.
+- Provisions are consumed only during exploration. Running out prevents further exploration but never prevents a safe return.
 
-## ข้อมูลและการเปลี่ยนระบบ
+## Survivors and equipment
 
-- เริ่มระบบใหม่จากศูนย์ ไม่ย้ายประวัติ เวลา EXP หรือความก้าวหน้าเดิม อนุญาตล้างข้อมูลเก่าเมื่อเปลี่ยนระบบ
-- ใช้ schema ใหม่ แยกข้อมูลเดิมก่อนล้างเป็นขั้นตอนจำกัดขนาด ป้องกันลบข้อมูลใหม่เมื่อรันซ้ำ
-- รักษา Firebase Spark ไม่มี Billing ทดสอบด้วย in-memory store และ network-blocking preload
-- บันทึกผลและความคืบหน้าแบบ atomic/idempotent ตรวจปิดหน้า เน็ตหลุด เปิดหลายแท็บ และรับผลซ้ำ
-- ใช้ summary documents ไม่สแกนประวัติเพื่อสร้าง progress ไม่มี polling/listeners อ่านประวัติเมื่อขอไม่เกิน 25 ต่อหน้า daily summaries ไม่เกิน 30 ต่อ query เวลา Asia/Bangkok
-- ระบุ read/write budgets จริงเมื่อออกแบบ schema ก่อนเปิดใช้ระบบใหม่
-- ลบโค้ด tests dependency และรูปเก่าที่ไม่มีผู้ใช้เมื่อมีของใหม่แทน รวมการลบใน commit ไม่แก้ประวัติ Git
-- README เป็นคำบรรยายโลก บรรยากาศ และแนวคิดล้วน ไม่มีรายการระบบ วิธีใช้ เทคนิค หรือชื่ออ้างอิง
-- เทคนิคและการเปลี่ยนข้อมูลอยู่ docs/DEVELOPMENT.md ภาพฉากเริ่มต้นไม่เกิน 500 kB เก็บ local compressed assets ไม่ใช้ GIF/video loops
-- ล้างภาพและ log ใน .playwright-mcp หลังตรวจงาน เก็บสิ่งที่ยังใช้หรือผู้ใช้เปิดอยู่ โฟลเดอร์นี้อยู่ .gitignore
+- Start with 5 survivors and housing for 8. Expand housing with materials and focus time.
+- Expeditions contain at most 3 people. Each has HP and an individual carrying contribution.
+- Each person equips 1 weapon, 1 outfit/armor, and 1 usable item, separate from the shared inventory.
+- Each has 1 fixed personal skill and 1 general skill that can be retrained at the fort using focus time.
+- Exploration experience modestly improves HP and skill effectiveness without adding skill slots. Preparation and knowledge remain more important than level.
+- Weapons and armor lose durability through use or events. At zero durability they cannot be used until repaired; they do not disappear permanently.
+- Swap the equipped usable item with inventory between events, never after confirming an action.
 
-## ลำดับส่งมอบ
+## Exploration and risk
 
-1. บันทึกแผน เปลี่ยนฟอนต์ และเริ่มภาษาไทยที่ login โดยรักษาระบบเดิมให้ทำงาน
-2. สร้าง domain model/schema ใหม่พร้อม in-memory tests: คน งาน โฟกัส คลัง กระเป๋า และผลสำรวจ
-3. ต่อ persistence และวงจรเล่นครบหนึ่งพื้นที่ ตรวจ atomicity/idempotency และ recovery
-4. ปรับ UI ไทยทั้งระบบ ฉากป้อมและ assets ตรวจ desktop/phone/zoom/reduced motion
-5. ล้างข้อมูลและส่วนเก่าที่ไม่ใช้ ปรับ README คำบรรยายใหม่ ตรวจครบ commit/push
+- Scene-based choices; combat resolves a selected approach as an event rather than a turn-based battle.
+- Choose the acting survivor and use their skills/equipment. Disclose team-wide consequences before confirmation.
+- Pair icons with text indicating noisy, quiet, or unknown outcomes. Display known costs and risks; do not rely on color alone.
+- Random outcomes stay within disclosed bounds. Warn of possible death. Knowledge and skills reveal uncertainty; a noisy action is not inherently wrong.
+- Low / medium / high-risk areas use provisional event counts of 2–3 / 3–5 / 5–7. Threat type and damage also determine risk.
+- Discovered information unlocks areas. Higher risks offer chances of better loot, materials, blueprints, and survivor skills, without guaranteed rewards.
+- Returning between events immediately reaches the fort safely.
+- A folklore journal records behavior, weaknesses, countermeasures, and clues, distinguishing confirmed facts from hearsay.
 
-ตัวเลข HP ความจุคลัง ต้นทุน ระยะเวลาผลิต และเนื้อหาเริ่มต้นให้กำหนดค่าทดลองระหว่าง implementation ไม่เพิ่มระบบหิว โรค ความเครียด หรือการเมืองในเวอร์ชันแรก
+## Inventory, storage, and rescue
+
+- The shared expedition inventory has at most 10 slots; usable capacity depends on team members. Large objects occupy multiple slots and some items stack.
+- Fort storage is limited and expandable with materials and focus time. Spend stored materials directly on upgrades and allow discarding items to avoid deadlocks.
+- Leave items the fort cannot accept at a marked location for a later expedition. They do not disappear while the app is closed.
+- Show available capacity before departure and return. Retrieved items must fit both team inventory and fort storage.
+- Rescued people do not occupy inventory slots. Supporting an injured survivor reduces the helper's carrying contribution; disclose this and allow inventory adjustments before confirmation.
+- Reveal skill clues before rescue and full skills upon reaching the fort. Rescued people cannot fight or use skills during that expedition.
+- After rescue, choose to continue or return. Count people already being escorted against available housing before allowing more rescues.
+- Full housing prevents bringing another person back. Mark their location so they can be rescued after expansion; they do not die from time outside the app.
+
+## Injury, death, and recovery
+
+- Events reduce HP; zero HP means permanent death. Returning does not heal automatically. Use medicine or a focus-based recovery job.
+- After a death, choose to continue or return. Recalculate capacity and resolve excess inventory. Recover equipped items only if space permits; otherwise choose what to leave.
+- A defeated team leaves its items at the death location for another team to recover. Dead characters never revive. Escorted survivors remain stranded and can be rescued again.
+- If everyone dies, a new survivor arrives. The fort and accumulated knowledge remain, avoiding a permanent dead end.
+- The map shows caches, recovery sites, and waiting survivors. Returning to them involves the area's risks.
+- Persist event outcomes immediately. Reopening preserves the outcome without rerolling; closing the app does not advance events.
+
+## Data and replacement
+
+- Start the new system from zero without migrating old history, focus totals, EXP, or progress. Legacy data deletion is authorized for the replacement rollout.
+- Use a new schema and bounded, repeatable legacy cleanup that cannot delete new-system data.
+- Keep Firebase Spark without Billing. Use an in-memory test store and the network-blocking preload.
+- Commit outcomes and progress atomically and idempotently. Test page closure, network loss, multiple tabs, and repeated reward claims.
+- Use summary documents without scanning history to rebuild progress. No polling/listeners. Load history on demand in pages of at most 25; bound daily-summary queries to 30 and paginate all-time days. Use Asia/Bangkok consistently.
+- Document actual read/write budgets before enabling the new schema.
+- Remove unused legacy code, tests, dependencies, and artwork once replacements exist. Include deletions in commits without rewriting Git history.
+- Keep README in English as world, atmosphere, and concept prose only: no feature lists, usage instructions, technical details, or inspiration titles.
+- Put technical and data-transition guidance in docs/DEVELOPMENT.md. Keep initial scene assets within 500 kB, local and compressed; no GIF/video loops.
+- Clean unused screenshots and logs from ignored .playwright-mcp after verification. Retain artifacts still needed or open in the editor.
+
+## Delivery order
+
+1. Record the plan, replace the font, and begin Thai account UI while preserving the current journey. Completed; README narrative also updated.
+2. Build the new domain model/schema with in-memory tests for survivors, jobs, focus, storage, inventory, and exploration outcomes.
+3. Connect persistence and one complete playable area. Verify atomicity, idempotency, and recovery.
+4. Complete the Thai UI, fort scenes, and assets. Verify desktop, phone, zoom, and reduced motion.
+5. Reset legacy data, remove replaced code/assets, review README and development documentation, run relevant checks, commit, and push.
+
+Choose trial HP, storage capacity, costs, production durations, and initial content during implementation. Do not add hunger, disease, stress, or fort politics in the first version.

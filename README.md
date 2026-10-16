@@ -1,11 +1,11 @@
 # Focuswilds
 
-*ตราบใดที่แสงไฟยังไม่ดับ เรายังมีที่ให้กลับไป*
+*As long as the fire burns, there is somewhere to return to.*
 
-โลกที่มนุษย์เคยรู้จักเหลือเพียงซาก สิ่งมีชีวิตที่เคยอยู่ในตำนานและเรื่องเล่าโบราณก้าวออกจากความมืด ถนนที่เคยเชื่อมเมืองกลายเป็นทางร้าง และเสียงเรียกจากชายป่าอาจไม่ได้เป็นของมนุษย์อีกต่อไป
+The world humanity knew lies in ruins. Creatures once confined to ancient tales have stepped out of the dark. Roads that joined thriving towns stand deserted, and a voice calling from the woods may no longer belong to a human.
 
-หลังกำแพงป้อมชายแดนเก่า ผู้รอดชีวิตกลุ่มเล็ก ๆ จุดไฟขึ้นอีกครั้ง ระหว่างก้อนหินแตกร้าวมีที่ให้นอนพัก มีมือที่คอยช่วยเหลือ และมีความหวังว่าพรุ่งนี้จะยังได้ยินเสียงคนรอบกองไฟ
+Behind the walls of an abandoned border fort, a handful of survivors light a fire again. Among the broken stones, there is a place to rest, a helping hand, and the hope of hearing familiar voices around the hearth tomorrow.
 
-Focuswilds คือพื้นที่สำหรับสมาธิท่ามกลางโลกที่มืดมน ช่วงเวลาที่ตั้งใจให้กับสิ่งตรงหน้าคือส่วนเล็ก ๆ ของการประคองชีวิตให้เดินต่อ ไม่มีใครจำเป็นต้องกอบกู้โลกทั้งใบในวันเดียว บางวัน การรักษาแสงไฟดวงหนึ่งไว้ก็เพียงพอแล้ว
+Focuswilds is a place for concentration in a darkened world. Time spent attending to what matters becomes a small act of keeping life moving forward. No one has to save the whole world in a day. Sometimes, keeping one light alive is enough.
 
-นอกกำแพงยังมีหมอก ซากหมู่บ้าน และเรื่องราวที่ไม่มีใครรู้ว่าจริงเพียงใด แต่เมื่อเหนื่อยล้า คุณกลับมาพักได้เสมอ โลกภายนอกอาจไม่อ่อนโยน ทว่าแสงอุ่นในที่พักพิงยังมีไว้สำหรับคุณ
+Beyond the walls lie mist, ruined villages, and stories whose truth remains uncertain. When you grow tired, you can return to rest. The world outside may be unkind, but the warmth of the shelter still has a place for you.

@@ -1,7 +1,7 @@
-﻿@font-face {
-  font-family: 'Pixelify Sans';
+@font-face {
+  font-family: 'Departure Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('./assets/fonts/pixelify-sans.ttf') format('truetype');
+  src: url('./assets/fonts/departure-mono.woff2') format('woff2');
 }

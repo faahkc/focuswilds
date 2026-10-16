@@ -80,7 +80,7 @@
 .wilds-title-backdrop { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; }
 .wilds-landing::before { content: ''; position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 50% 42%, #03060a18 10%, #03060a99 100%), linear-gradient(0deg, #03060acc, transparent 55%, #03060a44); }
 .wilds-landing .wilds-header { flex: 1; flex-direction: column; justify-content: center; flex-wrap: nowrap; gap: clamp(40px, 10svh, 100px); padding: 32px 16px; border: 0; }
-.wilds-title { display: flex; flex-direction: column; align-items: center; gap: 16px; margin: 0; color: #f4e8cd; font-size: clamp(48px, 9vw, 112px); font-weight: 400; line-height: 1; letter-spacing: .02em; text-shadow: 0 3px 0 #1a120e, 0 6px 30px #000; }
+.wilds-title { display: flex; flex-direction: column; align-items: center; gap: 16px; margin: 0; color: #f4e8cd; font-size: clamp(44px, 9vw, 110px); font-weight: 400; line-height: 1; letter-spacing: .02em; text-shadow: 0 3px 0 #1a120e, 0 6px 30px #000; }
 .wilds-title img { image-rendering: pixelated; mix-blend-mode: screen; filter: drop-shadow(0 0 20px #df8f4280); }
 .wilds-title span { padding-block: 14px; border-block: 1px solid #d6bd855c; }
 .wilds-landing .wilds-header > [data-slot="badge"] { display: none; }
@@ -89,6 +89,7 @@
 .wilds-landing [aria-label="Account"] [data-slot="button"]::before { content: ''; position: absolute; left: 14px; width: 8px; height: 12px; background: #e8c782; clip-path: polygon(0 0, 100% 50%, 0 100%, 0 75%, 55% 50%, 0 25%); }
 .wilds-landing [aria-label="Account"] [data-slot="button"]:hover { background: #bba27a26; border-color: #ead6ae; }
 @media (max-width: 767px) {
+  .wilds-landing [aria-label="Account"] [data-slot="button"] { font-size: 16.5px; padding-inline: 28px; }
   .wilds-shell { padding: 12px; }
   .wilds-header { gap: 8px; padding-bottom: 8px; }
   .wilds-header > span:first-child { font-size: 23px; gap: 8px; }

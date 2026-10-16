@@ -84,17 +84,17 @@
 .wilds-title img { image-rendering: pixelated; mix-blend-mode: screen; filter: drop-shadow(0 0 20px #df8f4280); }
 .wilds-title span { padding-block: 14px; border-block: 1px solid #d6bd855c; }
 .wilds-landing .wilds-header > [data-slot="badge"] { display: none; }
-.wilds-landing [aria-label="Account"] { align-items: center; text-align: center; }
-.wilds-landing [aria-label="Account"] [data-slot="button"] { position: relative; min-height: 48px; padding-inline: 36px; background: #080c1380; color: #f4e8cd; border: 1px solid #bba27a80; font-size: 22px; text-shadow: 1px 2px #000; box-shadow: 0 6px 24px #0005; }
-.wilds-landing [aria-label="Account"] [data-slot="button"]::before { content: ''; position: absolute; left: 14px; width: 8px; height: 12px; background: #e8c782; clip-path: polygon(0 0, 100% 50%, 0 100%, 0 75%, 55% 50%, 0 25%); }
-.wilds-landing [aria-label="Account"] [data-slot="button"]:hover { background: #bba27a26; border-color: #ead6ae; }
+.wilds-landing .wilds-account { align-items: center; text-align: center; }
+.wilds-landing .wilds-account [data-slot="button"] { position: relative; min-height: 48px; padding-inline: 36px; background: #080c1380; color: #f4e8cd; border: 1px solid #bba27a80; font-size: 22px; text-shadow: 1px 2px #000; box-shadow: 0 6px 24px #0005; }
+.wilds-landing .wilds-account [data-slot="button"]::before { content: ''; position: absolute; left: 14px; width: 8px; height: 12px; background: #e8c782; clip-path: polygon(0 0, 100% 50%, 0 100%, 0 75%, 55% 50%, 0 25%); }
+.wilds-landing .wilds-account [data-slot="button"]:hover { background: #bba27a26; border-color: #ead6ae; }
 @media (max-width: 767px) {
-  .wilds-landing [aria-label="Account"] [data-slot="button"] { font-size: 16.5px; padding-inline: 28px; }
+  .wilds-landing .wilds-account [data-slot="button"] { font-size: 16.5px; padding-inline: 28px; }
   .wilds-shell { padding: 12px; }
   .wilds-header { gap: 8px; padding-bottom: 8px; }
   .wilds-header > span:first-child { font-size: 23px; gap: 8px; }
   .wilds-header > [data-slot="badge"] { display: none; }
-  .wilds-header [aria-label="Account"] > div > span { max-width: 90px; }
+  .wilds-header .wilds-account > div > span { max-width: 90px; }
   .wilds-header [data-slot="button"] { padding-inline: 10px; font-size: 14px; }
   .wilds-toolbar { padding-block: 8px; gap: 8px; }
   .wilds-toolbar h1 { font-size: 22px; }

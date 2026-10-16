@@ -35,7 +35,7 @@ export function AuthPanel({ onSessionChange }: { onSessionChange: (user: User | 
   }
 
   return (
-    <section aria-label="บัญชี" className="flex flex-col items-start gap-2 sm:items-end">
+    <section aria-label="บัญชี" className="wilds-account flex flex-col items-start gap-2 sm:items-end">
       {loading ? <p role="status" className="text-sm">กำลังตรวจสอบการเข้าสู่ระบบ…</p> : user ? (
         <div className="flex flex-wrap items-center gap-3">
           <span className="max-w-48 truncate text-sm">{user.displayName || user.email || 'เข้าสู่ระบบแล้ว'}</span>

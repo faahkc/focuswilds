@@ -34,7 +34,7 @@ Take the first option that fully works:
 - Keep visual references, inspiration titles, and private design discussions out of repository files, commit messages, and public UI copy.
 - Design desktop layouts for wide screens and phone layouts for portrait use. Preserve accessibility zoom, reduced-motion support, and timer state during rotation. Installation as a web app is a product goal; do not claim PWA support before it exists.
 - Keep editable inputs, textareas, and selects at least 16px on phones to avoid focus zoom in Safari; do not disable viewport zoom.
-- Use Pixelify Sans throughout the entire interface, including body text, editable fields, dialogs, headings, controls, and timers.
+- Use Departure Mono throughout the entire interface, including body text, editable fields, dialogs, headings, controls, and timers.
 - Keep the main experience within one viewport. Open history, creatures, and progress through game-style icon dialogs; allow accessible scrolling inside long dialogs without visible scrollbars. Keep timer state mounted while dialogs open.
 - Follow the existing project structure and coding conventions.
 - Use the package manager indicated by the project's lockfile.

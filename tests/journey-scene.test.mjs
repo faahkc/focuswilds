@@ -7,8 +7,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import ts from 'typescript'
 
 const require = createRequire(import.meta.url)
-function component(file, dependencies = {}) {
-  const source = fs.readFileSync(new URL(`../src/components/${file}.tsx`, import.meta.url), 'utf8')
+function component(file, dependencies = {}, extension = 'tsx') {
+  const source = fs.readFileSync(new URL(`../src/components/${file}.${extension}`, import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => dependencies[name] ?? require(name), module, module.exports)
@@ -48,6 +48,8 @@ test('game windows close with Escape and restore focus to the opening control', 
 })
 const sceneDependencies = {
   '@/components/pixel-companion': pixel,
+  '@/components/woodland-stage': { WoodlandStage: ({ selected, evolved }) => React.createElement(pixel.PixelCompanion, { selected, evolved }) },
+  '@/lib/scene-motion': component('../lib/scene-motion', {}, 'ts'),
   '@/components/ui/button': { Button: ({ children, variant: _variant, size: _size, ...props }) => React.createElement('button', props, children) },
   '@/lib/companion': require('../src/lib/companion.ts'),
   '@/assets/woodland.webp': 'woodland.webp',
@@ -60,7 +62,9 @@ test('motion toggles without a running timer and reports device reduced motion h
   let toggle
   const { JourneyScene: Scene } = component('journey-scene', {
     ...sceneDependencies,
-    react: { ...React, useState: () => [motion, update => { motion = update(motion) }], useSyncExternalStore: () => reduced },
+    '@/lib/scene-motion': component('../lib/scene-motion', {
+      react: { ...React, useState: () => [motion, update => { motion = update(motion) }], useSyncExternalStore: () => reduced },
+    }, 'ts'),
     '@/components/ui/button': { Button: ({ children, onClick, variant: _variant, size: _size, ...props }) => {
       toggle = onClick
       return React.createElement('button', props, children)
@@ -98,11 +102,22 @@ test('focus and rest reuse one deferred scene with the selected companion and ph
 })
 
 test('scene assets stay within the initial transfer budget and reduced-motion users receive a static scene', () => {
-  const bytes = fs.readdirSync(new URL('../src/assets/', import.meta.url))
-    .reduce((sum, file) => sum + fs.statSync(new URL(`../src/assets/${file}`, import.meta.url)).size, 0)
+  const root = new URL('../src/assets/', import.meta.url)
+  const bytes = fs.readdirSync(root, { recursive: true, withFileTypes: true })
+    .filter(file => file.isFile())
+    .reduce((sum, file) => sum + fs.statSync(`${file.parentPath}/${file.name}`).size, 0)
   assert(bytes <= 500_000, `Scene assets exceed 500 kB: ${bytes}`)
   const css = fs.readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   assert.match(css, /prefers-reduced-motion: reduce[\s\S]*animation: none/)
+})
+
+test('walk frames change foot positions while preserving every companion identity', () => {
+  for (const selected of ['moss', 'rabbit', 'bird', 'squirrel']) {
+    const frames = [0, 1, 2].map(frame => renderToStaticMarkup(React.createElement(pixel.PixelCompanion, { selected, frame })))
+    assert.equal(new Set(frames).size, 3)
+    assert(frames.every(html => html.includes('shape-rendering="crispEdges"') && html.includes('companion-feet')))
+    assert.equal(new Set(frames.map(html => html.match(/aria-label="([^"]+)"/)[1])).size, 1)
+  }
 })
 
 test('only small touch screens in physical landscape are blocked, without unmounting the app', () => {

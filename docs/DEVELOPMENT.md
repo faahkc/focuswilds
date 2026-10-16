@@ -40,6 +40,14 @@ React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components 
 
 ## Website loading and cache
 
+### Scene and typography
+
+The signed-in scene uses an original 144,946-byte WebP environment with pixel companions placed on perspective planes, foreground silhouettes, drifting fog, rain and embers. Three.js loads in a separate chunk after the timer UI mounts. Point lighting flickers during focus and becomes warmer at camp. Artwork stays local to the site and loads after sign-in; there are no cloud asset requests. The English interface uses bundled Pixelify Sans for headings, controls and the clock, plus the system font for body text and editable fields. Its 49,840-byte font and OFL license replace the previous font files. Scene and font assets remain below 500 kB.
+
+Motion off and the device reduced-motion preference stop both CSS and WebGL animation. Hidden tabs stop the render loop; returning resumes only when motion is enabled. Scene replacement disposes GPU resources and resize observers. The HTML image and companion remain as the fallback if WebGL cannot start. The renderer does not save data or add document reads/writes; the quota table below is unchanged.
+
+Visual verification on 2026-10-16 used isolated Edge with intercepted authentication and an in-memory store; external requests were blocked. Desktop 1280×720 / 1440×900 and portrait 390×844 / 320×568 layouts fit the viewport. Pixel comparisons confirmed animation, Motion off and reduced-motion behavior. Timer countdown continued through a guide dialog; Escape restored focus. The main scene was checked in focus and rest. New rendering on physical Safari remains unverified. The separate graphics chunk increases the signed-in JavaScript download; the production build can still report a chunk-size warning.
+
 The journey and Firestore Lite code load after sign-in. The history view loads only after Open history; its existing bounded queries remain unchanged. React lazy imports cache loaded modules for the page lifetime. Loading states are announced with role=status. This reduces initial transfer, not necessarily the total bytes when every feature is opened.
 
 Vite keeps content hashes in JavaScript and CSS filenames so unchanged assets retain their URLs. GitHub Pages was checked on 2026-10-15: HTML and JavaScript returned Cache-Control: max-age=600; JavaScript also returned ETag and Last-Modified. Browser cache can reuse fresh assets and revalidate expired ones. Cache headers are managed by GitHub Pages, not this Vite config. Do not add unsupported header files or a service worker merely to hide the bundle warning; stale app code can interfere with authentication and schema changes. No cloud prefetch, polling, or extra document reads were introduced.

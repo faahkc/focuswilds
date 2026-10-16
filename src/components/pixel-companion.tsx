@@ -1,9 +1,9 @@
 import type { CompanionId } from '@/lib/companion'
 
-export function PixelCompanion({ selected, evolved = false }: { selected: CompanionId; evolved?: boolean }) {
+export function PixelCompanion({ selected, evolved = false, frame = 0 }: { selected: CompanionId; evolved?: boolean; frame?: 0 | 1 | 2 }) {
   const names = { moss: evolved ? 'Mossgrove' : 'Moss', rabbit: 'Fern Hare', bird: 'Dawn Finch', squirrel: 'Amber Squirrel' }
   const colors = { moss: '#65794f', rabbit: '#a59b7c', bird: '#b39357', squirrel: '#9a6545' }
-  return <svg role="img" aria-label={names[selected]} viewBox="0 0 32 36" shapeRendering="crispEdges" className="pixel-companion">
+  return <svg xmlns="http://www.w3.org/2000/svg" width="32" height="36" role="img" aria-label={names[selected]} viewBox="0 0 32 36" shapeRendering="crispEdges" className="pixel-companion">
     <path d="M5 32h22v2H5z" fill="#080d10" opacity=".7" />
     {selected === 'moss' && <g>
       <path d="M14 9V5h-4V3h6v2h3V3h6v3h-5v3z" fill="#8d9756" />
@@ -20,5 +20,8 @@ export function PixelCompanion({ selected, evolved = false }: { selected: Compan
     <path d="M12 18h1v1h-1zm9 0h1v1h-1z" fill="#e9ce91" />
     <path d={selected === 'bird' ? 'M15 21h4v2h-2v1h-2z' : 'M15 22h3v2h-3z'} fill={selected === 'bird' ? '#d5a34d' : '#313c2b'} />
     {selected === 'bird' && <path d="M7 22h3v4H7zm16 0h3v4h-3z" fill="#66543c" />}
+    <g className="companion-feet" fill="#463e30">
+      <path d={frame === 1 ? 'M8 29h6v3H8zM19 31h6v3h-6z' : frame === 2 ? 'M8 31h6v3H8zM19 29h6v3h-6z' : 'M9 31h5v2H9zM19 31h5v2h-5z'} />
+    </g>
   </svg>
 }

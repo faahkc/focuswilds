@@ -4,7 +4,7 @@ This document records approved requirements, not a list of fully implemented fea
 
 ## Checkpoint — 2026-10-17
 
-Development is paused at the owner's request. Wait for the owner to resume before implementing more gameplay.
+Development resumed at the owner's request on 2026-10-17. Delivery step 2 is in progress.
 
 Completed and pushed through `3efa04a` (v0.1.44), before this checkpoint update:
 
@@ -14,7 +14,7 @@ Completed and pushed through `3efa04a` (v0.1.44), before this checkpoint update:
 - Removed unused chart/sidebar CSS variables, corrected timezone copy, and confirmed that the remaining tracked assets have callers.
 - Offline tests, lint, build, and diff checks passed. Login checks at 1280×720, 390×844, and 320×568 found no overflow.
 
-Resume at delivery step 2: inspect current code, define the domain model/schema and trial balance values, then write in-memory tests for survivors, jobs, focus, storage, inventory, and exploration outcomes before connecting persistence/UI. The owner has authorized routine balance and implementation decisions without further questions for each value.
+Step 2 now has an isolated, versioned shelter model with revision-checked commands and offline tests. It covers initial survivors, concurrent one-shot garden/recovery/building jobs, partial focus, storage and inventory capacity, nonfatal expedition outcomes, and language validation. See [SHELTER_SCHEMA.md](SHELTER_SCHEMA.md) for trial values and limits. Equipment, rescue, lethal outcomes, recovery sites, production recipes, retraining, durable preference operations, and persisted-state validation remain before step 2 is complete. The owner has authorized routine balance and implementation decisions without further questions for each value.
 
 Remaining work includes the gameplay loop, fort artwork and human characters, bilingual UI with English defaults, signed-in Settings with Firestore language persistence, configurable focus duration, new persistence and read/write budgets, the legacy data reset, and deletion of legacy code/assets once replaced. The existing 25/5-minute journey still runs; production data has not been reset. Current account copy and page metadata remain Thai until bilingual UI implementation; Settings does not exist yet.
 

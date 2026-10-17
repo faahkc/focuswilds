@@ -1,5 +1,17 @@
-export function authErrorMessage(error: unknown) {
+export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'th') {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : null
+  if (language === 'en') {
+    switch (code) {
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request': return 'GitHub sign-in was cancelled. Please try again.'
+      case 'auth/popup-blocked': return 'Allow popups for this site, then try signing in again.'
+      case 'auth/unauthorized-domain': return 'This website domain is not authorized for sign-in.'
+      case 'auth/operation-not-allowed': return 'GitHub sign-in has not been enabled.'
+      case 'auth/network-request-failed': return 'Could not connect. Check your connection and retry.'
+      case 'auth/too-many-requests': return 'Too many sign-in attempts. Wait a moment and retry.'
+      default: return 'Could not complete the account action. Please retry.'
+    }
+  }
   switch (code) {
     case 'auth/popup-closed-by-user':
     case 'auth/cancelled-popup-request':

@@ -51,5 +51,73 @@ service cloud.firestore {
         && request.resource.data.startedAt is string && request.resource.data.completedAt is string
         && request.resource.data.seconds is int && request.resource.data.seconds >= 60 && request.resource.data.seconds <= 10800;
     }
+    function validShelter(data) {
+      return data.keys().size() == 15
+        && data.keys().hasOnly(['schema', 'revision', 'language', 'focusSeconds', 'completedSessions', 'housing', 'storage', 'inventory', 'armory', 'survivors', 'expedition', 'sites', 'knowledge', 'foundPeople', 'deaths'])
+        && data.schema == 1 && data.revision is int && data.revision >= 0
+        && data.language in ['en', 'th']
+        && data.focusSeconds is int && data.focusSeconds >= 0
+        && data.completedSessions is int && data.completedSessions >= 0 && data.completedSessions <= data.focusSeconds
+        && data.housing is int && data.housing >= 1
+        && data.storage is int && data.storage >= 1
+        && data.deaths is int && data.deaths >= 0
+        && data.inventory is map && data.inventory.keys().size() == 4
+        && data.inventory.keys().hasOnly(['wood', 'stone', 'provisions', 'medicine'])
+        && data.inventory.wood is int && data.inventory.wood >= 0
+        && data.inventory.stone is int && data.inventory.stone >= 0
+        && data.inventory.provisions is int && data.inventory.provisions >= 0
+        && data.inventory.medicine is int && data.inventory.medicine >= 0
+        && data.armory is list && data.survivors is list && data.survivors.size() > 0
+        && data.survivors.size() <= data.housing
+        && (data.expedition == null || data.expedition is map)
+        && data.sites is map && data.sites.size() <= 12
+        && data.knowledge is list && data.knowledge.size() <= 12
+        && data.foundPeople is list && data.foundPeople.size() <= 3;
+    }
+    match /users/{userId}/shelter/state {
+      allow get: if owner(userId);
+      allow create: if owner(userId) && validShelter(request.resource.data)
+        && request.resource.data.revision == 0
+        && request.resource.data.focusSeconds == 0 && request.resource.data.completedSessions == 0
+        && request.resource.data.survivors.size() == 5
+        && request.resource.data.housing == 8 && request.resource.data.storage == 20;
+      allow update: if owner(userId) && validShelter(request.resource.data)
+        && request.resource.data.revision == resource.data.revision + 1;
+    }
+    match /users/{userId}/shelterOperations/{operationId} {
+      allow get: if owner(userId);
+      allow create: if owner(userId)
+        && operationId.matches('^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
+        && request.resource.data.keys().hasOnly(['id', 'revision', 'fingerprint'])
+        && request.resource.data.id == operationId
+        && request.resource.data.revision is int && request.resource.data.revision > 0
+        && request.resource.data.fingerprint is string && request.resource.data.fingerprint.size() <= 16000
+        && getAfter(/databases/$(database)/documents/users/$(userId)/shelter/state).data.revision == request.resource.data.revision;
+    }
+    match /users/{userId}/shelterSessions/{sessionId} {
+      allow get: if owner(userId);
+      allow list: if owner(userId) && request.query.limit <= 25;
+      allow create: if owner(userId)
+        && request.resource.data.keys().hasOnly(['id', 'title', 'startedAt', 'completedAt', 'seconds', 'targetSeconds', 'completed'])
+        && request.resource.data.id == sessionId
+        && sessionId.matches('^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 120
+        && request.resource.data.startedAt is string && request.resource.data.completedAt is string
+        && request.resource.data.seconds is int && request.resource.data.seconds >= 1
+        && request.resource.data.targetSeconds is int && request.resource.data.targetSeconds <= 10800
+        && request.resource.data.seconds <= request.resource.data.targetSeconds
+        && request.resource.data.completed is bool
+        && request.resource.data.completed == (request.resource.data.seconds == request.resource.data.targetSeconds)
+        && getAfter(/databases/$(database)/documents/users/$(userId)/shelterOperations/$(sessionId)).data.id == sessionId;
+    }
+    match /users/{userId}/shelterDays/{day} {
+      allow get: if owner(userId);
+      allow list: if owner(userId) && request.query.limit <= 30;
+      allow create, update: if owner(userId)
+        && request.resource.data.keys().hasOnly(['day', 'sessions', 'seconds'])
+        && request.resource.data.day == day && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.sessions is int && request.resource.data.sessions >= 0
+        && request.resource.data.seconds is int && request.resource.data.seconds >= request.resource.data.sessions;
+    }
   }
 }

@@ -14,14 +14,14 @@ function phoneLandscape() {
   return window.matchMedia('(pointer: coarse)').matches && Math.min(width, height) <= 600 && width > height
 }
 
-export function ScreenLayout({ children }: { children: ReactNode }) {
+export function ScreenLayout({ children, language = 'en' }: { children: ReactNode; language?: 'en' | 'th' }) {
   const rotate = useSyncExternalStore(subscribe, phoneLandscape, () => false)
   return <>
     <div inert={rotate} aria-hidden={rotate || undefined}>{children}</div>
     {rotate && <div role="alert" className="fixed inset-0 z-50 grid place-content-center gap-4 bg-[#0d1317] p-8 text-center text-[#eee5d0]">
-      <p className="font-serif text-3xl">Turn back to the trail.</p>
-      <p>Rotate your phone upright to continue.</p>
-      <p className="text-sm text-[#c5c8bd]">Your timer keeps its place.</p>
+      <p className="font-serif text-3xl">{language === 'th' ? 'กลับสู่เส้นทาง' : 'Turn back to the trail.'}</p>
+      <p>{language === 'th' ? 'หมุนโทรศัพท์เป็นแนวตั้งเพื่อทำต่อ' : 'Rotate your phone upright to continue.'}</p>
+      <p className="text-sm text-[#c5c8bd]">{language === 'th' ? 'ตัวจับเวลายังทำงานต่อ' : 'Your timer keeps its place.'}</p>
     </div>}
   </>
 }

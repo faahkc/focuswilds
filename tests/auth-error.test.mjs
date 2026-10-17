@@ -2,6 +2,12 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { authErrorMessage } from '../src/lib/auth-error.ts'
 
+test('English account errors explain recovery without exposing details', () => {
+  assert.match(authErrorMessage({ code: 'auth/popup-blocked' }, 'en'), /Allow popups/)
+  assert.match(authErrorMessage({ code: 'auth/network-request-failed' }, 'en'), /connection/)
+  assert.equal(authErrorMessage({ secret: 'private' }, 'en').includes('private'), false)
+})
+
 test('account errors explain cancellation, blocked popups and Firebase setup failures', () => {
   assert.match(authErrorMessage({ code: 'auth/popup-closed-by-user' }), /ยกเลิก/)
   assert.equal(authErrorMessage({ code: 'auth/cancelled-popup-request' }), authErrorMessage({ code: 'auth/popup-closed-by-user' }))

@@ -1,14 +1,16 @@
 # Shelter domain checkpoint
 
-The replacement model lives in `src/lib/shelter.ts`. It is not connected to the application, Firebase, or browser storage. Existing accounts and timers are unchanged. This is the first increment of delivery step 2, not a playable replacement.
+The shelter has a playable interface at `/#shelter` under the application's base path, also reachable through **Enter the fort** after sign-in. The previous journey remains the default during staged rollout. New state starts separately, without migrating or deleting legacy progress. Publish the reviewed `firestore.rules` before using the shelter against the real account. No production database calls were made during implementation or routine tests.
 
 ## State and commands
 
-`Shelter` schema 1 groups the account language, revision, aggregate focus seconds and completed-session count, fort capacity, materials, survivors, and one active expedition. IDs and job/item names are stable English identifiers rather than UI copy. Every command clones the state; failed validation leaves its input intact. Language defaults to `en` and accepts only `en` or `th`.
+`Shelter` schema 1 groups account language, revision, focus totals, fort capacity, materials, armory, survivors, expedition, marked sites, confirmed journal entries, discovered rescue identities and death count. Every command clones state; validation failures leave the input intact. `parseShelter` validates decoded snapshots, identifiers, gear ownership, jobs, teams, housing and carrying limits. Snapshots over 600,000 UTF-8 bytes are rejected before writing; split rosters/caches before expanding content beyond this guard. Language defaults to `en` and accepts only `en` or `th`.
 
-Commands require an expected revision. Stale commands fail rather than repeating progress. Event commands additionally require the expected expedition event number. The offline transaction test simulates a committed write with a lost response: retrying the old revision cannot award focus again. This does not yet provide persisted receipts or reconcile uncertain saves for the UI.
+Commands require an expected revision and an immutable UUID operation receipt. Event choices also require the expected event number. The transaction reads the current state and receipt before writing. Duplicate retries return current state without applying rewards again; different payloads using the same UUID fail. Stale commands from another tab fail without writes. The UI preserves pending actions in tab-scoped session storage, retries only on user request after failures, and reuses transaction results without rereading state. A stale non-focus action is discarded only after refreshing, so the user can review it again. Unsaved focus stays pending; after refresh, the user can explicitly apply it to the current jobs. Separate simultaneously running timers are not merged automatically.
 
 Focus commands carry active seconds, target seconds, and completion status. Partial sessions advance all assigned jobs without increasing the completed-session count. Jobs finish once; unused focus after completion is not automatically assigned to another job. A full store retains completed garden work until capacity becomes available. Materials are charged on assignment, with no cancellation command yet.
+
+The timer uses deadlines and retains paused time, custom duration and pending save payloads across reloads in the same tab. It defaults to 15 minutes, offers 5/15/25-minute presets and accepts 1–180 custom minutes. Opening dialogs, switching language, reduced motion and phone rotation keep it mounted. Stop retains whole focused seconds. Jobs, equipment and expeditions are locked while a focus period is active; stop and save before changing them. Language may change while the timer runs. Closing a tab can remove its session storage; keep an unsaved tab open until its pending operation is confirmed. Corrupt local timer data is surfaced and preserved until the user explicitly discards it.
 
 ## Trial balance
 
@@ -25,21 +27,49 @@ Focus commands carry active seconds, target seconds, and completion status. Part
 | Recovery | 300 focused seconds restores up to 5 HP |
 | Housing | 4 wood + 2 stone + 900 focused seconds adds 2 beds |
 | Storage upgrade | 2 wood + 2 stone + 600 focused seconds adds 10 slots |
+| Medicine | 1 wood + 300 focused seconds produces 1 medicine; heals up to 5 HP |
+| Sword / armor | 2 wood + 2 stone / 2 wood; 600 focused seconds; 10 durability |
+| Repair | 1 wood + 1 stone + 300 focused seconds restores stored gear to 10 durability |
+| Retraining | 600 focused seconds switches the general skill; personal skill stays fixed |
 
-Focus durations are positive whole seconds in the domain; custom-duration UI limits remain to be chosen. There is no passive time advancement, fort attack, or absence penalty.
+There is no passive time advancement, fort attack, or absence penalty. Border/hollow/barrow contain 3/4/5 events. Information from the traveler/hermit events unlocks the next area. Quiet, force and observe choices disclose resource costs, noise, damage bounds, team-wide effects and possible permanent death. Rolls use expedition identity, event, approach and survivor identity, so retrying or reopening cannot reroll the same confirmed outcome. Loot has a disclosed 75% chance, with no guaranteed reward. Event costs, damage and loot come from content definitions rather than caller-supplied values.
+
+Equipped weapons and armor occupy separate slots and remain repairable at zero durability. Each survivor can carry one equipped medicine. Escorts cannot act and reserve housing; each needs a living helper whose carrying contribution decreases by 2. Skills are fully shown only after arrival. Event XP modestly increases maximum HP (up to +4) and reduces damage (up to 1), without automatically healing.
+
+Deaths remove survivors permanently and leave equipped items at a marked site. Surviving teams choose excess inventory to leave. If a helper dies, a free helper takes over or the escorted person stays stranded. Total defeat leaves shared items and escorted people at the site. If the entire fort roster is gone, a new survivor arrives while fort resources and knowledge remain. Rescue identities are recorded so revisiting cannot create duplicates.
+
+Return previews fill existing stacks, prioritize medicine/provisions and leave overflow at the last marked location. Users may select quantities and gear explicitly. Returning is always available even with no provisions or a full fort. Recovering marked items or stranded people requires revisiting the location through that area's event risks. Sites do not expire while the app is closed.
 
 ## Persistence and quota boundary
 
-There are zero additional production reads or writes: this module has no I/O and no production callers. Tests reuse the existing in-memory transaction store with network blocking enabled. No rules, production schema, or legacy data have changed.
+All paths live under `users/{ownerUid}` and use the existing owner-only account guard:
 
-The candidate state document is `accounts/{uid}/shelter/state`, separate from legacy collections. This path is only a proposal used by the offline test; current Firestore rules do not enable it. A future transaction would read one state document and write one state document per accepted command, excluding receipts, daily summaries, and session records. Those documents and their exact budgets must be designed and documented before enabling persistence. Do not store an unbounded command log or session history inside this state document.
+- `shelter/state`: one current bounded snapshot and aggregate totals, including language.
+- `shelterOperations/{uuid}`: immutable revision and canonical command fingerprint; no full state snapshots or unbounded arrays of receipts.
+- `shelterSessions/{uuid}`: immutable completed or partial focus record.
+- `shelterDays/{YYYY-MM-DD}`: aggregate focused seconds and completed-session count, using Asia/Bangkok completion dates even for late saves.
 
-## Required before integration
+| Operation | Application reads | Writes | Additional dependent rule reads, conservative maximum |
+| --- | ---: | ---: | ---: |
+| Initial account load / explicit refresh | 1 | 0 | 0 |
+| Explicit initialization | 1 | 1 if missing, otherwise 0 | 0 |
+| Ordinary action / changed language | 2 | 2 | 1 |
+| Unchanged language submitted | 2 | 0 | 0 |
+| Focus, partial or completed | 3 | 4 | 2 |
+| Duplicate committed action | 2 | 0 | 0 |
+| Reopen Settings / other cached dialog | 0 | 0 | 0 |
+| History page | at most 25 returned session documents | 0 | 0 |
+| Daily summary page (service API) | at most 30, or 25 for all-time cursor pages | 0 | 0 |
 
-- Validate decoded state at the persistence boundary, enforce supported language codes in rules, and implement cached account loading and changed-value preference saves with honest failure handling.
-- Resolve commands from trusted content definitions. The trial event command accepts already-resolved costs, damage and loot; it is not a validation boundary for UI-submitted event outcomes or randomness.
-- Add equipment identity, durability, recipes, retraining, skills and exploration progression. Current equipment slots deliberately contain only `null`.
-- Add rescue, housing reservations, injured helpers, death, stranded survivors, recovery sites and the last-survivor fallback. Lethal trial events are rejected until these exist.
-- Add selective return/discard and marked overflow caches. The trial return rejects full storage atomically; it must not be exposed as a player flow until safe return works regardless of capacity.
-- Add bounded event receipts and uncertain-save reconciliation, concurrent-tab transaction behavior, preference operations, daily totals in Asia/Bangkok, and tests for closure and network recovery.
-- Persisted language UI, translations, Settings, fort artwork and timer integration belong to subsequent delivery work.
+Firestore can bill an empty query's minimum read and dependent rule evaluations; cache reuse can reduce dependent reads. Transaction conflicts can multiply these per-attempt budgets; the existing Firestore Lite adapter allows at most 3 attempts. The rule `getAfter` lookups connect receipts to the post-write revision and focus records to their receipt. They validate owner access, supported language, basic state shapes and bounded queries, but do not recompute nested game outcomes or prove focused time. This remains a personal application, not a competitive economy. Receipt documents grow with accepted actions; there is no retention deletion yet, preserving retry evidence.
+
+Simultaneous account reads, refreshes, initialization and identical saves are coalesced. Cached snapshots are cloned so UI callers cannot mutate the cache. No listeners, focus/visibility refetch, database polling, Emulator, Firebase CLI, new dependency or billing setup was added. History loads only on demand, in cursor pages of at most 25; explicit history refresh is available. Daily summaries are separately bounded and never rebuilt from history. Tests keep the network-blocking preload enabled.
+
+## Rollout and remaining limits
+
+1. In Firebase Console, select project `focuswilds`, open Firestore Database → Rules, replace the rules with the repository's complete `firestore.rules`, and Publish. The agent has no authenticated console session or deployment credentials, so this external step has not been performed.
+2. Open the deployed app, sign in and choose **Enter the fort** (or open `/focuswilds/#shelter`). **Light the hearth** creates only the separate shelter state. Failed account loads never initialize or overwrite data.
+3. Perform a bounded live check: load once, assign one garden job, complete or stop one focus period, open Settings and change language once, refresh once and open history once. Verify rule permissions and the documented budgets. Keep Spark without Billing and existing App Check protections.
+4. After live verification, make the shelter the default, implement bounded resumable cleanup for only the legacy `state/progress`, `days` and `sessions` paths, then delete replaced code/assets. Legacy cleanup is authorized but has not run; current rules still deny deletes. Do not erase old progress to fix a failed new-state read.
+
+The artwork is an initial local SVG fort/courtyard with human sprites, not a finished illustration set. The first content set has materials and medicine but no blueprint drops, large multi-slot objects or newly unlocked skill types. Journal entries are confirmed observations; a separate hearsay system is not implemented. Physical-device Thai marks, real OAuth/App Check/Firestore behavior and installed-web-app behavior remain unverified. No PWA support is claimed.

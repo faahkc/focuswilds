@@ -13,7 +13,7 @@ const ShelterJourney = lazy(() => import('@/components/shelter-journey').then(mo
 
 export default function App() {
   const [session, setSession] = useState<User | null>(null)
-  const [shelter, setShelter] = useState(() => window.location.hash === '#shelter')
+  const [shelter, setShelter] = useState(() => window.location.hash !== '#legacy')
   const [language, setLanguage] = useState<Language>('en')
   const handleSessionChange = useCallback((user: User | null) => {
     setLanguage('en')
@@ -36,7 +36,7 @@ export default function App() {
           <AuthPanel onSessionChange={handleSessionChange} language={session && shelter ? language : 'en'} />
         </header>
         {session && <Suspense fallback={<p role="status" className="py-10">Loading your journey…</p>}>{shelter
-          ? <ShelterJourney key={session.uid} userId={session.uid} onLanguageChange={setLanguage} onLegacy={() => { window.location.hash = ''; setShelter(false) }}/>
+          ? <ShelterJourney key={session.uid} userId={session.uid} onLanguageChange={setLanguage} onLegacy={() => { window.location.hash = 'legacy'; setShelter(false) }}/>
           : <FocusJourney key={session.uid} userId={session.uid} />}</Suspense>}
       </div>
     </main></ScreenLayout>

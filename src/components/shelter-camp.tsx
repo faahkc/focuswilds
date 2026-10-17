@@ -5,6 +5,7 @@ import { areas, type Approach, type AreaId } from '@/lib/shelter-content'
 import { loadShelter, saveShelterOperation, loadShelterSessions, type ShelterOperation, type ShelterSession } from '@/lib/shelter-store'
 import { newShelterTimer, restoreShelterTimer, timerRemaining, toggleShelterTimer, finishShelterTimer } from '@/lib/shelter-timer'
 import { eventText, shelterText, survivorName } from '@/lib/shelter-text'
+import { ShelterJournal } from '@/components/shelter-journal'
 import { Button } from '@/components/ui/button'
 import { GameWindow } from '@/components/game-window'
 import { FortStage } from '@/components/fort-stage'
@@ -207,7 +208,7 @@ export function ShelterCamp({ initialState, userId, store, onLanguageChange }: {
       </>}
         <h3>{t.location}</h3>{Object.entries(state.sites).filter(([, site]) => inventorySlots(site.inventory) || gearSlots(site.gear) || site.survivors.length).map(([location, site]) => <p key={location}>{t[location.split(':')[0] as AreaId]} · {t.event} {Number(location.split(':')[1]) + 1}: {inventorySlots(site.inventory) + gearSlots(site.gear)} {t.slots}, {site.survivors.length} {t.traveler}</p>)}<p>{t.resetRisk}</p>
       </div>}
-      {panel === 'journal' && <div className="shelter-list"><p>{t.blueprintHint}</p><p>{t.pathfinderHint}</p><h3>{t.knowledge}</h3>{state.knowledge.length ? state.knowledge.map(id => <p key={id}>{eventText(id, state.language)}</p>) : <p>{t.empty}</p>}</div>}
+      {panel === 'journal' && <ShelterJournal knowledge={state.knowledge} language={state.language}/>}
       {panel === 'history' && <div className="shelter-list"><p>{t.total}: {Math.floor(state.focusSeconds / 60)} {t.minutes} · {t.sessions}: {state.completedSessions}</p><Button disabled={historyBusy} variant="secondary" onClick={() => void readHistory(true)}>{t.refresh}</Button>{history.map(row => <article key={row.id}><h3>{row.title}</h3><p>{new Intl.DateTimeFormat(state.language, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }).format(new Date(row.completedAt))} · {clock(row.seconds)} · {row.completed ? t.saved : t.partial}</p></article>)}
         {!history.length && historyLoaded && <p>{t.empty}</p>}{historyBusy && <p role="status">{t.loading}</p>}{historyError && <p role="alert">{t.loadError}</p>}{(historyError || historyCursor) && <Button disabled={historyBusy} onClick={() => void readHistory()}>{historyError ? t.retry : t.more}</Button>}
       </div>}

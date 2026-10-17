@@ -1,6 +1,8 @@
 import type { Language } from './shelter.ts'
 
 const en = {
+  rumors: 'Unconfirmed accounts', rumorHint: 'These accounts are unverified. Confirm the matching event to replace an account with an observation. Rumors alone unlock nothing.',
+  fortRumor: 'Heard at the fort', travelerRumor: 'Heard from the traveler', hermitRumor: 'Heard from the hermit',
   blueprint: 'Armor blueprint', relic: 'Stone relic', bulwark: 'Reinforced armor', pathfinder: 'Pathfinder',
   specialLoot: 'Possible marked discoveries (25% chance each)',
   blueprintHint: 'Hollow and barrow events may reveal an armor blueprint. Bring it to fort storage to craft reinforced armor: 3 protection while intact, instead of 2. Stone relics from the barrow are collectibles occupying 3 slots.',
@@ -33,6 +35,8 @@ const en = {
   jobCost: 'Materials and focused minutes', resetRisk: 'Death is permanent. The fort and knowledge remain.',
 }
 const th: typeof en = {
+  rumors: 'ข่าวลือที่ยังไม่ยืนยัน', rumorHint: 'คำบอกเล่าเหล่านี้ยังไม่ยืนยัน เมื่อผ่านเหตุการณ์ที่ตรงกัน ข้อสังเกตจะแทนที่ข่าวลือ ข่าวลือเพียงอย่างเดียวไม่ปลดล็อกสิ่งใด',
+  fortRumor: 'ได้ยินที่ป้อม', travelerRumor: 'ได้ยินจากนักเดินทาง', hermitRumor: 'ได้ยินจากฤๅษี',
   blueprint: 'แบบสร้างเกราะ', relic: 'โบราณวัตถุหิน', bulwark: 'เกราะเสริม', pathfinder: 'ผู้ชำนาญเส้นทาง',
   specialLoot: 'สิ่งที่อาจพบ ณ จุดทำเครื่องหมาย (โอกาสอย่างละ 25%)',
   blueprintHint: 'เหตุการณ์ในหุบเขาและสุสานอาจพบแบบสร้างเกราะ นำกลับคลังป้อมเพื่อสร้างเกราะเสริม ป้องกัน 3 แทน 2 เมื่อยังทนทาน โบราณวัตถุหินจากสุสานเป็นของสะสม กินพื้นที่ 3 ช่อง',
@@ -85,3 +89,11 @@ const clues: Record<string, [string, string]> = {
   crown: ['The crown is a warning. The dead remember its bearer.', 'มงกุฎเป็นคำเตือน ผู้ตายยังจดจำผู้สวมมัน'],
 }
 export const eventText = (id: string, language: Language) => clues[id]?.[language === 'th' ? 1 : 0] ?? ''
+
+const rumors: Record<string, [string, string]> = {
+  tracks: ['People at the fort say cold iron may turn away the cloven creature. Look for tracks near the border fence.', 'คนในป้อมเล่าว่าเหล็กเย็นอาจขับไล่สัตว์กีบ ลองหารอยเท้าใกล้รั้วชายแดน'],
+  lanterns: ['A watchman claims the marsh lights borrow familiar voices. No one here has checked the tale.', 'ยามอ้างว่าแสงเหนือบึงยืมเสียงคนคุ้นเคย ยังไม่มีใครที่นี่ยืนยันเรื่องนี้'],
+  ward: ['The traveler speaks of a ward still guarding a deserted shrine deep in the hollow.', 'นักเดินทางเล่าถึงอาคมที่อาจยังปกป้องศาลร้างลึกเข้าไปในหุบเขา'],
+  shade: ['The hermit believes old iron nails can repel the shade in the barrow. The claim needs evidence.', 'ฤๅษีเชื่อว่าตะปูเหล็กเก่าขับไล่เงามืดในสุสานได้ ยังต้องหาหลักฐานยืนยัน'],
+}
+export const rumorText = (id: string, language: Language) => rumors[id]?.[language === 'th' ? 1 : 0] ?? ''

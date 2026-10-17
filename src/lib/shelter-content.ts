@@ -26,3 +26,13 @@ export function eventAt(area: AreaId, index: number): Event {
   if (!event || !Number.isSafeInteger(index) || index < 0) throw new Error('No event at this location')
   return event
 }
+
+const rumors = [
+  { evidence: 'tracks', heardAfter: null, source: 'fortRumor' },
+  { evidence: 'lanterns', heardAfter: null, source: 'fortRumor' },
+  { evidence: 'ward', heardAfter: 'traveler', source: 'travelerRumor' },
+  { evidence: 'shade', heardAfter: 'hermit', source: 'hermitRumor' },
+] as const
+export function journalRumors(knowledge: readonly string[]) {
+  return rumors.filter(rumor => (!rumor.heardAfter || knowledge.includes(rumor.heardAfter)) && !knowledge.includes(rumor.evidence))
+}

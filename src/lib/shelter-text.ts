@@ -1,6 +1,11 @@
 import type { Language } from './shelter.ts'
 
 const en = {
+  paused: 'Paused',
+  cleanup: 'Remove previous journey data', cleanupHint: 'Permanently remove old focus history, EXP and companion progress, up to 20 records per step. Repeat until complete. Your fort, its history and saved language stay unchanged.',
+  cleanupConfirm: 'Permanently remove the next batch of previous journey data? This cannot be undone. Your fort and its history will stay.',
+  cleanupDone: 'Previous journey data has been removed.', cleanupMore: 'Batch processed. Run the next step to continue or confirm completion.',
+  cleanupError: 'Could not confirm cleanup. Your fort stays unchanged. Retry this step; if access is denied, check the published cleanup rules.',
   rumors: 'Unconfirmed accounts', rumorHint: 'These accounts are unverified. Confirm the matching event to replace an account with an observation. Rumors alone unlock nothing.',
   fortRumor: 'Heard at the fort', travelerRumor: 'Heard from the traveler', hermitRumor: 'Heard from the hermit',
   blueprint: 'Armor blueprint', relic: 'Stone relic', bulwark: 'Reinforced armor', pathfinder: 'Pathfinder',
@@ -10,7 +15,7 @@ const en = {
   shelter: 'The last hearth', safe: 'The fort is safe while you are away.', loading: 'Opening the shelter…',
   loadError: 'Could not load the shelter. Your saved progress has not been changed.', retry: 'Retry',
   startNew: 'Light the hearth', newGame: 'Five survivors have reached the abandoned fort. Begin a new shelter; your previous journey stays separate.',
-  legacy: 'Open previous journey', crew: 'Survivors', stores: 'Storage', explore: 'Explore', journal: 'Journal', history: 'History', settings: 'Settings', close: 'Close',
+  crew: 'Survivors', stores: 'Storage', explore: 'Explore', journal: 'Journal', history: 'History', settings: 'Settings', close: 'Close',
   focus: 'Focus', minutes: 'Minutes', title: 'Focus title', start: 'Start', pause: 'Pause', resume: 'Resume', finish: 'Stop and keep progress',
   partial: 'Partial focus advances jobs. Only a finished timer counts as a completed session.', saving: 'Saving…', saved: 'Saved',
   saveError: 'Could not confirm the save. Keep this page open and retry the same action.', stale: 'Another tab changed the shelter. Refresh saved progress before continuing.',
@@ -35,6 +40,11 @@ const en = {
   jobCost: 'Materials and focused minutes', resetRisk: 'Death is permanent. The fort and knowledge remain.',
 }
 const th: typeof en = {
+  paused: 'พักโฟกัส',
+  cleanup: 'ลบข้อมูลการเดินทางเดิม', cleanupHint: 'ลบประวัติโฟกัส EXP และความก้าวหน้าเพื่อนจากระบบเก่าถาวร ครั้งละไม่เกิน 20 รายการ ทำซ้ำจนเสร็จ ป้อม ประวัติป้อม และภาษาที่บันทึกไว้จะไม่เปลี่ยน',
+  cleanupConfirm: 'ลบข้อมูลการเดินทางเดิมชุดถัดไปถาวรหรือไม่? ย้อนคืนไม่ได้ ป้อมและประวัติป้อมจะยังอยู่',
+  cleanupDone: 'ลบข้อมูลการเดินทางเดิมครบแล้ว', cleanupMore: 'ประมวลผลชุดนี้แล้ว กดทำขั้นถัดไปเพื่อทำต่อหรือยืนยันว่าเสร็จ',
+  cleanupError: 'ยังยืนยันผลการล้างไม่ได้ ป้อมยังไม่เปลี่ยน ลองขั้นตอนนี้อีกครั้ง หากถูกปฏิเสธสิทธิ์ให้ตรวจ rules สำหรับล้างข้อมูลที่เผยแพร่แล้ว',
   rumors: 'ข่าวลือที่ยังไม่ยืนยัน', rumorHint: 'คำบอกเล่าเหล่านี้ยังไม่ยืนยัน เมื่อผ่านเหตุการณ์ที่ตรงกัน ข้อสังเกตจะแทนที่ข่าวลือ ข่าวลือเพียงอย่างเดียวไม่ปลดล็อกสิ่งใด',
   fortRumor: 'ได้ยินที่ป้อม', travelerRumor: 'ได้ยินจากนักเดินทาง', hermitRumor: 'ได้ยินจากฤๅษี',
   blueprint: 'แบบสร้างเกราะ', relic: 'โบราณวัตถุหิน', bulwark: 'เกราะเสริม', pathfinder: 'ผู้ชำนาญเส้นทาง',
@@ -44,7 +54,7 @@ const th: typeof en = {
   shelter: 'กองไฟสุดท้าย', safe: 'ป้อมปลอดภัยระหว่างที่คุณไม่อยู่', loading: 'กำลังเปิดที่พักพิง…',
   loadError: 'โหลดที่พักพิงไม่ได้ ข้อมูลที่บันทึกไว้ยังไม่เปลี่ยนแปลง', retry: 'ลองอีกครั้ง',
   startNew: 'จุดไฟในป้อม', newGame: 'ผู้รอดชีวิตห้าคนมาถึงป้อมร้าง เริ่มที่พักพิงใหม่ โดยเก็บการเดินทางเดิมแยกไว้',
-  legacy: 'เปิดการเดินทางเดิม', crew: 'ผู้รอดชีวิต', stores: 'คลัง', explore: 'สำรวจ', journal: 'สมุดบันทึก', history: 'ประวัติ', settings: 'ตั้งค่า', close: 'ปิด',
+  crew: 'ผู้รอดชีวิต', stores: 'คลัง', explore: 'สำรวจ', journal: 'สมุดบันทึก', history: 'ประวัติ', settings: 'ตั้งค่า', close: 'ปิด',
   focus: 'โฟกัส', minutes: 'นาที', title: 'ชื่อช่วงโฟกัส', start: 'เริ่ม', pause: 'พัก', resume: 'ทำต่อ', finish: 'หยุดและเก็บความคืบหน้า',
   partial: 'โฟกัสไม่ครบก็สะสมงานได้ นับรอบสำเร็จเมื่อครบเวลาเท่านั้น', saving: 'กำลังบันทึก…', saved: 'บันทึกแล้ว',
   saveError: 'ยังยืนยันการบันทึกไม่ได้ โปรดเปิดหน้านี้ไว้แล้วลองบันทึกการกระทำเดิมอีกครั้ง', stale: 'อีกแท็บเปลี่ยนข้อมูลป้อมแล้ว โปรดโหลดข้อมูลที่บันทึกไว้ก่อนทำต่อ',

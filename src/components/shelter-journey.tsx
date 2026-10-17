@@ -7,7 +7,7 @@ import { shelterText } from '@/lib/shelter-text'
 import { Button } from '@/components/ui/button'
 import { ShelterCamp } from '@/components/shelter-camp'
 
-export function ShelterJourney({ userId, onLanguageChange, onLegacy }: { userId: string; onLanguageChange: (language: Language) => void; onLegacy: () => void }) {
+export function ShelterJourney({ userId, onLanguageChange }: { userId: string; onLanguageChange: (language: Language) => void }) {
   const [state, setState] = useState<Shelter | null | undefined>(undefined)
   const [error, setError] = useState(false)
   const [retry, setRetry] = useState(0)
@@ -28,8 +28,8 @@ export function ShelterJourney({ userId, onLanguageChange, onLegacy }: { userId:
   if (userId !== OWNER_UID) return <p role="alert">This account does not have access to this shelter.</p>
   if (state) return <ShelterCamp initialState={state} userId={userId} store={focusStore} onLanguageChange={onLanguageChange}/>
   return <div className="shelter-welcome">
-    {error ? <><p role="alert">{t.loadError}</p><Button disabled={busy} onClick={() => setRetry(value => value + 1)}>{t.retry}</Button><Button variant="secondary" onClick={onLegacy}>{t.legacy}</Button></>
-      : state === null ? <><h1>{t.shelter}</h1><p>{t.newGame}</p><Button disabled={busy} onClick={() => void start()}>{busy ? t.saving : t.startNew}</Button><Button variant="secondary" onClick={onLegacy}>{t.legacy}</Button></>
+    {error ? <><p role="alert">{t.loadError}</p><Button disabled={busy} onClick={() => setRetry(value => value + 1)}>{t.retry}</Button></>
+      : state === null ? <><h1>{t.shelter}</h1><p>{t.newGame}</p><Button disabled={busy} onClick={() => void start()}>{busy ? t.saving : t.startNew}</Button></>
         : <p role="status">{t.loading}</p>}
   </div>
 }

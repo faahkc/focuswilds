@@ -1,50 +1,39 @@
 # Development
 
-## สถานะการเปลี่ยนระบบ
+## Current checkpoint
 
-ข้อกำหนดและลำดับส่งมอบอยู่ใน [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) เอกสารแผนไม่ใช่รายการความสามารถที่เปิดใช้แล้ว
+The shelter is the only signed-in experience at `/focuswilds/`. Existing hashes, including `#legacy`, open the shelter. The retired 25/5 timer, companion/EXP screens, forest renderer, their dedicated tests, Three.js dependencies and unused forest WebP/CSS have been removed. No cloud data was deleted by implementation or tests.
 
-- ทำแล้ว: ใช้ GNU Unifont ทั้ง UI พร้อมใบอนุญาต หน้าเข้าใช้และ metadata เริ่มอังกฤษ ระบบป้อมใหม่รองรับอังกฤษ/ไทยและเก็บภาษาบัญชีใน Firestore ผ่าน Settings
-- ยังใช้ระบบเดิม: ตัวจับเวลา 25/5 นาที ประวัติ EXP เพื่อนสิ่งมีชีวิต และฉากป่า ข้อความส่วนนี้ยังเป็นอังกฤษ
-- ต่อแล้วที่ `/focuswilds/#shelter`: งานในป้อม ผู้รอดชีวิต ทีมสำรวจ HP อุปกรณ์ คลังจำกัด ช่วยคน การตายและกู้ของ สมุดบันทึก โฟกัสกำหนดเวลาเอง และฉากป้อม SVG พร้อมตัวละครคน
-- README และ metadata เป็นคำบรรยายโลกใหม่แล้ว แต่ยังไม่ได้ล้างข้อมูลเดิม
+The owner reported the initial shelter rules publication and bounded account check passed on 2026-10-17. **The new cleanup rules still need publication.** See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for scope and [SHELTER_SCHEMA.md](SHELTER_SCHEMA.md) for schema and normal operation budgets.
 
-ระบบใหม่จะเริ่มจากศูนย์ ไม่แปลงประวัติ เวลา EXP หรือความก้าวหน้าเดิม แต่การอนุมัติเริ่มใหม่ยังไม่ใช่การล้างข้อมูลที่เกิดขึ้นแล้ว ต้องมี schema ใหม่และขั้นตอนล้างข้อมูลเก่าแบบจำกัดขนาดและรันซ้ำได้อย่างปลอดภัยก่อนเปิดใช้ ห้ามให้ขั้นตอนล้างข้อมูลเก่าลบข้อมูลของระบบใหม่
+English is the default; signed-in Settings stores English/Thai preference in shelter state. Authentication changes clear the previous language before account loading. Language changes preserve the timer and jobs. The HTML title defaults to `Focuswilds`. During focus the tab shows remaining time; paused timers show the localized paused label. Idle, stopped, completed and unmounted timers restore `Focuswilds`, without cloud writes. Settings/history reads remain explicit and bounded, with no listeners, polling or focus refetch. History uses Asia/Bangkok and summary documents, never a history scan for totals.
 
-รายละเอียด schema, read/write budgets, ผลทดสอบและขั้นตอนเปิดใช้อยู่ใน [SHELTER_SCHEMA.md](SHELTER_SCHEMA.md) เจ้าของรายงานว่า Publish rules และทดสอบบัญชีจริงผ่านเมื่อ 2026-10-17 ผู้พัฒนาไม่ได้เรียกฐานข้อมูลจริงระหว่างทดสอบ เปิด `/focuswilds/` หลังเข้าสู่ระบบจะเข้าป้อมทันที ลิงก์ `#shelter` เดิมยังใช้ได้ ระบบเก่าเปิดผ่าน `#legacy` หรือปุ่มย้อนกลับจากหน้าเริ่ม/โหลดป้อมที่ล้มเหลว ยังไม่ลบหรือแปลงข้อมูลของทั้งสองระบบ ทดสอบเส้นทางค่าเริ่มต้นและ fallback รวมทั้งชุดผ่าน 92 รายการ พร้อม lint และ build
+## Retired journey cleanup
 
-เพิ่ม blueprint สำหรับสร้างเกราะเสริม ของสะสมหินขนาด 3 ช่อง และฝึก Pathfinder หลังยืนยันอาคมในหุบเขาแล้ว รองรับข้อมูล schema 1 เดิม ใช้ rules และ read/write budgets เดิม ปิดหรือรีโหลดแท็บแอปรุ่นเก่าก่อนใช้เนื้อหาใหม่ รุ่นเก่าจะปฏิเสธค่าที่ไม่รู้จักโดยไม่เขียนทับข้อมูล
+1. In Firebase Console, select `focuswilds`, open Firestore Database > Rules, replace the complete rules with repository `firestore.rules`, and Publish. This freezes old-tab writes to legacy paths and permits only owner deletion after a schema-1 shelter exists. Shelter writes and immutable receipts retain their existing rules. The agent has no authenticated console session; rule publication/enforcement has not been independently verified.
+2. Reload the latest application. Confirm the fort loads correctly, stop/save any active timer, and open Settings > **Remove previous journey data**. The first step asks for confirmation of permanent deletion. The Thai label is available through the saved account language.
+3. Repeat the button until completion is reported. Each click handles at most 20 documents. If a save fails or its response is lost, retry the step. Closing the dialog or reloading is safe: progress is the remaining cloud data, without a browser-only cursor or cleanup marker.
 
-สมุดบันทึกแยกข่าวลือพร้อมแหล่งที่มาจากข้อสังเกตที่ยืนยันแล้ว เริ่มด้วยข่าวลือในป้อม 2 เรื่อง และเปิดคำบอกเล่าอีก 2 เรื่องหลังพบนักเดินทาง/ฤๅษี เมื่อยืนยันเหตุการณ์ที่ตรงกัน ข่าวลือจะถูกแทนด้วยข้อสังเกต ใช้ knowledge เดิม ไม่เพิ่มการอ่าน/เขียนหรือเปลี่ยน rules ข่าวลือไม่ปลดล็อกพื้นที่หรือทักษะ ทดสอบออฟไลน์ผ่าน 88 รายการ พร้อม lint และ build
+Only `users/OWNER_UID/sessions/*`, `days/*` and finally `state/progress` can be deleted. Each operation first loads and validates `shelter/state`; missing or corrupt shelter state prevents deletion. Collections are queried in document-ID order with limit 20, including malformed legacy records lacking timestamps. After a successful batch, the next request starts at the first remaining document. The summary is removed only after both collections are empty. No recursive delete, collection-group query, scanning of shelter history, or automatic background cleanup exists. Current shelter state, operations, sessions, days and language remain unchanged. The adapter independently validates every deletion path and batch bound.
 
-### ข้อกำหนดสำหรับ implementation ถัดไป
+### Cleanup document budgets per button press
 
-- โฟกัสเริ่ม 15 นาที เลือก 5 / 15 / 25 หรือกำหนดเอง งานสะสมตามเวลาจริง แม้หยุดก่อนครบ ทุกคนทำงานพร้อมกันได้คนละหนึ่งงาน
-- ทีมสำรวจสูงสุด 3 คน กระเป๋ารวมสูงสุด 10 ช่องตามความสามารถแบก คลังป้อมและที่พักขยายด้วยวัสดุและเวลาโฟกัส
-- ผลเหตุการณ์ การใช้ของ HP และการตายต้องบันทึก atomic/idempotent เปิดใหม่ไม่สุ่มผลซ้ำ ทดสอบเน็ตหลุด ปิดหน้า และหลายแท็บ
-- พื้นที่ป้อมปลอดภัย เลือกกลับแล้วปลอดภัยทันที ไม่ลงโทษการไม่ได้เปิดแอป
-- คง Spark ไม่มี Billing ไม่มี polling/listeners ใช้ summary documents ไม่สแกนประวัติ อ่านประวัติไม่เกิน 25 ต่อหน้า daily-summary queries ไม่เกิน 30 และใช้ Asia/Bangkok
-- ออกแบบ read/write budget ของ schema ใหม่ก่อนต่อ persistence ตารางด้านล่างเป็นของระบบเดิมเท่านั้น
-- ลบโค้ด tests รูป และ dependency เดิมเมื่อไม่มีผู้ใช้ รวมการลบใน commit โดยไม่ rewrite Git history
-- README เป็นคำบรรยายโลกและบรรยากาศล้วน ไม่ใส่รายการระบบ วิธีใช้ รายละเอียดเทคนิค หรือชื่อผลงานอ้างอิง
+| Step | Application reads | Deletes | Extra dependent rule reads, conservative maximum |
+| --- | --- | --- | --- |
+| Nonempty sessions batch | 1 shelter + at most 20 session documents | at most 20 | at most 20, one per deletion |
+| Sessions empty, nonempty days batch | 1 shelter + empty sessions query + at most 20 day documents | at most 20 | at most 20, one per deletion |
+| Both collections empty, summary present | 1 shelter + 2 empty queries + 1 legacy summary | 1 | 1 |
+| Already clean | 1 shelter + 2 empty queries + 1 missing legacy summary | 0 | 0 |
 
-Requirements: Node.js 24, npm, and a Git clone.
+The batch size is 20 because each delete checks the saved shelter, staying within the [20 rule access calls per batch](https://firebase.google.com/docs/firestore/security/rules-conditions#access_call_limits) even without caching. Identical rule lookups may be cached and reduce reads. Firestore applies minimum charges for empty queries and missing document reads; these are shown explicitly rather than treated as free. A failed/uncertain request or an explicit retry may cost additional reads/deletes. There are no automatic retries. Concurrent calls in one store share one operation; across tabs deletion is idempotent. No normal shelter action gains extra database operations.
 
-## Shelter bilingual Settings
-
-The opt-in shelter supports English (`en`, default) and Thai (`th`). Settings is available only after sign-in through an icon dialog and persists language in the shelter account snapshot, using the existing Spark project without Billing. The new rules must be published before real-account use. Reopening Settings uses cached state, changing language writes an idempotent operation, and failed saves retain the previous displayed language. Login defaults to English.
-
-Saved preferences apply on account load or explicit refresh; there is no listener, polling, or focus refetch. Application validation and rules restrict language to `en`/`th`. Language changes preserve the mounted timer and game state; document language, titles, dates and accessible labels follow the saved language. Offline and intercepted-browser checks cover both languages, save failures and timer continuity. README and IMPLEMENTATION_PLAN.md stay English.
-
-Default-language regression checks in `tests/language-defaults.test.mjs` verify English HTML metadata before JavaScript, account/loading/error controls, runtime titles, rotation guidance and legacy dates on a browser configured for Thai. Authentication changes clear the previous account language before loading saved preferences. Legacy history and discoveries explicitly format English dates in Asia/Bangkok; shelter dates follow the saved account language. These fixes add no database reads or writes. Keep this coverage in `npm test` when changing public copy or language defaults.
-
-Validate dependency changes with `npm ci` in a clean directory and the Linux CI build. Preserve lockfile metadata for bundled optional dependencies; an existing `node_modules` tree can hide an incomplete lockfile. Missing bundled dependency entries can stop deployment before tests run.
+Old browser timer data is not automatically erased: it can contain unsaved legacy work. The retired app no longer runs or imports that data. Published cleanup rules reject further legacy writes from stale tabs.
 
 ## Firebase setup
 
 GitHub Auth and Firestore Lite use the public configuration in src/lib/firebase.ts. OAuth client secrets stay in the Firebase console. Enable GitHub Authentication, set the GitHub callback to https://focuswilds.firebaseapp.com/__/auth/handler, and authorize faahkc.github.io (plus localhost for local testing). Session persistence stays scoped to the current tab.
 
-Only the owner UID in src/lib/account.ts is allowed. Publish the contents of firestore.rules in the Firebase console before using this version: it restricts access to the owner, validates basic document shapes, keeps saved sessions immutable, and rejects session queries without a limit of at most 25 (daily summaries: 30). All unlisted paths and deletes are denied. The rules do not prove focus duration or independently recompute rewards; this is a personal app, not a competitive reward system.
+Only the owner UID in src/lib/account.ts is allowed. Publish the contents of firestore.rules in the Firebase console before using this version: it restricts access to the owner, validates basic document shapes, keeps saved sessions immutable, and rejects session queries without a limit of at most 25 (daily summaries: 30). Unlisted paths and all shelter deletes are denied. Only the three legacy paths described below allow owner-only deletion after shelter creation; legacy creates/updates are denied. The rules do not prove focus duration or independently recompute rewards; this is a personal app, not a competitive reward system.
 
 ### App Check
 
@@ -76,25 +65,17 @@ npm run preview
 
 React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components live in `src/components/ui`; add only those needed using the shadcn CLI or MCP. Tests live in `tests/`; `npm test` runs the offline JavaScript tests. Development scripts remain in `scripts/`.
 
-## Website loading and cache
+## Website loading, assets and verification
 
-### Legacy scene and shared typography
-
-The legacy signed-in scene uses a 144,946-byte WebP background on a flat plane, with pixel companions on separate perspective planes, drifting fog, rain and embers. It does not contain modeled terrain or buildings, or depth-of-field postprocessing. Three.js loads in a separate chunk after the timer UI mounts. Point lighting flickers during focus and becomes warmer at camp. The login title screen reuses the same WebP as a static full-viewport background before sign-in, adding 144,946 bytes to the initial image transfer without a second scene asset. The animated journey and graphics renderer load after sign-in. Artwork stays local to the site; there are no cloud asset requests or additional document reads/writes. The interface uses bundled GNU Unifont 17.0.05, including body text, editable fields, dialogs, headings, controls and the clock. The Thai/Latin/punctuation WOFF2 subset is 5,976 bytes and includes upstream copyright metadata and the OFL license. It replaces the previous font assets. Account controls and errors default to English; the signed-in shelter follows the saved English/Thai preference. The legacy journey screens remain English. Scene and font assets total 150,922 bytes, below 500 kB. The shelter uses local code-drawn SVG fort/courtyard and three expedition scenes, with layered silhouettes, landmarks and human sprites. The scene source is about 7.2 kB before minification; the art pass adds about 1.6 kB of compressed entry JavaScript compared with v0.1.50, without additional image transfers. SVG is suitable for these simple shapes; detailed future bitmap artwork should be measured separately rather than assuming SVG is always smaller.
+Fort/courtyard and three expedition scenes are local SVG code. The forest WebP and Three.js renderer are gone; the initial scene has no raster background transfer. GNU Unifont remains bundled for all text and controls, with its license. Editable phone fields remain at least 16px; viewport zoom and reduced-motion support remain enabled. Long dialogs scroll without visible scrollbars, and the timer stays mounted.
 
 The font subset comes from `https://unifoundry.com/pub/unifont/unifont-17.0.05/font-builds/unifont-17.0.05.otf`. To reproduce it with FontTools and Brotli, run `pyftsubset unifont-17.0.05.otf --unicodes=U+0020-00FF,U+0E00-0E7F,U+2000-206F --flavor=woff2 --name-IDs='*' --name-languages='*' --name-legacy --output-file=unifont-thai-latin.woff2`. Retain upstream copyright/name metadata and the bundled OFL notice. Do not commit the full font or temporary conversion tools. Text outside this subset can use the system fallback.
 
-Motion off and the device reduced-motion preference stop both CSS and WebGL animation. Hidden tabs stop the render loop; returning resumes only when motion is enabled. Scene replacement disposes GPU resources and resize observers. The HTML image and companion remain as the fallback if WebGL cannot start. The renderer does not save data or add document reads/writes; the quota table below is unchanged.
+The shelter/Firestore chunk loads after sign-in; cleanup performs no reads until its button is pressed. History queries run only when opened or explicitly refreshed. Vite content hashes preserve unchanged asset URLs. Host cache policy is unchanged; no service worker, unsupported header files or PWA support was added.
 
-Visual verification on 2026-10-16 used isolated Edge with intercepted authentication and an in-memory store; external requests were blocked. Desktop 1280×720 / 1440×900 and portrait 390×844 / 320×568 layouts fit the viewport. Pixel comparisons confirmed animation, Motion off and reduced-motion behavior. Timer countdown continued through a guide dialog; Escape restored focus. The main scene was checked in focus and rest. New rendering on physical Safari remains unverified. The separate graphics chunk increases the signed-in JavaScript download; the production build can still report a chunk-size warning.
+Tests use the existing network-blocking preload and in-memory stores. Cleanup tests cover bounds, all protected paths, missing/corrupt fort state, failures, lost responses, concurrent calls and resume. Intercepted browser checks exercised failed cleanup followed by four batches, leaving zero legacy records and identical fort data. UI tests for the retired journey were removed with their implementation; timer, rule-adjacent service, quota, language and accessibility checks for the shelter remain. Actual Firestore rule enforcement and physical-device rendering require manual verification.
 
-The subsequent GNU Unifont/account translation check verified loaded font and login bounds at 1280×720, 390×844 and 320×568, and reviewed a phone screenshot. It did not repeat the earlier signed-in scene checks with the new font or test real OAuth sign-in. A later cleanup fixed account styling that still depended on the old English accessibility label: styles now use `.wilds-account`, independently of the translated label. Browser checks confirmed the current shelter button fits those three viewport sizes with its intended font size, 48px minimum height and arrow decoration. Physical-device Thai mark placement and long Thai paragraphs remain to be verified during the full UI replacement.
-
-Playwright screenshots and console logs belong in ignored `.playwright-mcp/`. Remove artifacts once they are no longer needed after verification; retain files still used for diagnosis or open in the user's editor. Do not commit temporary screenshots, full-resolution unused originals, font conversion tools or downloaded full fonts. Commit deletions of tracked assets that no longer have callers.
-
-The journey and Firestore Lite code load after sign-in. The history view loads only after Open history; its existing bounded queries remain unchanged. React lazy imports cache loaded modules for the page lifetime. Loading states are announced with role=status. This reduces initial transfer, not necessarily the total bytes when every feature is opened.
-
-Vite keeps content hashes in JavaScript and CSS filenames so unchanged assets retain their URLs. GitHub Pages was checked on 2026-10-15: HTML and JavaScript returned Cache-Control: max-age=600; JavaScript also returned ETag and Last-Modified. Browser cache can reuse fresh assets and revalidate expired ones. Cache headers are managed by GitHub Pages, not this Vite config. Do not add unsupported header files or a service worker merely to hide the bundle warning; stale app code can interfere with authentication and schema changes. No cloud prefetch, polling, or extra document reads were introduced.
+Playwright artifacts belong in ignored `.playwright-mcp/`; remove unused artifacts but retain logs open in the editor. Do not commit screenshots, secrets, debug tokens, unused full-resolution artwork or font conversion tools.
 
 ## Application version
 
@@ -102,7 +83,7 @@ Vite keeps content hashes in JavaScript and CSS filenames so unchanged assets re
 npm run app:version
 ```
 
-`package.json` is the single source of the application version. The lockfile and the website use the same value. Dev/build do not change tracked files. Restart the dev server or rebuild after committing to refresh the displayed version.
+`package.json` is the single source of the application version. The lockfile and the website use the same value. Dev/build do not change tracked files. Vite imports package.json as a watched config dependency and automatically restarts when its version changes. Production requires a rebuild.
 
 `npm install` and `npm ci` install the repository's pre-commit hook through the `prepare` script (skipped in CI). On an existing checkout, run `npm run prepare` once. The installer refuses to replace existing custom hooks. Before each normal local commit with staged changes, the hook increments patch and stages both package files in that same commit. A retry after a failed commit preserves the already-staged increment. Partially staged package edits block the commit rather than being overwritten.
 
@@ -117,48 +98,3 @@ npm run version:major
 These commands update both package files and reset patch to zero. Stage both files and commit; the hook preserves the explicit version instead of adding patch again. Never run these commands without the owner's request.
 
 Commits made through GitHub's web UI, merges created by GitHub, and commits made with hooks disabled do not run the local hook. Make versioned changes from a configured local clone. CI builds the committed version and does not bump it. Empty commits do not bump version.
-
-## Cloud data — current legacy journey
-
-This section describes the running journey implementation, not the planned shelter schema. Keep its behavior intact until the replacement and reset path are ready.
-
-Paths live under users/OWNER_UID:
-
-- state/progress: schema version, monotonic revision, ready flag, session/second totals, encounter counts, latest discovery, selected companion, and resumable import metadata.
-- days/YYYY-MM-DD: daily session/second totals in Asia/Bangkok. The same timezone is used on all devices, including imported records.
-- sessions/UUID: immutable ID, title, start/completion times, and recorded seconds. UUIDs, titles and variable durations from the backup are preserved; every completed focus session still awards 25 EXP.
-
-The timer runs locally and survives reload in sessionStorage. Old tab timers are recovered using the known source account ID. No cloud write occurs per tick, title edit, pause, reset, or break. Only completed focus sessions are saved. Progress revisions prevent delayed responses from rolling EXP or companion selection backwards in the UI.
-
-### Quota budget
-
-Normal successful operations before SDK conflict retries (overview reads are skipped when the same account/day is already cached in memory):
-
-| Action | Document reads | Document writes |
-| --- | --- | --- |
-| Open journey / manually refresh progress / new Thailand day | 2 | 0 |
-| Finish a new focus session | 3 | 3 |
-| Retry an already saved session | 3 | 0 |
-| Change companion | 1 | 1 (0 if unchanged) |
-| Open 7/30-day history | At most 7/30 day documents | 0 |
-| Open all-time daily history / load older days | At most 25 day documents per page | 0 |
-| View individual sessions / load more | At most 25 session documents per page | 0 |
-
-An empty query still has a minimum read charge. Transaction conflicts retry at most 3 times and can consume additional reads. These numbers describe app document operations, not a guarantee of the final billing meter; index reads or other service overhead can apply. No polling, realtime database listeners, visibility/focus refetch, automatic history scans, or automatic network retry loops are used. Concurrent identical reads and saves are coalesced. Overview results remain cached for the current account/day until an explicit refresh, successful write, or page reload; component remounts reuse them. Transaction results update the UI without a follow-up read. Changes from another device require Refresh progress / Refresh history or reloading the app.
-
-History stays closed until requested. Each selected-period view remains in memory while open; changing periods or refreshing explicitly issues a new bounded query. All-time totals come from the progress document, never from counting every session. Summary tables and session pages load separately. A full page offers Load more; an extra empty query may be needed to learn there is no next page.
-
-### Saved progress — before the shelter reset
-
-The one-time migration is complete. The application loads existing Firebase progress directly; there is no backup upload or restore screen. Missing or incomplete progress shows an error without initializing, resetting or overwriting cloud data. Existing migration metadata remains readable for compatibility. Keep the original JSON backup outside Git; normal use does not require it.
-
-These are the legacy loader's current safeguards. The approved shelter rollout intentionally starts fresh, but no reset is implemented yet. Current Firestore rules deny deletes and unlisted paths; any new schema or bounded reset procedure requires corresponding validated rules changes before deployment. Do not add an automatic client reset to work around missing or incomplete progress.
-
-### Bounded live verification — legacy behavior only
-
-1. Sign in and compare saved totals and companion. Reload once to confirm persistence.
-2. Open history once and check the selected period and one session page as applicable. Do not loop refreshes.
-3. Complete one real focus round. Verify +1 session, +25 EXP, +25 minutes and one discovery. This live completion check was previously skipped by the owner.
-4. If a write is uncertain, use the existing Retry action; do not create replacement sessions.
-
-Firebase Spark remains without Billing. No images, analytics, functions or file uploads use Firebase. Images and animations remain website assets on GitHub Pages.

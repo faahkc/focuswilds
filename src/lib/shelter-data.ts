@@ -1,5 +1,5 @@
 import { areas, eventAt } from './shelter-content.ts'
-import { record } from './focus-data.ts'
+import { record } from './saved-data.ts'
 import { expeditionCapacity, inventorySlots, gearSlots, equippable, availableSkills, hasBlueprint, items, jobs, parseLanguage, requireValue, type Shelter } from './shelter.ts'
 
 const count = (value: unknown): value is number => Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) <= 1_000_000_000

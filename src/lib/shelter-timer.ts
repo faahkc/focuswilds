@@ -1,5 +1,5 @@
 import { DEFAULT_FOCUS_SECONDS, integer, requireValue } from './shelter.ts'
-import { record } from './focus-data.ts'
+import { record } from './saved-data.ts'
 import { parseShelterSession, type ShelterOperation } from './shelter-store.ts'
 
 export type ShelterTimer = {
@@ -11,6 +11,12 @@ export function newShelterTimer(id: string, targetSeconds = DEFAULT_FOCUS_SECOND
   return { id, targetSeconds, remainingMs: targetSeconds * 1000, deadline: null, startedAt: null, title: 'Keep the fire', pending: null }
 }
 export const timerRemaining = (timer: ShelterTimer, now: number) => timer.deadline === null ? timer.remainingMs : Math.max(0, timer.deadline - now)
+export function timerTabTitle(timer: ShelterTimer | null, now: number, pausedLabel: string): string {
+  if (!timer?.startedAt || timer.pending || timerRemaining(timer, now) === 0) return 'Focuswilds'
+  if (timer.deadline === null) return `${pausedLabel} — Focuswilds`
+  const seconds = Math.ceil(timerRemaining(timer, now) / 1000)
+  return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')} — Focuswilds`
+}
 export function toggleShelterTimer(timer: ShelterTimer, now: number): ShelterTimer {
   requireValue(!timer.pending && timerRemaining(timer, now) > 0, 'Timer is waiting to save')
   return timer.deadline === null

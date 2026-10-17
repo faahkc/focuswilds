@@ -1,9 +1,6 @@
-import { todayBounds } from './pomodoro.ts'
-import { normalizeFocusTitle } from './focus-title.ts'
-import { dayKey } from './account.ts'
+import { todayBounds } from './account.ts'
 
 export type HistoryPeriod = 7 | 30 | 'all'
-export type HistorySession = { id: string; title: string; finished_at: string; duration_seconds: number }
 
 export function historyRange(period: HistoryPeriod, now: number) {
   const { start, end } = todayBounds(now)
@@ -11,24 +8,4 @@ export function historyRange(period: HistoryPeriod, now: number) {
   const firstDay = new Date(start)
   firstDay.setUTCDate(firstDay.getUTCDate() - period + 1)
   return { start: firstDay.toISOString(), end }
-}
-
-export function summarizeHistory(rows: HistorySession[]) {
-  const groups = new Map<string, { sessions: number; seconds: number }>()
-  let seconds = 0
-  for (const row of rows) {
-    const day = dayKey(row.finished_at)
-    const group = groups.get(day) ?? { sessions: 0, seconds: 0 }
-    group.sessions += 1
-    group.seconds += row.duration_seconds
-    groups.set(day, group)
-    seconds += row.duration_seconds
-  }
-  return {
-    sessions: rows.length,
-    minutes: Math.floor(seconds / 60),
-    entries: rows.map(row => ({ ...row, title: normalizeFocusTitle(row.title) })),
-    days: [...groups].sort(([a], [b]) => b.localeCompare(a))
-      .map(([date, group]) => ({ date, sessions: group.sessions, minutes: Math.floor(group.seconds / 60) })),
-  }
 }

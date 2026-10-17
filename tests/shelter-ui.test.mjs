@@ -16,6 +16,7 @@ function component(name) {
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => {
     if (name === '@/components/ui/button') return { Button: ({ children, variant: _variant, ...props }) => React.createElement('button', props, children) }
+    if (name === '@/lib/legacy-cleanup-store') return { legacyCleanupStore: {} }
     if (name.startsWith('@/lib/')) return require(`../src/lib/${name.slice(6)}.ts`)
     if (name.startsWith('@/components/')) return component(name.slice(13))
     return require(name)
@@ -25,6 +26,17 @@ function component(name) {
 const { ShelterCamp } = component('shelter-camp')
 const { ShelterJournal } = component('shelter-journal')
 const { FortStage } = component('fort-stage')
+const { LegacyCleanup } = component('legacy-cleanup')
+
+test('cleanup describes permanent deletion and preserves the fort in both languages, with a disabled control during focus', () => {
+  for (const language of ['en', 'th']) {
+    const t = shelterText(language)
+    const html = renderToStaticMarkup(React.createElement(LegacyCleanup, { userId: 'test', language, disabled: true }))
+    assert.ok(html.includes(t.cleanup))
+    assert.ok(html.includes(t.cleanupHint))
+    assert.ok(html.includes('disabled=""'))
+  }
+})
 
 test('fort and expedition art remain decorative and display the correct party without mounting a timer', () => {
   const exterior = renderToStaticMarkup(React.createElement(FortStage, { exterior: true }))

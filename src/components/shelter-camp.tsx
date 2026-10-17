@@ -3,9 +3,10 @@ import type { FocusStore } from '@/lib/focus-store'
 import { applyShelterCommand, emptyInventory, FOCUS_PRESETS, inventorySlots, gearSlots, equippable, availableSkills, hasBlueprint, expeditionCapacity, items, jobs, previewEvent, previewReturn, type Shelter, type ShelterCommand, type Language, type PackSelection, type Job, type Skill } from '@/lib/shelter'
 import { areas, type Approach, type AreaId } from '@/lib/shelter-content'
 import { loadShelter, saveShelterOperation, loadShelterSessions, type ShelterOperation, type ShelterSession } from '@/lib/shelter-store'
-import { newShelterTimer, restoreShelterTimer, timerRemaining, toggleShelterTimer, finishShelterTimer } from '@/lib/shelter-timer'
+import { newShelterTimer, restoreShelterTimer, timerRemaining, timerTabTitle, toggleShelterTimer, finishShelterTimer } from '@/lib/shelter-timer'
 import { eventText, shelterText, survivorName } from '@/lib/shelter-text'
 import { ShelterJournal } from '@/components/shelter-journal'
+import { LegacyCleanup } from '@/components/legacy-cleanup'
 import { Button } from '@/components/ui/button'
 import { GameWindow } from '@/components/game-window'
 import { FortStage } from '@/components/fort-stage'
@@ -60,6 +61,10 @@ export function ShelterCamp({ initialState, userId, store, onLanguageChange }: {
   const preview = expedition && expedition.event < areas[expedition.area].events.length ? previewEvent(state, acting, approach) : null
 
   useEffect(() => { onLanguageChange(state.language) }, [state.language, onLanguageChange])
+  useEffect(() => {
+    document.title = timerTabTitle(timer, now, t.paused)
+    return () => { document.title = 'Focuswilds' }
+  }, [timer, now, t.paused])
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(interval)
@@ -169,7 +174,7 @@ export function ShelterCamp({ initialState, userId, store, onLanguageChange }: {
     </div>}
     {panel && <GameWindow title={t[panel]} open onClose={() => { setPanel(null); setCustomPack(false) }} closeLabel={t.close}>
       {locked && panel !== 'settings' && panel !== 'history' && panel !== 'journal' && <p>{active ? t.activeJobs : t.pending}</p>}
-      {panel === 'settings' && <div className="shelter-list"><label>{t.language}<select value={state.language} disabled={blocked} onChange={event => send({ type: 'language', language: event.target.value as Language })}><option value="en">English</option><option value="th">ไทย</option></select></label><p>{t.languageHint}</p><Button disabled={blocked || active} onClick={() => void refresh()}>{t.refresh}</Button></div>}
+      {panel === 'settings' && <div className="shelter-list"><label>{t.language}<select value={state.language} disabled={blocked} onChange={event => send({ type: 'language', language: event.target.value as Language })}><option value="en">English</option><option value="th">ไทย</option></select></label><p>{t.languageHint}</p><Button disabled={blocked || active} onClick={() => void refresh()}>{t.refresh}</Button><LegacyCleanup userId={userId} language={state.language} disabled={locked}/></div>}
       {panel === 'crew' && <div className="shelter-list">{state.survivors.map(person => <article key={person.id} className="shelter-person">
         <h3>{name(person.id)} · {t.hp} {person.hp}/{person.maxHp}</h3><p>{t.personal}: {t[person.personalSkill]} · {t.general}: {t[person.generalSkill]}</p>
         <p>{person.job ? `${t[person.job.kind]} · ${person.job.seconds}/${jobs[person.job.kind].seconds}s` : expedition?.team.includes(person.id) ? t.outside : t.idle}</p>

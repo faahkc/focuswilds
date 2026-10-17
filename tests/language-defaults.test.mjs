@@ -87,6 +87,36 @@ test('runtime metadata and account controls require a signed-in saved Thai prefe
   } finally { globalThis.document = previousDocument }
 })
 
+test('the root opens the fort while legacy remains an explicit fallback', () => {
+  const previousWindow = globalThis.window
+  try {
+    for (const hash of ['', '#shelter', '#legacy', '#unknown']) {
+      globalThis.window = { location: { hash } }
+      const runtime = hooks([{ uid: 'owner' }])
+      let lazyIndex = 0, journeyProps
+      const { default: App } = load('App.tsx', {
+        react: { ...runtime.react, lazy: () => {
+          const journey = lazyIndex++ === 0 ? 'legacy' : 'shelter'
+          return props => { journeyProps = props; return React.createElement('div', { 'data-journey': journey }) }
+        } },
+        '@/components/ui/badge': { Badge: div }, '@/components/ui/button': { Button },
+        '@/components/auth-panel': { AuthPanel: () => null },
+        '@/components/screen-layout': { ScreenLayout: div }, '@/components/fort-stage': { FortStage: () => null }, '@/assets/woodland.webp': 'woodland.webp',
+      })
+      const html = renderToStaticMarkup(React.createElement(App))
+      const shelter = hash !== '#legacy'
+      assert.ok(html.includes(`data-journey="${shelter ? 'shelter' : 'legacy'}"`))
+      assert.equal(html.includes('Enter the fort'), !shelter)
+      assert.equal(journeyProps.userId, 'owner')
+      if (shelter) {
+        journeyProps.onLegacy()
+        assert.equal(window.location.hash, 'legacy')
+        assert.equal(runtime.values[1], false)
+      }
+    }
+  } finally { globalThis.window = previousWindow }
+})
+
 test('rotation guidance defaults to English and translates only after selecting Thai', () => {
   const { ScreenLayout } = load('components/screen-layout.tsx', { react: { ...React, useSyncExternalStore: () => true } })
   noThai(renderToStaticMarkup(React.createElement(ScreenLayout, null, 'Timer')))

@@ -64,7 +64,7 @@ function HistoryContent({ userId, todayStart, period, profile }: { userId: strin
           <thead><tr><th scope="col" className="p-3">Session</th><th scope="col" className="p-3">Completed</th><th scope="col" className="p-3 text-right">Minutes</th></tr></thead>
           <tbody>{sessions.entries.map(entry => <tr key={entry.id} className="border-t border-white/10">
             <th scope="row" className="max-w-xs break-words p-3 font-normal">{entry.title}</th>
-            <td className="p-3"><time dateTime={entry.completedAt}>{new Date(entry.completedAt).toLocaleString(undefined, { timeZone: 'Asia/Bangkok' })}</time></td>
+            <td className="p-3"><time dateTime={entry.completedAt}>{new Date(entry.completedAt).toLocaleString('en', { timeZone: 'Asia/Bangkok' })}</time></td>
             <td className="p-3 text-right">{Math.floor(entry.seconds / 60)}</td>
           </tr>)}</tbody>
         </table>

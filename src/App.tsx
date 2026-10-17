@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
 import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
@@ -15,6 +15,10 @@ export default function App() {
   const [session, setSession] = useState<User | null>(null)
   const [shelter, setShelter] = useState(() => window.location.hash === '#shelter')
   const [language, setLanguage] = useState<Language>('en')
+  const handleSessionChange = useCallback((user: User | null) => {
+    setLanguage('en')
+    setSession(user)
+  }, [])
   useEffect(() => {
     document.documentElement.lang = session && shelter ? language : 'en'
     document.title = session && shelter && language === 'th' ? 'Focuswilds — กองไฟสุดท้าย' : 'Focuswilds — The last hearth'
@@ -29,7 +33,7 @@ export default function App() {
             : <h1 className="wilds-title"><img src={`${import.meta.env.BASE_URL}favicon.png`} alt="" width="64" height="64" /><span>Focuswilds</span></h1>}
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{__APP_VERSION__}</Badge>
           {session && !shelter && <Button variant="secondary" onClick={() => { window.location.hash = 'shelter'; setShelter(true) }}>Enter the fort</Button>}
-          <AuthPanel onSessionChange={setSession} language={session && shelter ? language : 'en'} />
+          <AuthPanel onSessionChange={handleSessionChange} language={session && shelter ? language : 'en'} />
         </header>
         {session && <Suspense fallback={<p role="status" className="py-10">Loading your journey…</p>}>{shelter
           ? <ShelterJourney key={session.uid} userId={session.uid} onLanguageChange={setLanguage} onLegacy={() => { window.location.hash = ''; setShelter(false) }}/>

@@ -3,9 +3,9 @@ import { areas, eventAt, type Approach, type AreaId } from './shelter-content.ts
 export type Language = 'en' | 'th'
 export type Item = 'wood' | 'stone' | 'provisions' | 'medicine'
 export type Inventory = Record<Item, number>
-export type Gear = { id: string; kind: 'sword' | 'coat'; durability: number }
-export type Skill = 'gatherer' | 'scout'
-export type Job = 'garden' | 'recover' | 'housing' | 'storage' | 'medicine' | 'sword' | 'coat' | 'repair' | 'train'
+export type Gear = { id: string; kind: 'sword' | 'coat' | 'bulwark' | 'blueprint' | 'relic'; durability: number }
+export type Skill = 'gatherer' | 'scout' | 'pathfinder'
+export type Job = 'garden' | 'recover' | 'housing' | 'storage' | 'medicine' | 'sword' | 'coat' | 'bulwark' | 'repair' | 'train'
 export type Survivor = {
   id: string; hp: number; maxHp: number; carry: number; xp: number
   personalSkill: 'forager' | 'scout'; generalSkill: Skill
@@ -33,6 +33,7 @@ export const jobs = {
   medicine: { seconds: 300, wood: 1, stone: 0 }, sword: { seconds: 600, wood: 2, stone: 2 },
   coat: { seconds: 600, wood: 2, stone: 0 }, repair: { seconds: 300, wood: 1, stone: 1 },
   train: { seconds: 600, wood: 0, stone: 0 },
+  bulwark: { seconds: 900, wood: 3, stone: 4 },
 } as const
 
 export function requireValue(condition: unknown, message: string): asserts condition {
@@ -64,6 +65,10 @@ export function inventorySlots(inventory: Inventory): number {
   for (const item of items) { integer(inventory[item]); slots += Math.ceil(inventory[item] / 5) }
   return slots
 }
+export const gearSlots = (gear: Gear[]) => gear.reduce((slots, item) => slots + (item.kind === 'relic' ? 3 : 1), 0)
+export const equippable = (kind: Gear['kind'], slot: 'weapon' | 'armor') => slot === 'weapon' ? kind === 'sword' : kind === 'coat' || kind === 'bulwark'
+export const availableSkills = (state: Shelter): Skill[] => state.knowledge.includes('ward') ? ['gatherer', 'scout', 'pathfinder'] : ['gatherer', 'scout']
+export const hasBlueprint = (state: Shelter) => state.armory.some(gear => gear.kind === 'blueprint')
 export function expeditionCapacity(state: Shelter): number {
   const expedition = state.expedition
   if (!expedition) return 0
@@ -106,12 +111,12 @@ function packFit(state: Shelter, selection?: PackSelection) {
     expedition.inventory = kept
     expedition.gear = expedition.gear.filter(gear => selection.gearIds.includes(gear.id))
   }
-  requireValue(inventorySlots(expedition.inventory) + expedition.gear.length <= expeditionCapacity(state), 'Choose what to leave at the marked site')
+  requireValue(inventorySlots(expedition.inventory) + gearSlots(expedition.gear) <= expeditionCapacity(state), 'Choose what to leave at the marked site')
 }
 export type EventPreview = {
   id: string; noise: 'quiet' | 'noisy' | 'unknown'; provisions: number
   damage: { survivor: string; minimum: number; maximum: number; possibleDeath: boolean }[]
-  loot: Inventory; lootChance: number; rescueClue: string | null; wear: number
+  loot: Inventory; lootChance: number; specialLoot: ('blueprint' | 'relic')[]; specialChance: number; rescueClue: string | null; wear: number
 }
 export function previewEvent(state: Shelter, actorId: string, approach: Approach): EventPreview {
   const expedition = state.expedition
@@ -126,15 +131,16 @@ export function previewEvent(state: Shelter, actorId: string, approach: Approach
   const affected = event.teamWide ? expedition.team : [actorId]
   return {
     id: event.id, noise: approach === 'force' ? 'noisy' : approach === 'quiet' ? 'quiet' : 'unknown',
-    provisions: approach === 'observe' ? 2 : 1,
+    provisions: approach === 'observe' && actor.generalSkill !== 'pathfinder' ? 2 : 1,
     damage: affected.map(id => {
       const person = personAt(state, id)
-      const armor = person.equipment.armor && person.equipment.armor.durability > 0 ? 2 : 0
+      const armor = person.equipment.armor && person.equipment.armor.durability > 0 ? (person.equipment.armor.kind === 'bulwark' ? 3 : 2) : 0
       const maximum = Math.max(0, base - armor - Math.min(1, Math.floor(person.xp / 10)))
       return { survivor: id, minimum: Math.max(0, maximum - 1), maximum, possibleDeath: maximum >= person.hp }
     }),
     loot: { wood: expedition.area === 'border' ? 2 : 4, stone: approach === 'force' ? 2 : 1, provisions: actor.personalSkill === 'forager' ? 1 : 0, medicine: expedition.area === 'barrow' ? 1 : 0 },
     lootChance: 75,
+    specialLoot: expedition.area === 'barrow' ? ['blueprint', 'relic'] : expedition.area === 'hollow' ? ['blueprint'] : [], specialChance: 25,
     rescueClue: event.rescue ? 'An injured traveler knows the old paths.' : null, wear: 1,
   }
 }
@@ -149,16 +155,19 @@ export function previewReturn(state: Shelter): PackSelection {
   const inventory = emptyInventory(), combined = { ...state.inventory }
   for (const item of ['medicine', 'provisions', 'wood', 'stone'] as const) {
     // Fill an existing partial stack before allocating more slots.
-    const free = state.storage - inventorySlots(combined) - state.armory.length
+    const free = state.storage - inventorySlots(combined) - gearSlots(state.armory)
     const partial = combined[item] % 5 ? 5 - combined[item] % 5 : 0
     inventory[item] = Math.min(expedition.inventory[item], Math.max(0, free * 5 + partial))
     combined[item] += inventory[item]
   }
-  const free = Math.max(0, state.storage - inventorySlots(combined) - state.armory.length)
-  return { inventory, gearIds: expedition.gear.slice(0, free).map(gear => gear.id) }
+  let free = Math.max(0, state.storage - inventorySlots(combined) - gearSlots(state.armory))
+  const gearIds: string[] = []
+  for (const gear of expedition.gear) if (gearSlots([gear]) <= free) { gearIds.push(gear.id); free -= gearSlots([gear]) }
+  return { inventory, gearIds }
 }
 export type ShelterCommand =
   | { type: 'language'; language: Language }
+  | { type: 'discardGear'; gearId: string }
   | { type: 'assign'; survivor: string; job: Job; gearId?: string; skill?: Skill }
   | { type: 'focus'; seconds: number; targetSeconds: number; completed: boolean }
   | { type: 'discard'; item: Item; quantity: number }
@@ -182,9 +191,10 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
       const person = fortPerson(state, command.survivor)
       requireValue(Object.hasOwn(jobs, command.job), 'Unknown job')
       const job = jobs[command.job]
-      if (command.job === 'repair') requireValue(state.armory.some(gear => gear.id === command.gearId && gear.durability < 10)
+      if (command.job === 'bulwark') requireValue(hasBlueprint(state), 'Recover a blueprint to the fort first')
+      if (command.job === 'repair') requireValue(state.armory.some(gear => gear.id === command.gearId && (equippable(gear.kind, 'weapon') || equippable(gear.kind, 'armor')) && gear.durability < 10)
         && !state.survivors.some(person => person.job?.gearId === command.gearId), 'Gear unavailable for repair')
-      if (command.job === 'train') requireValue(command.skill === 'scout' || command.skill === 'gatherer', 'Unknown skill')
+      if (command.job === 'train') requireValue(command.skill && availableSkills(state).includes(command.skill), 'Skill undiscovered')
       requireValue(state.inventory.wood >= job.wood && state.inventory.stone >= job.stone, 'Insufficient materials')
       state.inventory.wood -= job.wood; state.inventory.stone -= job.stone
       person.job = { kind: command.job, seconds: 0, gearId: command.job === 'repair' ? command.gearId! : null, skill: command.job === 'train' ? command.skill! : null }
@@ -201,12 +211,12 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
         const job = person.job
         job.seconds = Math.min(jobs[job.kind].seconds, job.seconds + command.seconds)
         if (job.seconds < jobs[job.kind].seconds) continue
-        if (job.kind === 'garden' || job.kind === 'medicine' || job.kind === 'sword' || job.kind === 'coat') {
+        if (job.kind === 'garden' || job.kind === 'medicine' || job.kind === 'sword' || job.kind === 'coat' || job.kind === 'bulwark') {
           const inventory = { ...state.inventory }, gear = [...state.armory]
           if (job.kind === 'garden') inventory.provisions += 2
           else if (job.kind === 'medicine') inventory.medicine += 1
           else gear.push({ id: `gear-${state.revision}-${person.id}`, kind: job.kind, durability: 10 })
-          if (inventorySlots(inventory) + gear.length > state.storage) continue
+          if (inventorySlots(inventory) + gearSlots(gear) > state.storage) continue
           state.inventory = inventory; state.armory = gear
         }
         if (job.kind === 'recover') person.hp = Math.min(person.maxHp, person.hp + 5)
@@ -217,6 +227,13 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
         person.job = null
       }
       break
+    case 'discardGear': {
+      const gear = state.armory.find(gear => gear.id === command.gearId)
+      requireValue(gear && !state.survivors.some(person => person.job?.gearId === gear.id), 'Gear unavailable')
+      requireValue(gear.kind !== 'blueprint' || state.armory.filter(item => item.kind === 'blueprint').length > 1
+        || !state.survivors.some(person => person.job?.kind === 'bulwark'), 'Blueprint in use')
+      state.armory = state.armory.filter(gear => gear.id !== command.gearId); break
+    }
     case 'discard':
       requireValue(Object.hasOwn(state.inventory, command.item), 'Unknown item'); integer(command.quantity, 1)
       takeInventory(state.inventory, { ...emptyInventory(), [command.item]: command.quantity }); break
@@ -227,13 +244,13 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
       const expedition = state.expedition?.team.includes(person.id) ? state.expedition : null
       const gear = expedition ? expedition.gear : state.armory
       const chosen = command.gearId === null ? null : gear.find(gear => gear.id === command.gearId)
-      requireValue(command.gearId === null || (chosen && chosen.kind === (command.slot === 'weapon' ? 'sword' : 'coat')), 'Wrong equipment')
+      requireValue(command.gearId === null || (chosen && equippable(chosen.kind, command.slot)), 'Wrong equipment')
       requireValue(!state.survivors.some(person => person.job?.gearId === command.gearId && command.gearId !== null), 'Gear under repair')
       const previous = person.equipment[command.slot]
       if (chosen) gear.splice(gear.indexOf(chosen), 1)
       if (previous) gear.push(previous)
       person.equipment[command.slot] = chosen ?? null
-      requireValue(inventorySlots(expedition ? expedition.inventory : state.inventory) + gear.length <= (expedition ? expeditionCapacity(state) : state.storage), 'No equipment storage space')
+      requireValue(inventorySlots(expedition ? expedition.inventory : state.inventory) + gearSlots(gear) <= (expedition ? expeditionCapacity(state) : state.storage), 'No equipment storage space')
       break
     }
     case 'usable': {
@@ -246,7 +263,7 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
       } else if (!command.equipped && person.equipment.usable) {
         inventory.medicine += 1; person.equipment.usable = null
       }
-      requireValue(inventorySlots(inventory) + (expedition ? expedition.gear.length : state.armory.length) <= (expedition ? expeditionCapacity(state) : state.storage), 'No item storage space')
+      requireValue(inventorySlots(inventory) + (expedition ? gearSlots(expedition.gear) : gearSlots(state.armory)) <= (expedition ? expeditionCapacity(state) : state.storage), 'No item storage space')
       break
     }
     case 'heal': {
@@ -275,6 +292,10 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
       const site = siteAt(state, expedition.location)
       expedition.inventory.provisions -= preview.provisions
       if (roll(`${expedition.id}:${command.event}:${command.approach}:loot`) % 4 !== 0) addInventory(expedition.inventory, preview.loot)
+      // Optional discoveries stay at the site until explicitly collected.
+      for (const kind of preview.specialLoot) if (roll(`${expedition.id}:${command.event}:${command.approach}:${kind}`) % 4 === 0) {
+        site.gear.push({ id: `${kind}-${expedition.id}-${command.event}`, kind, durability: 0 })
+      }
       for (const damage of preview.damage) {
         const person = personAt(state, damage.survivor)
         person.hp = Math.max(0, person.hp - (damage.minimum + roll(`${expedition.id}:${command.event}:${command.approach}:${person.id}`) % (damage.maximum - damage.minimum + 1)))
@@ -345,7 +366,7 @@ export function applyShelterCommand(current: Shelter, revision: number, command:
       requireValue(new Set(take.gearIds).size === take.gearIds.length && take.gearIds.every(id => expedition.gear.some(gear => gear.id === id)), 'Invalid gear selection')
       addInventory(state.inventory, take.inventory)
       state.armory.push(...expedition.gear.filter(gear => take.gearIds.includes(gear.id)))
-      requireValue(inventorySlots(state.inventory) + state.armory.length <= state.storage, 'Fort storage full')
+      requireValue(inventorySlots(state.inventory) + gearSlots(state.armory) <= state.storage, 'Fort storage full')
       const site = siteAt(state, expedition.location ?? `${expedition.area}:0`)
       addInventory(site.inventory, left); site.gear.push(...expedition.gear.filter(gear => !take.gearIds.includes(gear.id)))
       state.survivors.push(...expedition.escorted.map(escort => escort.person)); state.expedition = null; break

@@ -1,6 +1,10 @@
 import type { Language } from './shelter.ts'
 
 const en = {
+  blueprint: 'Armor blueprint', relic: 'Stone relic', bulwark: 'Reinforced armor', pathfinder: 'Pathfinder',
+  specialLoot: 'Possible marked discoveries (25% chance each)',
+  blueprintHint: 'Hollow and barrow events may reveal an armor blueprint. Bring it to fort storage to craft reinforced armor: 3 protection while intact, instead of 2. Stone relics from the barrow are collectibles occupying 3 slots.',
+  pathfinderHint: 'Confirm the hollow shrine ward to unlock Pathfinder training. An acting Pathfinder spends only 1 provision when observing, instead of 2.',
   shelter: 'The last hearth', safe: 'The fort is safe while you are away.', loading: 'Opening the shelter…',
   loadError: 'Could not load the shelter. Your saved progress has not been changed.', retry: 'Retry',
   startNew: 'Light the hearth', newGame: 'Five survivors have reached the abandoned fort. Begin a new shelter; your previous journey stays separate.',
@@ -29,6 +33,10 @@ const en = {
   jobCost: 'Materials and focused minutes', resetRisk: 'Death is permanent. The fort and knowledge remain.',
 }
 const th: typeof en = {
+  blueprint: 'แบบสร้างเกราะ', relic: 'โบราณวัตถุหิน', bulwark: 'เกราะเสริม', pathfinder: 'ผู้ชำนาญเส้นทาง',
+  specialLoot: 'สิ่งที่อาจพบ ณ จุดทำเครื่องหมาย (โอกาสอย่างละ 25%)',
+  blueprintHint: 'เหตุการณ์ในหุบเขาและสุสานอาจพบแบบสร้างเกราะ นำกลับคลังป้อมเพื่อสร้างเกราะเสริม ป้องกัน 3 แทน 2 เมื่อยังทนทาน โบราณวัตถุหินจากสุสานเป็นของสะสม กินพื้นที่ 3 ช่อง',
+  pathfinderHint: 'ยืนยันอาคมศาลในหุบเขาเพื่อปลดล็อกการฝึกผู้ชำนาญเส้นทาง ผู้ลงมือที่มีทักษะนี้ใช้เสบียงเพียง 1 แทน 2 เมื่อสังเกตการณ์',
   shelter: 'กองไฟสุดท้าย', safe: 'ป้อมปลอดภัยระหว่างที่คุณไม่อยู่', loading: 'กำลังเปิดที่พักพิง…',
   loadError: 'โหลดที่พักพิงไม่ได้ ข้อมูลที่บันทึกไว้ยังไม่เปลี่ยนแปลง', retry: 'ลองอีกครั้ง',
   startNew: 'จุดไฟในป้อม', newGame: 'ผู้รอดชีวิตห้าคนมาถึงป้อมร้าง เริ่มที่พักพิงใหม่ โดยเก็บการเดินทางเดิมแยกไว้',

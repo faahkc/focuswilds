@@ -5,6 +5,16 @@ import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, rmSy
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { nextVersion } from '../scripts/version.mjs'
+import { resolveConfig } from 'vite'
+import { fileURLToPath } from 'node:url'
+
+test('Vite tracks the package version as a configuration dependency for automatic restart', async () => {
+  const config = await resolveConfig({ configFile: fileURLToPath(new URL('../vite.config.ts', import.meta.url)) }, 'serve')
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+  assert.equal(config.define.__APP_VERSION__, JSON.stringify(pkg.version))
+  const packagePath = fileURLToPath(new URL('../package.json', import.meta.url)).replaceAll('\\', '/')
+  assert.ok(config.configFileDependencies.some(path => path.replaceAll('\\', '/') === packagePath))
+})
 
 test('patch increments and explicit releases reset lower fields', () => {
   assert.equal(nextVersion('0.1.3', 'patch'), '0.1.4')

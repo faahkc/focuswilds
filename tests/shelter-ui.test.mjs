@@ -5,9 +5,10 @@ import { createRequire } from 'node:module'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import ts from 'typescript'
-import { createShelter } from '../src/lib/shelter.ts'
-import { areas } from '../src/lib/shelter-content.ts'
-import { eventText, shelterText } from '../src/lib/shelter-text.ts'
+import { createShelter, applyShelterCommand, availableSkills } from '../src/lib/shelter.ts'
+import { areas, journalRumors } from '../src/lib/shelter-content.ts'
+import { parseShelter } from '../src/lib/shelter-data.ts'
+import { eventText, rumorText, shelterText } from '../src/lib/shelter-text.ts'
 const require = createRequire(import.meta.url)
 function component(name) {
   const source = fs.readFileSync(new URL(`../src/components/${name}.tsx`, import.meta.url), 'utf8')
@@ -22,6 +23,44 @@ function component(name) {
   return module.exports
 }
 const { ShelterCamp } = component('shelter-camp')
+const { ShelterJournal } = component('shelter-journal')
+
+test('rumors follow known sources and become confirmed only after the matching saved event', () => {
+  const state = createShelter()
+  const snapshot = structuredClone(state)
+  assert.deepEqual(journalRumors(state.knowledge).map(row => row.evidence), ['tracks', 'lanterns'])
+  assert.deepEqual(journalRumors(['traveler']).map(row => row.evidence), ['tracks', 'lanterns', 'ward'])
+  assert.equal(journalRumors(['hermit']).find(row => row.evidence === 'shade').source, 'hermitRumor')
+  assert.deepEqual(availableSkills(state), ['gatherer', 'scout'], 'hearsay cannot unlock skills')
+  assert.deepEqual(state, snapshot, 'reading rumors never changes progress')
+  const departed = applyShelterCommand(state, state.revision, { type: 'depart', team: ['survivor-1'], provisions: 1 })
+  assert.ok(journalRumors(departed.knowledge).some(row => row.evidence === 'tracks'), 'previewing an event is not confirmation')
+  const confirmed = applyShelterCommand(departed, departed.revision, { type: 'choose', event: 0, actor: 'survivor-1', approach: 'quiet' })
+  const reloaded = parseShelter(JSON.parse(JSON.stringify(confirmed)))
+  assert.ok(reloaded.knowledge.includes('tracks'))
+  assert.deepEqual(journalRumors(reloaded.knowledge).map(row => row.evidence), ['lanterns'])
+  assert.deepEqual(journalRumors(['traveler', 'hermit', 'tracks', 'lanterns', 'ward', 'shade']), [])
+})
+
+test('journal separates sourced hearsay from confirmed observations in English and Thai', () => {
+  for (const language of ['en', 'th']) {
+    const knowledge = ['traveler', 'tracks'], t = shelterText(language)
+    const html = renderToStaticMarkup(React.createElement(ShelterJournal, { knowledge, language }))
+    assert.ok(html.includes(`<h3>${t.knowledge}</h3>`))
+    assert.ok(html.includes(`<h3>${t.rumors}</h3>`))
+    assert.ok(html.includes(t.travelerRumor))
+    assert.ok(html.includes(eventText('tracks', language)))
+    assert.ok(!html.includes(rumorText('tracks', language)))
+    assert.ok(!html.includes(eventText('ward', language)), 'unverified claims are not observations')
+    for (const rumor of journalRumors(knowledge)) {
+      const text = rumorText(rumor.evidence, language)
+      assert.ok(text && html.includes(text))
+      assert.match(text, language === 'th' ? /[ก-๛]/u : /^[^ก-๛]+$/u)
+    }
+    assert.ok(!html.includes(rumorText('shade', language)), 'unknown source reveals no rumor')
+    assert.ok(rumorText('shade', language))
+  }
+})
 test('camp renders both languages with accessible timer, navigation and usable input sizes', () => {
   const previous = globalThis.sessionStorage
   globalThis.sessionStorage = { getItem: () => null }

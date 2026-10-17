@@ -24,6 +24,45 @@ function component(name) {
 }
 const { ShelterCamp } = component('shelter-camp')
 const { ShelterJournal } = component('shelter-journal')
+const { FortStage } = component('fort-stage')
+
+test('fort and expedition art remain decorative and display the correct party without mounting a timer', () => {
+  const exterior = renderToStaticMarkup(React.createElement(FortStage, { exterior: true }))
+  assert.ok(exterior.includes('aria-hidden="true"'))
+  assert.ok(!exterior.includes('class="fort-person"'))
+  const courtyard = renderToStaticMarkup(React.createElement(FortStage, { people: 5 }))
+  assert.equal((courtyard.match(/class="fort-person"/g) ?? []).length, 5)
+  assert.ok(courtyard.includes('fort-flame'))
+  const crowded = renderToStaticMarkup(React.createElement(FortStage, { people: 20 }))
+  assert.equal((crowded.match(/class="fort-person"/g) ?? []).length, 8)
+  for (const area of Object.keys(areas)) {
+    const html = renderToStaticMarkup(React.createElement(FortStage, { area, people: 2 }))
+    assert.ok(html.includes(`data-area="${area}"`))
+    assert.ok(html.includes(`class="trail-${area}"`))
+    assert.ok(html.includes('aria-hidden="true"'))
+    assert.equal((html.match(/class="fort-person"/g) ?? []).length, 2)
+    assert.ok(!html.includes('fort-flame'))
+    assert.ok(!html.includes('<image'), 'scenes do not request remote or raster assets')
+  }
+})
+
+test('camp selects expedition scenery from saved state and keeps its focus controls', () => {
+  const previous = globalThis.sessionStorage
+  globalThis.sessionStorage = { getItem: () => null }
+  try {
+    for (const area of Object.keys(areas)) {
+      const state = createShelter()
+      if (areas[area].requires) state.knowledge.push(areas[area].requires)
+      const departed = applyShelterCommand(state, state.revision, { type: 'depart', area, team: ['survivor-1', 'survivor-2'], provisions: 1 })
+      const html = renderToStaticMarkup(React.createElement(ShelterCamp, { initialState: departed, userId: 'test', store: {}, onLanguageChange() {} }))
+      assert.ok(html.includes(`data-area="${area}"`))
+      assert.equal((html.match(/class="fort-person"/g) ?? []).length, 2)
+      assert.ok(html.includes('15:00'))
+      assert.ok(html.includes('aria-label="Focus"'))
+      assert.deepEqual(departed.expedition.team, ['survivor-1', 'survivor-2'])
+    }
+  } finally { globalThis.sessionStorage = previous }
+})
 
 test('rumors follow known sources and become confirmed only after the matching saved event', () => {
   const state = createShelter()

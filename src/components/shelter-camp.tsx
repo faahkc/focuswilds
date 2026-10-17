@@ -143,7 +143,7 @@ export function ShelterCamp({ initialState, userId, store, onLanguageChange }: {
 
   return <section className="shelter-camp">
     <div className="shelter-heading"><div><h1>{t.shelter}</h1><p>{t.safe}</p></div><span>{state.survivors.length}/{state.housing} {t.beds}</span></div>
-    <div className="shelter-scene"><FortStage people={state.survivors.length}/><span className="shelter-scene-caption">{expedition ? `${t.explore} · ${t[expedition.area]}` : t.shelter}</span></div>
+    <div className="shelter-scene"><FortStage area={expedition?.area} people={expedition ? expedition.team.length : state.survivors.length}/><span className="shelter-scene-caption">{expedition ? `${t.explore} · ${t[expedition.area]}` : t.shelter}</span></div>
     <div className="shelter-console">
       <div className="shelter-timer">
         {timer ? <>

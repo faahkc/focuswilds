@@ -1,6 +1,6 @@
 # Shelter domain checkpoint
 
-The shelter has a playable interface at `/#shelter` under the application's base path, also reachable through **Enter the fort** after sign-in. The previous journey remains the default during staged rollout. New state starts separately, without migrating or deleting legacy progress. Publish the reviewed `firestore.rules` before using the shelter against the real account. No production database calls were made during implementation or routine tests.
+The shelter has a playable interface at `/#shelter` under the application's base path, also reachable through **Enter the fort** after sign-in. The previous journey remains the default during staged rollout. New state starts separately, without migrating or deleting legacy progress. The owner reported publishing the rules and passing the bounded live shelter check on 2026-10-17. This is owner-reported validation; the agent made no production database calls during implementation or routine tests.
 
 ## State and commands
 
@@ -31,10 +31,19 @@ The timer uses deadlines and retains paused time, custom duration and pending sa
 | Sword / armor | 2 wood + 2 stone / 2 wood; 600 focused seconds; 10 durability |
 | Repair | 1 wood + 1 stone + 300 focused seconds restores stored gear to 10 durability |
 | Retraining | 600 focused seconds switches the general skill; personal skill stays fixed |
+| Reinforced armor | Recovered blueprint in fort storage + 3 wood + 4 stone + 900 focused seconds; 10 durability, protection 3 instead of 2 |
+| Blueprint / stone relic | 1 / 3 slots, non-equippable collectibles; blueprints unlock reinforced armor while stored at the fort |
+| Pathfinder | Confirm the hollow's ward, then retrain for 600 focused seconds; acting survivor observes for 1 provision instead of 2 |
 
 There is no passive time advancement, fort attack, or absence penalty. Border/hollow/barrow contain 3/4/5 events. Information from the traveler/hermit events unlocks the next area. Quiet, force and observe choices disclose resource costs, noise, damage bounds, team-wide effects and possible permanent death. Rolls use expedition identity, event, approach and survivor identity, so retrying or reopening cannot reroll the same confirmed outcome. Loot has a disclosed 75% chance, with no guaranteed reward. Event costs, damage and loot come from content definitions rather than caller-supplied values.
 
 Equipped weapons and armor occupy separate slots and remain repairable at zero durability. Each survivor can carry one equipped medicine. Escorts cannot act and reserve housing; each needs a living helper whose carrying contribution decreases by 2. Skills are fully shown only after arrival. Event XP modestly increases maximum HP (up to +4) and reduces damage (up to 1), without automatically healing.
+
+Hollow/barrow events have a disclosed 25% chance per blueprint discovery; barrow events also offer a 25% stone-relic chance. Optional discoveries remain marked until explicitly collected, so they never silently overflow the shared pack. Results are deterministic for the same expedition/event/approach. Recovering a blueprint to fort storage unlocks the recipe without consuming it. Stone relics currently serve as collectibles only. Weighted capacity applies to collection, equipment swaps, rescue, production, returns and decoded saves. Stored objects can be discarded to free space, except repair targets and the last blueprint while a reinforced-armor job needs it.
+
+These additions retain schema 1, the same top-level fields and unchanged read/write budgets. Existing published rules already permit these nested gear/job/skill values; no rules republish or data migration is needed. Reload older app tabs before using the new content: older parsers reject unfamiliar values rather than overwriting progress.
+
+Verification: 86 offline tests pass, including crafting/repair, locked skills, legacy snapshots, weighted collection/return, overflow retention, protected blueprint disposal and deterministic discovery chances. Lint and production build pass with the existing legacy graphics chunk-size warning. Intercepted browser checks verify recipe/training options, a disabled discard button for an in-use blueprint, both languages and no horizontal overflow at 1280×720, 390×844 and 320×568. Browser fixtures use local fake data, never production accounts.
 
 Deaths remove survivors permanently and leave equipped items at a marked site. Surviving teams choose excess inventory to leave. If a helper dies, a free helper takes over or the escorted person stays stranded. Total defeat leaves shared items and escorted people at the site. If the entire fort roster is gone, a new survivor arrives while fort resources and knowledge remain. Rescue identities are recorded so revisiting cannot create duplicates.
 
@@ -67,9 +76,9 @@ Simultaneous account reads, refreshes, initialization and identical saves are co
 
 ## Rollout and remaining limits
 
-1. In Firebase Console, select project `focuswilds`, open Firestore Database → Rules, replace the rules with the repository's complete `firestore.rules`, and Publish. The agent has no authenticated console session or deployment credentials, so this external step has not been performed.
+1. Rules publication through Firebase Console was reported complete by the owner on 2026-10-17. The agent has no authenticated deployment session and did not independently perform or inspect publication.
 2. Open the deployed app, sign in and choose **Enter the fort** (or open `/focuswilds/#shelter`). **Light the hearth** creates only the separate shelter state. Failed account loads never initialize or overwrite data.
 3. Perform a bounded live check: load once, assign one garden job, complete or stop one focus period, open Settings and change language once, refresh once and open history once. Verify rule permissions and the documented budgets. Keep Spark without Billing and existing App Check protections.
 4. After live verification, make the shelter the default, implement bounded resumable cleanup for only the legacy `state/progress`, `days` and `sessions` paths, then delete replaced code/assets. Legacy cleanup is authorized but has not run; current rules still deny deletes. Do not erase old progress to fix a failed new-state read.
 
-The artwork is an initial local SVG fort/courtyard with human sprites, not a finished illustration set. The first content set has materials and medicine but no blueprint drops, large multi-slot objects or newly unlocked skill types. Journal entries are confirmed observations; a separate hearsay system is not implemented. Physical-device Thai marks, real OAuth/App Check/Firestore behavior and installed-web-app behavior remain unverified. No PWA support is claimed.
+The artwork is an initial local SVG fort/courtyard with human sprites, not a finished illustration set. Journal entries are confirmed observations; a separate hearsay system is not implemented. Physical-device Thai marks, actual cross-device behavior and installed-web-app behavior remain unverified. The newly added content has offline and intercepted-browser checks, not a production-account content test. No PWA support is claimed.

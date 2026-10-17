@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createShelter, applyShelterCommand, inventorySlots, expeditionCapacity, parseLanguage, previewEvent, emptyInventory, previewReturn } from '../src/lib/shelter.ts'
+import { createShelter, applyShelterCommand, inventorySlots, gearSlots, availableSkills, expeditionCapacity, parseLanguage, previewEvent, emptyInventory, previewReturn } from '../src/lib/shelter.ts'
 import { parseShelter } from '../src/lib/shelter-data.ts'
 import { areas } from '../src/lib/shelter-content.ts'
 import { fakeStore } from './fake-focus-store.mjs'
@@ -8,6 +8,109 @@ import { fakeStore } from './fake-focus-store.mjs'
 const apply = (state, command) => applyShelterCommand(state, state.revision, command)
 const focus = seconds => ({ type: 'focus', seconds, targetSeconds: 900, completed: seconds === 900 })
 const loot = { wood: 1, stone: 0, provisions: 0, medicine: 0 }
+
+test('legacy snapshots stay readable; recovered blueprints unlock focused armor crafting and repair', () => {
+  let state = parseShelter(createShelter())
+  const assignment = { type: 'assign', survivor: 'survivor-1', job: 'bulwark' }
+  assert.throws(() => apply(state, assignment), /blueprint/)
+  state.armory.push({ id: 'found-blueprint', kind: 'blueprint', durability: 0 })
+  assert.throws(() => apply(state, { type: 'equip', survivor: 'survivor-1', slot: 'armor', gearId: 'found-blueprint' }))
+  assert.throws(() => apply(state, { type: 'assign', survivor: 'survivor-1', job: 'repair', gearId: 'found-blueprint' }))
+  state = apply(state, assignment)
+  assert.throws(() => apply(state, { type: 'discardGear', gearId: 'found-blueprint' }), /in use/)
+  assert.equal(state.inventory.wood, 3)
+  assert.equal(state.inventory.stone, 0)
+  state = parseShelter(apply(state, focus(900)))
+  const armor = state.armory.find(gear => gear.kind === 'bulwark')
+  assert.ok(armor)
+  state = apply(state, { type: 'equip', survivor: 'survivor-1', slot: 'armor', gearId: armor.id })
+  state = apply(state, { type: 'depart', team: ['survivor-1'], provisions: 2 })
+  const protectedDamage = previewEvent(state, 'survivor-1', 'force').damage[0].maximum
+  const coatState = structuredClone(state)
+  coatState.survivors[0].equipment.armor.kind = 'coat'
+  assert.equal(previewEvent(coatState, 'survivor-1', 'force').damage[0].maximum, protectedDamage + 1)
+  state = apply(state, { type: 'choose', event: 0, actor: 'survivor-1', approach: 'observe' })
+  assert.equal(state.survivors[0].equipment.armor.durability, 9)
+  state = apply(state, { type: 'return' })
+  state = apply(state, { type: 'equip', survivor: 'survivor-1', slot: 'armor', gearId: null })
+  state.inventory.stone = 1
+  state = apply(state, { type: 'assign', survivor: 'survivor-1', job: 'repair', gearId: armor.id })
+  state = parseShelter(apply(state, focus(300)))
+  assert.equal(state.armory.find(gear => gear.id === armor.id).durability, 10)
+  state = apply(state, { type: 'discardGear', gearId: 'found-blueprint' })
+  assert.throws(() => apply(state, assignment), /blueprint/)
+})
+
+test('large objects consume three slots on collection, return and saved-state validation', () => {
+  let state = apply(createShelter(), { type: 'depart', team: ['survivor-1'], provisions: 1 })
+  state = apply(state, { type: 'choose', event: 0, actor: 'survivor-1', approach: 'quiet' })
+  const relic = { id: 'stone-relic', kind: 'relic', durability: 0 }
+  state.sites['border:0'].gear.push(relic)
+  assert.equal(gearSlots([relic]), 3)
+  const collect = { type: 'collect', inventory: emptyInventory(), gearIds: [relic.id] }
+  state.expedition.inventory = { ...emptyInventory(), wood: 6 }
+  assert.throws(() => apply(state, collect), /Choose what to leave/)
+  assert.equal(state.sites['border:0'].gear.length, 1)
+  state.expedition.inventory = emptyInventory()
+  state = parseShelter(apply(state, collect))
+  const overloaded = structuredClone(state)
+  overloaded.expedition.inventory.wood = 6
+  assert.throws(() => parseShelter(overloaded), /carrying capacity/)
+  state.storage = inventorySlots(state.inventory) + 2
+  assert.deepEqual(previewReturn(state).gearIds, [])
+  assert.throws(() => apply(state, { type: 'return', take: { inventory: emptyInventory(), gearIds: [relic.id] } }), /storage full/)
+  const returned = parseShelter(apply(state, { type: 'return' }))
+  assert.equal(returned.sites['border:0'].gear[0].id, relic.id)
+  state.storage += 1
+  state = parseShelter(apply(state, { type: 'return' }))
+  assert.equal(state.armory[0].id, relic.id)
+  const invalid = structuredClone(state)
+  invalid.storage -= 1
+  assert.throws(() => parseShelter(invalid), /storage exceeded/)
+  state = apply(state, { type: 'discardGear', gearId: relic.id })
+  assert.equal(gearSlots(state.armory), 0)
+})
+
+test('Pathfinder requires confirmed knowledge and training, preserves the personal skill and reduces observe cost', () => {
+  let state = createShelter()
+  const train = { type: 'assign', survivor: 'survivor-1', job: 'train', skill: 'pathfinder' }
+  assert.deepEqual(availableSkills(state), ['gatherer', 'scout'])
+  assert.throws(() => apply(state, train), /undiscovered/)
+  state.survivors[0].generalSkill = 'pathfinder'
+  assert.throws(() => parseShelter(state), /undiscovered/)
+  state.survivors[0].generalSkill = 'gatherer'
+  state.knowledge.push('ward')
+  state = apply(state, train)
+  state = parseShelter(apply(state, focus(600)))
+  assert.equal(state.survivors[0].personalSkill, 'scout')
+  state = apply(state, { type: 'depart', team: ['survivor-1'], provisions: 1 })
+  assert.equal(previewEvent(state, 'survivor-1', 'observe').provisions, 1)
+  state = parseShelter(apply(state, { type: 'choose', event: 0, actor: 'survivor-1', approach: 'observe' }))
+  assert.equal(state.expedition.inventory.provisions, 0)
+})
+
+test('special discoveries are disclosed, deterministic, optional and require recovery to unlock crafting', () => {
+  const found = { blueprint: 0, relic: 0 }
+  for (let seed = 0; seed < 32; seed++) {
+    let state = createShelter()
+    state.revision = seed
+    state.knowledge.push('hermit')
+    state = apply(state, { type: 'depart', team: ['survivor-1'], area: 'barrow', provisions: 1 })
+    const preview = previewEvent(state, 'survivor-1', 'quiet')
+    assert.deepEqual(preview.specialLoot, ['blueprint', 'relic'])
+    assert.equal(preview.specialChance, 25)
+    const command = { type: 'choose', event: 0, actor: 'survivor-1', approach: 'quiet' }
+    const next = parseShelter(apply(state, command))
+    assert.deepEqual(apply(state, command), next)
+    assert.equal(next.expedition.gear.length, 0, 'discoveries do not silently change the carried pack')
+    for (const gear of next.sites['barrow:0'].gear) found[gear.kind]++
+    if (next.sites['barrow:0'].gear.some(gear => gear.kind === 'blueprint')) {
+      const returned = apply(next, { type: 'return' })
+      assert.throws(() => apply(returned, { type: 'assign', survivor: 'survivor-2', job: 'bulwark' }), /blueprint/)
+    }
+  }
+  assert.deepEqual(found, { blueprint: 8, relic: 8 })
+})
 
 test('new accounts have independent state, five survivors, eight beds and English', () => {
   const state = createShelter()

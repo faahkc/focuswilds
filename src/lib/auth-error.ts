@@ -1,6 +1,6 @@
-export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'th') {
+export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'en') {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : null
-  if (language === 'en') {
+  if (language !== 'th') {
     switch (code) {
       case 'auth/popup-closed-by-user':
       case 'auth/cancelled-popup-request': return 'GitHub sign-in was cancelled. Please try again.'

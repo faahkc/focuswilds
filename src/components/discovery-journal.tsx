@@ -25,7 +25,7 @@ export function DiscoveryJournal({ journal, error, onRetry, selected, saving, on
         </div> : journal ? <>
           <div role="status" className="space-y-1 text-[#e8c782]">
             <p>{journal.encounters.filter(count => count > 0).length} / {creatures.length} species discovered</p>
-            {latest && journal.latest ? <p>Latest encounter: {latest.name} · <time dateTime={journal.latest.finishedAt}>{new Date(journal.latest.finishedAt).toLocaleString()}</time></p>
+            {latest && journal.latest ? <p>Latest encounter: {latest.name} · <time dateTime={journal.latest.finishedAt}>{new Date(journal.latest.finishedAt).toLocaleString('en', { timeZone: 'Asia/Bangkok' })}</time></p>
               : <p>Finish your first focus session to discover who is waiting on the trail.</p>}
           </div>
           <ul aria-label="Discovered creatures" className="grid gap-4 sm:grid-cols-3">

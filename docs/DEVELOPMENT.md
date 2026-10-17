@@ -32,6 +32,8 @@ The opt-in shelter supports English (`en`, default) and Thai (`th`). Settings is
 
 Saved preferences apply on account load or explicit refresh; there is no listener, polling, or focus refetch. Application validation and rules restrict language to `en`/`th`. Language changes preserve the mounted timer and game state; document language, titles, dates and accessible labels follow the saved language. Offline and intercepted-browser checks cover both languages, save failures and timer continuity. README and IMPLEMENTATION_PLAN.md stay English.
 
+Default-language regression checks in `tests/language-defaults.test.mjs` verify English HTML metadata before JavaScript, account/loading/error controls, runtime titles, rotation guidance and legacy dates on a browser configured for Thai. Authentication changes clear the previous account language before loading saved preferences. Legacy history and discoveries explicitly format English dates in Asia/Bangkok; shelter dates follow the saved account language. These fixes add no database reads or writes. Keep this coverage in `npm test` when changing public copy or language defaults.
+
 Validate dependency changes with `npm ci` in a clean directory and the Linux CI build. Preserve lockfile metadata for bundled optional dependencies; an existing `node_modules` tree can hide an incomplete lockfile. Missing bundled dependency entries can stop deployment before tests run.
 
 ## Firebase setup

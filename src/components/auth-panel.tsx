@@ -4,11 +4,14 @@ import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { authErrorMessage } from '@/lib/auth-error'
 
-export function AuthPanel({ onSessionChange }: { onSessionChange: (user: User | null) => void }) {
+export function AuthPanel({ onSessionChange, language = 'en' }: { onSessionChange: (user: User | null) => void; language?: 'en' | 'th' }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<unknown>(null)
+  const text = language === 'th'
+    ? { account: 'บัญชี', loading: 'กำลังตรวจสอบการเข้าสู่ระบบ…', signedIn: 'เข้าสู่ระบบแล้ว', out: 'ออกจากระบบ', leaving: 'กำลังออกจากระบบ…', wait: 'รอสักครู่…', enter: 'เข้าสู่ที่พักพิง' }
+    : { account: 'Account', loading: 'Checking sign-in…', signedIn: 'Signed in', out: 'Sign out', leaving: 'Signing out…', wait: 'Please wait…', enter: 'Enter the shelter' }
 
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     setUser(nextUser)
@@ -17,32 +20,32 @@ export function AuthPanel({ onSessionChange }: { onSessionChange: (user: User | 
   }, () => {
     setUser(null)
     onSessionChange(null)
-    setError('กู้คืนการเข้าสู่ระบบไม่ได้ โปรดโหลดหน้าใหม่เพื่อลองอีกครั้ง')
+    setError({ code: 'auth/restore-failed' })
     setLoading(false)
   }), [onSessionChange])
 
   async function updateAccount() {
     setBusy(true)
-    setError('')
+    setError(null)
     try {
       if (user) await signOut(auth)
       else await signInWithPopup(auth, new GithubAuthProvider())
     } catch (accountError) {
-      setError(authErrorMessage(accountError))
+      setError(accountError)
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <section aria-label="บัญชี" className="wilds-account flex flex-col items-start gap-2 sm:items-end">
-      {loading ? <p role="status" className="text-sm">กำลังตรวจสอบการเข้าสู่ระบบ…</p> : user ? (
+    <section aria-label={text.account} className="wilds-account flex flex-col items-start gap-2 sm:items-end">
+      {loading ? <p role="status" className="text-sm">{text.loading}</p> : user ? (
         <div className="flex flex-wrap items-center gap-3">
-          <span className="max-w-48 truncate text-sm">{user.displayName || user.email || 'เข้าสู่ระบบแล้ว'}</span>
-          <Button disabled={busy} onClick={() => void updateAccount()} variant="secondary">{busy ? 'กำลังออกจากระบบ…' : 'ออกจากระบบ'}</Button>
+          <span className="max-w-48 truncate text-sm">{user.displayName || user.email || text.signedIn}</span>
+          <Button disabled={busy} onClick={() => void updateAccount()} variant="secondary">{busy ? text.leaving : text.out}</Button>
         </div>
-      ) : <Button disabled={busy} onClick={() => void updateAccount()} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">{busy ? 'รอสักครู่…' : 'เข้าสู่ที่พักพิง'}</Button>}
-      {error && <p role="alert" className="max-w-sm text-sm text-[#ffc3ab]">{error}</p>}
+      ) : <Button disabled={busy} onClick={() => void updateAccount()} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">{busy ? text.wait : text.enter}</Button>}
+      {error !== null && <p role="alert" className="max-w-sm text-sm text-[#ffc3ab]">{authErrorMessage(error, language)}</p>}
     </section>
   )
 }

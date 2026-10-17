@@ -4,12 +4,14 @@
 
 ข้อกำหนดและลำดับส่งมอบอยู่ใน [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) เอกสารแผนไม่ใช่รายการความสามารถที่เปิดใช้แล้ว
 
-- ทำแล้ว: ใช้ GNU Unifont ทั้ง UI พร้อมใบอนุญาต แปลส่วนบัญชีและข้อผิดพลาดเป็นไทย ตั้งภาษาเอกสารเป็น `th` ปุ่มหน้าแรกใช้ “เข้าสู่ที่พักพิง” และสถานะรอ “รอสักครู่…”
+- ทำแล้ว: ใช้ GNU Unifont ทั้ง UI พร้อมใบอนุญาต หน้าเข้าใช้และ metadata เริ่มอังกฤษ ระบบป้อมใหม่รองรับอังกฤษ/ไทยและเก็บภาษาบัญชีใน Firestore ผ่าน Settings
 - ยังใช้ระบบเดิม: ตัวจับเวลา 25/5 นาที ประวัติ EXP เพื่อนสิ่งมีชีวิต และฉากป่า ข้อความส่วนนี้ยังเป็นอังกฤษ
-- ยังไม่ทำ: งานในป้อม ผู้รอดชีวิต ทีมสำรวจ HP อุปกรณ์ คลังจำกัด การกู้ของ สมุดตำนาน และฉากป้อมใหม่
+- ต่อแล้วที่ `/focuswilds/#shelter`: งานในป้อม ผู้รอดชีวิต ทีมสำรวจ HP อุปกรณ์ คลังจำกัด ช่วยคน การตายและกู้ของ สมุดบันทึก โฟกัสกำหนดเวลาเอง และฉากป้อม SVG พร้อมตัวละครคน
 - README และ metadata เป็นคำบรรยายโลกใหม่แล้ว แต่ยังไม่ได้ล้างข้อมูลเดิม
 
 ระบบใหม่จะเริ่มจากศูนย์ ไม่แปลงประวัติ เวลา EXP หรือความก้าวหน้าเดิม แต่การอนุมัติเริ่มใหม่ยังไม่ใช่การล้างข้อมูลที่เกิดขึ้นแล้ว ต้องมี schema ใหม่และขั้นตอนล้างข้อมูลเก่าแบบจำกัดขนาดและรันซ้ำได้อย่างปลอดภัยก่อนเปิดใช้ ห้ามให้ขั้นตอนล้างข้อมูลเก่าลบข้อมูลของระบบใหม่
+
+รายละเอียด schema, read/write budgets, ผลทดสอบและขั้นตอนเปิดใช้อยู่ใน [SHELTER_SCHEMA.md](SHELTER_SCHEMA.md) ต้อง Publish `firestore.rules` ชุดใหม่ผ่าน Firebase Console ก่อนตรวจระบบป้อมกับบัญชีจริง ยังไม่ได้ Publish rules หรือเรียกฐานข้อมูลจริงระหว่างพัฒนา ระบบเดิมยังเป็นค่าเริ่มต้นและยังไม่ลบข้อมูล
 
 ### ข้อกำหนดสำหรับ implementation ถัดไป
 
@@ -24,11 +26,11 @@
 
 Requirements: Node.js 24, npm, and a Git clone.
 
-## Planned bilingual Settings
+## Shelter bilingual Settings
 
-The replacement app will support English (`en`, default) and Thai (`th`). Settings is available only after sign-in, through an icon dialog, and stores the preference in the account's Cloud Firestore data on the existing Spark project without Billing. The current Thai account text is an interim implementation; English defaults, Settings, and preference persistence are not shipped yet.
+The opt-in shelter supports English (`en`, default) and Thai (`th`). Settings is available only after sign-in through an icon dialog and persists language in the shelter account snapshot, using the existing Spark project without Billing. The new rules must be published before real-account use. Reopening Settings uses cached state, changing language writes an idempotent operation, and failed saves retain the previous displayed language. Login defaults to English.
 
-Load language with account data, reuse the loaded value when reopening Settings, and write only on a saved-value change. Saved preferences apply across devices on account load or explicit refresh; no listener, polling, or focus refetch is introduced. Report failed reads/writes and allow retry without claiming a successful save or overwriting an unread preference. Validate `en`/`th` in application code and rules, and document actual read/write costs with the new schema. Language changes must preserve the mounted timer and game state. Test these cases offline, including English defaults and save failures. README and IMPLEMENTATION_PLAN.md stay English.
+Saved preferences apply on account load or explicit refresh; there is no listener, polling, or focus refetch. Application validation and rules restrict language to `en`/`th`. Language changes preserve the mounted timer and game state; document language, titles, dates and accessible labels follow the saved language. Offline and intercepted-browser checks cover both languages, save failures and timer continuity. README and IMPLEMENTATION_PLAN.md stay English.
 
 Validate dependency changes with `npm ci` in a clean directory and the Linux CI build. Preserve lockfile metadata for bundled optional dependencies; an existing `node_modules` tree can hide an incomplete lockfile. Missing bundled dependency entries can stop deployment before tests run.
 
@@ -70,7 +72,7 @@ React, TypeScript, Vite, Tailwind CSS, and shadcn/ui are configured. Components 
 
 ## Website loading and cache
 
-### Scene and typography
+### Legacy scene and shared typography
 
 The current signed-in scene uses a 144,946-byte WebP background on a flat plane, with pixel companions on separate perspective planes, drifting fog, rain and embers. It does not contain modeled terrain or buildings, or depth-of-field postprocessing. Three.js loads in a separate chunk after the timer UI mounts. Point lighting flickers during focus and becomes warmer at camp. The login title screen reuses the same WebP as a static full-viewport background before sign-in, adding 144,946 bytes to the initial image transfer without a second scene asset. The animated journey and graphics renderer load after sign-in. Artwork stays local to the site; there are no cloud asset requests or additional document reads/writes. The interface uses bundled GNU Unifont 17.0.05, including body text, editable fields, dialogs, headings, controls and the clock. The Thai/Latin/punctuation WOFF2 subset is 5,976 bytes and includes upstream copyright metadata and the OFL license. It replaces the previous font assets. Account controls and account errors are Thai; the existing journey screens remain English until their replacement. Scene and font assets total 150,922 bytes, below 500 kB. The new fort artwork is not implemented.
 

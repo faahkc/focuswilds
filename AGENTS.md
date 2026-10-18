@@ -72,7 +72,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Every commit must have a concise English subject and a descriptive body explaining what changed, why, validation performed, and material limitations when applicable.
 - Report the commit hash and a brief summary to the user.
 - After committing verified task changes, push to the configured remote and branch unless the user asks otherwise. Report whether the push succeeded. Never force-push, amend commits, or rewrite history unless explicitly requested.
-- Publishing hold (2026-10-18): the owner has asked not to push. Keep subsequent work local until the owner explicitly authorizes pushing again.
+- Publishing update (2026-10-18): the owner lifted the earlier push hold. Commit verified, meaningful work in stages and push when appropriate; the visual goal remains subject to its own acceptance checks.
 
 ## Instruction loading and token efficiency
 

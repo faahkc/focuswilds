@@ -25,9 +25,12 @@ export function courtyardRightEdge(z: number) {
 export function courtyardHeight(x: number, z: number, stairX = camp.stairX) {
   const local = stairLocal(x, z, stairX)
   const stairBed = local.along > -.24 && local.along < fortStairs.run * 8 + .55 && Math.abs(local.across) < fortStairs.width / 2 + .3
-  const descent = Math.min(8, Math.max(0, (stairBed ? local.along : z - 3.8) / fortStairs.run)) * fortStairs.rise
+  const shoulder = Math.abs(local.across) <= fortStairs.width / 2 ? 1
+    : Math.min(1, Math.max(0, (fortStairs.width / 2 + 2 - Math.abs(local.across)) / 2)) * Math.min(1, Math.max(0, (z - 1.9) / 1.1))
+  const slope = Math.min(8, Math.max(0, local.along / fortStairs.run)), outside = Math.min(8, Math.max(0, (z - 3.8) / fortStairs.run))
+  const descent = (slope * shoulder + outside * (1 - shoulder)) * fortStairs.rise
   const roughness = stairBed ? 0 : Math.min(1, Math.max(0, z - 4))
-  return camp.floor - descent - (stairBed ? .55 : 0) - Math.max(0, z - 9) * .35 - Math.abs(Math.sin(x * 1.3) * Math.cos(z * .9)) * .18 * roughness
+  return camp.floor - descent - Math.max(0, z - 9) * .35 - Math.abs(Math.sin(x * 1.3) * Math.cos(z * .9)) * .18 * roughness
 }
 
 export function courtyardTerrain(stairX = camp.stairX) {

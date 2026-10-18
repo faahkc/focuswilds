@@ -92,15 +92,26 @@ test('wide and ultrawide views retain survivor scale instead of fitting the fort
   assert.ok(sceneRenderSize(5120, 1440).height >= 900)
 })
 
-test('terrain keeps the occupied camp level and provides a recessed stair bed at both layouts', () => {
+test('terrain keeps the hearth level and follows the diagonal stair grade at both layouts', () => {
+  assert.equal(courtyardHeight(camp.fireX, camp.fireZ), camp.floor)
   for (const x of [-10, -6, -2, 4]) assert.equal(courtyardHeight(x, 0), camp.floor)
   for (const stairX of [camp.stairX, -5.1]) {
     for (let i = 0; i < 9; i++) {
       const { x, y, z } = stairPosition(i, stairX)
-      assert.ok(courtyardHeight(x, z, stairX) <= y - .25)
+      assert.ok(Math.abs(courtyardHeight(x, z, stairX) - y) < 1e-10)
     }
   }
   assert.ok(courtyardHeight(0, 24) < courtyardHeight(0, 12))
+})
+
+test('terrain beside the diagonal flight grades down with the steps instead of forming a high terrace', () => {
+  for (let i = 0; i <= 8; i++) {
+    const point = stairPosition(i)
+    for (const across of [-3.05, 3.05]) {
+      const x = point.x + Math.cos(fortStairs.yaw) * across, z = point.z - Math.sin(fortStairs.yaw) * across
+      assert.ok(courtyardHeight(x, z) <= point.y + .6)
+    }
+  }
 })
 
 test('terrain has valid upward-facing top triangles and continuous deep skirts instead of a box deck', () => {

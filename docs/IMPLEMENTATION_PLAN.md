@@ -4,7 +4,7 @@ This document records approved requirements, not a list of fully implemented fea
 
 ## Login checkpoint — 2026-10-18
 
-The animated ruined courtyard login is implemented with centered title/account controls, separate detailed object assets, four two-pose seated pixel survivors, elevated terrain/stairs, lighting, fire, smoke, mist, sparks and cloth motion. Loading, static recovery, responsive assets and scene disposal are connected. Offline tests, lint, production build and browser checks passed; measured asset sizes and browser performance are recorded in DEVELOPMENT.md. Physical-device performance and real production authentication remain unverified. This checkpoint does not mark the signed-in graphics migration complete or claim owner visual acceptance.
+The animated ruined courtyard login is implemented with centered title/account controls, separate detailed object assets, four seated pixel survivors with four idle poses each, elevated terrain/stairs, lighting, fire, smoke, mist, sparks and cloth motion. Loading, static recovery, responsive assets and scene disposal are connected. Offline tests, lint, production build and browser checks passed; measured asset sizes and browser performance are recorded in DEVELOPMENT.md. Physical-device performance and real production authentication remain unverified. This checkpoint does not mark the signed-in graphics migration complete or claim owner visual acceptance.
 
 ## Checkpoint — 2026-10-17
 

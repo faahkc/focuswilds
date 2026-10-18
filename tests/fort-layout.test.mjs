@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { seededRandom, camp, stepHeight, sceneRenderSize, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+import { seededRandom, camp, fireFrame, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
 
 test('the stair starts at the courtyard and descends in consistent bounded risers', () => {
   assert.equal(stepHeight(0), camp.floor)
@@ -26,11 +26,11 @@ test('portrait framing preserves a finite camera and render resolution stays bou
 
 test('idle animation switches drawn poses discretely with an independent phase per survivor', () => {
   assert.equal(survivorPose(0, 0), 0)
-  assert.equal(survivorPose(2.79, 0), 0)
-  assert.equal(survivorPose(2.8, 0), 1)
-  assert.equal(survivorPose(5.6, 0), 0)
-  assert.equal(survivorPose(0, 3), 1)
-  for (let t = 0; t < 20; t += .1) assert.ok([0, 1].includes(survivorPose(t, 2)))
+  assert.equal(survivorPose(1.19, 0), 0)
+  assert.equal(survivorPose(1.2, 0), 1)
+  assert.equal(survivorPose(4.8, 0), 0)
+  assert.equal(survivorPose(0, 1), 1)
+  for (let t = 0; t < 20; t += .1) assert.ok([0, 1, 2, 3].includes(survivorPose(t, 2)))
 })
 
 test('seeded rubble and atmosphere placement stay stable across mounts without remote assets', () => {
@@ -46,6 +46,33 @@ test('framing changes continuously at square sizes and keeps the portrait camp v
   const before = titleFraming(990, 1000), after = titleFraming(1010, 1000)
   assert.ok(Math.abs(before.centerX - after.centerX) < .2)
   const phone = titleFraming(390, 844)
-  assert.ok(phone.height * phone.aspect >= 7.8)
+  assert.ok(phone.height * phone.aspect >= 10.8)
+  assert.ok(phone.centerY > titleFraming(1440, 900).centerY)
+  assert.equal(phone.compact, 1)
+  assert.ok(phone.height >= 24)
   assert.ok(phone.foregroundScale < titleFraming(1440, 900).foregroundScale)
+})
+
+test('trimmed idle frames stay inside the atlas without sampling the neighboring pose', () => {
+  for (let column = 0; column < 4; column++) {
+    const frames = Array.from({ length: 4 }, (_, pose) => survivorFrame(pose * 1.2 + .01, column)).sort((a, b) => a.top - b.top)
+    let previousBottom = 0
+    for (const { top, bottom } of frames) {
+      assert.ok(top >= previousBottom && bottom <= 512 && bottom > top)
+      assert.ok(bottom - top <= 128)
+      previousBottom = bottom
+    }
+  }
+})
+
+test('fire frames loop at eight poses per second and keep all sampled pixels inside the atlas', () => {
+  assert.equal(fireFrame(0).pose, 0)
+  assert.equal(fireFrame(.125).pose, 1)
+  assert.equal(fireFrame(.75).pose, 0)
+  for (let pose = 0; pose < 6; pose++) {
+    const frame = fireFrame(pose / 8)
+    assert.equal(frame.pose, pose)
+    assert.ok(frame.left >= 0 && frame.left + 128 <= 384)
+    assert.ok(frame.bottom <= 256 && frame.bottom - frame.height >= 0)
+  }
 })

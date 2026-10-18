@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three'
-import { camp, seededRandom, sceneRenderSize, stepHeight, survivorPose, titleFraming } from './fort-layout'
+import { camp, fireFrame, seededRandom, sceneRenderSize, stepHeight, survivorFrame, survivorPose, titleFraming } from './fort-layout'
 import shelterUrl from '@/assets/title-shelter.webp'
 import archUrl from '@/assets/title-arch.webp'
 import foregroundUrl from '@/assets/title-foreground.webp'
@@ -66,8 +66,8 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const bannerMap = texture(bannerUrl), fireMap = texture(fireUrl, true)
   fireMap.repeat.set(1 / 3, .5)
   stoneMap.wrapS = stoneMap.wrapT = THREE.RepeatWrapping
-  stoneMap.repeat.set(5, 2)
-  const ground = material(new THREE.MeshStandardMaterial({ map: stoneMap, color: '#b0b0b4', roughness: .93, emissiveMap: stoneMap, emissive: '#ffffff', emissiveIntensity: .12 }))
+  stoneMap.repeat.set(8, 3.2)
+  const ground = material(new THREE.MeshStandardMaterial({ map: stoneMap, color: '#bcbcc0', roughness: .93, emissiveMap: stoneMap, emissive: '#ffffff', emissiveIntensity: .18 }))
   const sideStoneMap = stoneMap.clone()
   sideStoneMap.repeat.set(5, .4); textures.add(sideStoneMap)
   const masonry = material(new THREE.MeshStandardMaterial({ map: sideStoneMap, color: '#a0a0a4', roughness: 1, emissiveMap: sideStoneMap, emissive: '#ffffff', emissiveIntensity: .22 }))
@@ -89,22 +89,27 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const stairMaterials = [stairSide, stairSide, stairTop, stairSide, stairSide, stairSide]
   solid('raised-courtyard', pavedStone, -3.2, -.2, -1, 25, 2, 10)
   solid('terrace-foundation', masonry, -3.2, -1.6, -1, 25.3, .8, 10.3)
+  const stairs: THREE.Mesh[] = []
   for (let i = 0; i < 9; i++) {
     const top = stepHeight(i)
-    solid(`stair-${i}`, stairMaterials, -1.5, top - .14, 4.1 + i * .53, 5.4, .28, .6)
+    stairs.push(solid(`stair-${i}`, stairMaterials, -1.5, top - .14, 4.1 + i * .53, 5.4, .28, .6))
   }
-  solid('lower-stone-walk', ground, -1.5, -1.15, 10, 9, .3, 4)
+  const lowerWalk = solid('lower-stone-walk', ground, -1.5, -1.15, 10, 9, .3, 4)
   for (let i = 0; i < 12; i++) {
     solid('broken-side-parapet', masonry, 9.1, camp.floor + .25 + random() * .22, -5 + i * .8, .5, .5 + random() * .5, .65)
   }
   const cardPitch = -Math.atan2(14, 30)
+  function placeCard(mesh: THREE.Mesh, x: number, y: number, z: number, h: number, scale = 1) {
+    mesh.scale.setScalar(scale)
+    mesh.position.set(x, y + Math.cos(cardPitch) * h * scale / 2, z + Math.sin(cardPitch) * h * scale / 2)
+  }
   function card(name: string, map: THREE.Texture, x: number, y: number, z: number, w: number, h: number, lit = true) {
     const mat = lit
       ? material(new THREE.MeshStandardMaterial({ map, transparent: false, alphaTest: .35, side: THREE.DoubleSide, roughness: 1, emissiveMap: map, emissive: '#ffffff', emissiveIntensity: .3 }))
       : material(new THREE.MeshBasicMaterial({ map, alphaTest: .35, side: THREE.DoubleSide, toneMapped: false }))
     const mesh = new THREE.Mesh(geometry(new THREE.PlaneGeometry(w, h)), mat)
     mesh.name = name; mesh.rotation.x = cardPitch
-    mesh.position.set(x, y + Math.cos(cardPitch) * h / 2, z + Math.sin(cardPitch) * h / 2)
+    placeCard(mesh, x, y, z, h)
     mesh.castShadow = lit; mesh.receiveShadow = lit
     // Custom depth preserves the transparent silhouette in the moon shadow map.
     if (lit) mesh.customDepthMaterial = material(new THREE.MeshDepthMaterial({ map, alphaTest: .35, depthPacking: THREE.RGBADepthPacking, side: THREE.DoubleSide }))
@@ -114,10 +119,10 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const landscape = card('distant-valley', valleyMap, 4, -15, -42, 39.1, 22, false)
   landscape.position.set(0, -19, -46)
   landscape.renderOrder = -1
-  card('occupied-shelter', shelterMap, -8.4, camp.floor, -3, 20, 13.33)
-  card('broken-arch', archMap, 4.8, camp.floor, 3.8, 11.5, 17.25)
+  const shelter = card('occupied-shelter', shelterMap, -8.4, camp.floor, -3, 20, 13.33)
+  const arch = card('broken-arch', archMap, 4.8, camp.floor, 3.8, 11.5, 17.25)
   const foreground = card('foreground-parapet', foregroundMap, -5, -2.3, 12, 27, 9.4)
-  card('right-terrace-ruins', foregroundMap, 7.5, -1.4, 5.3, 10, 4)
+  const rightRuins = card('right-terrace-ruins', foregroundMap, 7.5, -1.4, 5.3, 10, 4)
 
   const moon = new THREE.DirectionalLight('#e0e2eb', 1.4)
   moon.position.set(15, 22, -10); moon.castShadow = true
@@ -125,13 +130,13 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   Object.assign(moon.shadow.camera, { left: -21, right: 18, top: 18, bottom: -15, far: 65 })
   moon.shadow.normalBias = .06
   scene.add(moon, new THREE.HemisphereLight('#b3b5bf', '#262025', 1.6))
-  const hearth = new THREE.PointLight('#ed5941', 24, 10, 2)
+  const hearth = new THREE.PointLight('#d78d7c', 12, 10, 2)
   hearth.position.set(camp.fireX, 1.7, camp.fireZ); scene.add(hearth)
   const people: { mesh: THREE.Mesh; map: THREE.Texture; column: number }[] = []
   const places = [[-8.35, .7], [-7.1, -.7], [-4.6, -.6], [-3.9, 1.4]]
   places.forEach(([x, z], column) => {
     const map = peopleMap.clone(); textures.add(map)
-    map.repeat.set(.25, .5); map.offset.set(column / 4, .5)
+    map.repeat.set(.25, .25); map.offset.set(column / 4, .75)
     const survivor = card(`seated-survivor-${column}`, map, x, camp.floor + .01, z, 2.05, 2.05)
     people.push({ mesh: survivor, map, column })
     const shadow = new THREE.Mesh(geometry(new THREE.CircleGeometry(.58, 20)), material(new THREE.MeshBasicMaterial({ color: '#08070a', transparent: true, opacity: .45, depthWrite: false })))
@@ -146,21 +151,31 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     rock.position.set(x, camp.floor + .08, z); rock.scale.set(.5 + random(), .3 + random() * .4, .5 + random())
     rock.rotation.set(random(), random() * Math.PI, random()); rock.castShadow = rock.receiveShadow = true; scene.add(rock)
   }
-  for (let i = 0; i < 12; i++) {
-    const angle = i / 12 * Math.PI * 2
+  for (let i = 0; i < 9; i++) {
+    const angle = i / 9 * Math.PI * 2 + random() * .1
     const rock = new THREE.Mesh(ring, masonry)
-    rock.position.set(camp.fireX + Math.cos(angle) * .65, .9, camp.fireZ + Math.sin(angle) * .65)
-    rock.scale.set(1, .65, 1); rock.castShadow = rock.receiveShadow = true; scene.add(rock)
+    rock.position.set(camp.fireX + Math.cos(angle) * .55, camp.floor + .05, camp.fireZ + Math.sin(angle) * .55)
+    rock.scale.set(.65 + random() * .2, .3 + random() * .15, .6 + random() * .2)
+    rock.rotation.y = random() * Math.PI
+    rock.castShadow = rock.receiveShadow = true; scene.add(rock)
   }
-  const fire = card('animated-hearth', fireMap, camp.fireX, .86, camp.fireZ, 1.8, 1.8, false)
+  const charcoal = material(new THREE.MeshStandardMaterial({ color: '#241c1c', roughness: 1 }))
+  const logShape = geometry(new THREE.CylinderGeometry(.09, .12, 1.1, 7))
+  for (let i = 0; i < 3; i++) {
+    const log = new THREE.Mesh(logShape, charcoal)
+    log.name = 'fixed-charred-log'; log.position.set(camp.fireX, camp.floor + .12 + i * .025, camp.fireZ + (i - 1) * .1)
+    log.rotation.set(Math.PI / 2, 0, i * Math.PI / 3)
+    log.castShadow = log.receiveShadow = true; scene.add(log)
+  }
+  const fire = card('animated-hearth', fireMap, camp.fireX, .86, camp.fireZ, 1.55, 1.55, false)
   fire.material.transparent = true
   fire.material.depthWrite = false
   const iron = material(new THREE.MeshStandardMaterial({ color: '#333035', roughness: .8, metalness: .5 }))
   const rod = geometry(new THREE.CylinderGeometry(.025, .035, 1, 6))
-  const apex = new THREE.Vector3(camp.fireX, 2.9, camp.fireZ)
+  const apex = new THREE.Vector3(camp.fireX, 2.65, camp.fireZ)
   for (let i = 0; i < 3; i++) {
     const angle = i * Math.PI * 2 / 3
-    const foot = new THREE.Vector3(camp.fireX + Math.cos(angle) * .8, camp.floor, camp.fireZ + Math.sin(angle) * .8)
+    const foot = new THREE.Vector3(camp.fireX + Math.cos(angle) * .66, camp.floor, camp.fireZ + Math.sin(angle) * .66)
     const leg = new THREE.Mesh(rod, iron)
     leg.name = 'cooking-tripod'; leg.position.copy(foot).add(apex).multiplyScalar(.5)
     leg.scale.y = foot.distanceTo(apex)
@@ -170,10 +185,10 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const pot = new THREE.Mesh(geometry(new THREE.LatheGeometry([
     new THREE.Vector2(0, 0), new THREE.Vector2(.18, 0), new THREE.Vector2(.3, .1), new THREE.Vector2(.34, .35),
   ], 16)), iron)
-  pot.name = 'suspended-cooking-pot'; pot.position.set(camp.fireX, 2, camp.fireZ); pot.castShadow = true; scene.add(pot)
+  pot.name = 'suspended-cooking-pot'; pot.position.set(camp.fireX, 1.8, camp.fireZ); pot.castShadow = true; scene.add(pot)
   const hanger = new THREE.Mesh(rod, iron)
-  hanger.position.set(camp.fireX, 2.62, camp.fireZ); hanger.scale.y = .56; scene.add(hanger)
-  const glow = new THREE.PointLight('#9d271f', 7, 6, 2)
+  hanger.position.set(camp.fireX, 2.4, camp.fireZ); hanger.scale.y = .5; scene.add(hanger)
+  const glow = new THREE.PointLight('#9d271f', 2, 6, 2)
   glow.position.set(camp.fireX, 1, camp.fireZ + .2); scene.add(glow)
 
   const clothShape = new THREE.PlaneGeometry(2, 6, 12, 40)
@@ -237,9 +252,16 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     camera.top = half; camera.bottom = -half
     camera.position.set(framing.centerX, framing.centerY + 14, 30)
     camera.lookAt(framing.centerX, framing.centerY, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld()
-    foreground.scale.setScalar(framing.foregroundScale)
-    foreground.position.y = -2.3 + Math.cos(cardPitch) * 9.4 * framing.foregroundScale / 2
-    foreground.position.z = 12 + Math.sin(cardPitch) * 9.4 * framing.foregroundScale / 2
+    const compact = framing.compact
+    placeCard(shelter, -8.4 - compact * .4, camp.floor, -3, 13.33, .85 - compact * .15)
+    const archX = 4.8 - compact * 6.4, archZ = 3.8 - compact * 4.4, archScale = .88 - compact * .18
+    placeCard(arch, archX, camp.floor, archZ, 17.25, archScale)
+    banner.scale.setScalar(archScale)
+    banner.position.set(archX - 3.7 * archScale, camp.floor + 8.7 * archScale, archZ - 3.7 * archScale)
+    placeCard(foreground, -5, -2.3, 12, 9.4, framing.foregroundScale)
+    placeCard(rightRuins, 7.5 - compact * 5, -1.4, 5.3, 4, .75 - compact * .3)
+    stairs.forEach(step => { step.position.x = -1.5 - compact * 3.6 })
+    lowerWalk.position.x = -1.5 - compact * 3.6
     const landscapeHeight = Math.max(framing.height + 2, (framing.height * framing.aspect + 2) / (39.1 / 22))
     landscape.scale.setScalar(landscapeHeight / 22)
     landscape.position.set(framing.centerX, framing.centerY, 0).addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 65)
@@ -254,11 +276,23 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     if (disposed || lost || failedAsset) return
     elapsed += delta
     const time = elapsed
-    hearth.intensity = 24 + Math.sin(time*5)*1.4 + Math.sin(time*9)*.6
-    glow.intensity = 7 + Math.sin(time*4)*.5
-    const firePose = Math.floor(time*8)%6
-    fireMap.offset.set((firePose % 3) / 3, firePose < 3 ? .5 : 0)
-    people.forEach(({ map, column }) => { map.offset.y = survivorPose(time,column) ? 0 : .5 })
+    hearth.intensity = 12 + Math.sin(time*5)*.65 + Math.sin(time*9)*.25
+    glow.intensity = 2 + Math.sin(time*4)*.18
+    const flame = fireFrame(time), firePose = flame.pose
+    fireMap.offset.set(flame.left / 384, 1 - flame.bottom / 256)
+    fireMap.repeat.y = flame.height / 256
+    fire.scale.y = flame.height / 128
+    const flameHeight = 1.55 * flame.height / 128
+    fire.position.y = camp.floor + .16 + Math.cos(cardPitch) * flameHeight / 2
+    fire.position.z = camp.fireZ + Math.sin(cardPitch) * flameHeight / 2
+    people.forEach(({ mesh, map, column }) => {
+      const { top, bottom } = survivorFrame(time, column), height = 2.05 * (bottom - top) / 128
+      map.repeat.y = (bottom - top) / 512
+      map.offset.y = 1 - bottom / 512
+      mesh.scale.y = (bottom - top) / 128
+      mesh.position.y = camp.floor + .01 + Math.cos(cardPitch) * height / 2
+      mesh.position.z = places[column][1] + Math.sin(cardPitch) * height / 2
+    })
     for (let i=0;i<clothPositions.count;i++) {
       const freedom = (3-clothRest[i*3+1])/6
       const wave = Math.sin(time*1.4+clothRest[i*3+1]*2)*freedom

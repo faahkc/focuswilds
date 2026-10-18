@@ -67,7 +67,8 @@
   .shelter-heading h1 { font-size: 20px; }
   .shelter-heading p, .shelter-hint { display: none; }
   .shelter-scene { grid-row: 2; min-height: 0; }
-  .shelter-console { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 6px; overflow: auto; scrollbar-width: none; }
+  .shelter-console { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: safe center; gap: 6px; overflow: auto; scrollbar-width: none; }
+  .shelter-console > * { flex-shrink: 0; }
   .shelter-timer { gap: 4px 8px; }
   .shelter-clock { font-size: 40px; }
   .shelter-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }

@@ -15,6 +15,8 @@ function component(name) {
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => {
+    if (name === '@/assets/shelter-courtyard.webp') return { __esModule: true, default: '/assets/shelter-courtyard.webp' }
+    if (name === '@/assets/shelter-survivors.webp') return { __esModule: true, default: '/assets/shelter-survivors.webp' }
     if (name === '@/components/ui/button') return { Button: ({ children, variant: _variant, ...props }) => React.createElement('button', props, children) }
     if (name === '@/lib/legacy-cleanup-store') return { legacyCleanupStore: {} }
     if (name.startsWith('@/lib/')) return require(`../src/lib/${name.slice(6)}.ts`)
@@ -45,6 +47,9 @@ test('fort and expedition art remain decorative and display the correct party wi
   const courtyard = renderToStaticMarkup(React.createElement(FortStage, { people: 5 }))
   assert.equal((courtyard.match(/class="fort-person"/g) ?? []).length, 5)
   assert.ok(courtyard.includes('fort-flame'))
+  assert.ok(courtyard.includes('href="/assets/shelter-courtyard.webp"'))
+  const assetSize = ['shelter-courtyard.webp', 'shelter-survivors.webp'].reduce((total, name) => total + fs.statSync(new URL(`../src/assets/${name}`, import.meta.url)).size, 0)
+  assert.ok(assetSize <= 500_000)
   const crowded = renderToStaticMarkup(React.createElement(FortStage, { people: 20 }))
   assert.equal((crowded.match(/class="fort-person"/g) ?? []).length, 8)
   for (const area of Object.keys(areas)) {
@@ -54,7 +59,8 @@ test('fort and expedition art remain decorative and display the correct party wi
     assert.ok(html.includes('aria-hidden="true"'))
     assert.equal((html.match(/class="fort-person"/g) ?? []).length, 2)
     assert.ok(!html.includes('fort-flame'))
-    assert.ok(!html.includes('<image'), 'scenes do not request remote or raster assets')
+    assert.ok(html.includes('href="/assets/shelter-survivors.webp"'))
+    assert.ok(!html.includes('https://'), 'scenes use bundled assets')
   }
 })
 

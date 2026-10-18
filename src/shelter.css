@@ -4,6 +4,8 @@
 .shelter-heading p, .shelter-hint, .shelter-status { font-size: 14px; color: #bbae99; }
 .shelter-scene { position: relative; overflow: hidden; min-height: 100px; flex: 1; border: 1px solid #6d5944; background: #111a20; box-shadow: inset 0 0 40px #0008; }
 .fort-stage { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.fort-courtyard { image-rendering: auto; }
+.fort-sprite { image-rendering: pixelated; }
 .shelter-scene-caption { position: absolute; bottom: 10px; left: 14px; color: #edce9e; text-shadow: 2px 2px #000; }
 .fort-flame { animation: fort-fire 1.6s steps(3) infinite; transform-origin: 325px 274px; }
 @keyframes fort-fire { 50% { transform: scale(.9, 1.12); opacity: .8; } }

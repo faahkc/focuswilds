@@ -1,12 +1,13 @@
 import type { AreaId } from '@/lib/shelter-content'
+import courtyard from '@/assets/shelter-courtyard.webp'
+import survivors from '@/assets/shelter-survivors.webp'
 
 function People({ count, traveling = false }: { count: number; traveling?: boolean }) {
   return <g className="fort-people">{Array.from({ length: Math.max(0, Math.min(8, count)) }, (_, index) => <g className="fort-person" key={index} transform={`translate(${traveling ? 270 + index * 25 : [260, 368, 280, 351, 233, 399, 304, 335][index]} ${traveling ? 283 - index * 5 : [253, 252, 294, 294, 275, 276, 222, 223][index]})`}>
-    <ellipse cx="0" cy="18" rx="10" ry="3" fill="#10171c"/>
-    <path d="M-4-9h9v9h-9z" fill="#bc9677"/><path d="M-5-11h10v5H-5z" fill="#302729"/>
-    <path d="M-6 0H7v13H-6z" fill={index % 2 ? '#626c6b' : '#79654e'}/>
-    {traveling && <path d="M-9 0h5v11h-5zM8-2h2v22H8z" fill="#9a8058"/>}
-    <path d="M-5 13h4v6h-4zm7 0h4v6H2z" fill="#28282b"/>
+    <ellipse cx="0" cy="18" rx="9" ry="3" fill="#10171c" opacity=".65"/>
+    <svg x="-12" y="-14" width="24" height="32" viewBox={`${index % 4 * 96} ${Math.floor(index / 4) * 128} 96 128`} overflow="hidden" className="fort-sprite">
+      <image href={survivors} width="384" height="256"/>
+    </svg>
   </g>)}</g>
 }
 
@@ -48,9 +49,15 @@ function ExpeditionStage({ area, people }: { area: AreaId; people: number }) {
 
 export function FortStage({ exterior = false, people = 5, area }: { exterior?: boolean; people?: number; area?: AreaId }) {
   if (area && !exterior) return <ExpeditionStage area={area} people={people}/>
-  return <svg className={`fort-stage ${exterior ? 'fort-exterior' : ''}`} viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" shapeRendering="crispEdges" aria-hidden="true">
+  if (!exterior) return <svg className="fort-stage fort-courtyard" viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <image href={courtyard} width="640" height="360" preserveAspectRatio="none"/>
+    <g shapeRendering="crispEdges"><People count={people}/></g>
+    <g transform="translate(319 247) scale(.55) translate(-325 -274)">
+      <g className="fort-flame"><path d="M314 272v-15h6v-15h7v-12h5v21h7v10h-3v12z" fill="#e89540"/><path d="M321 273v-14h6v-11h5v15h3v10z" fill="#ffe0a0"/></g>
+    </g>
+  </svg>
+  return <svg className="fort-stage fort-exterior" viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" shapeRendering="crispEdges" aria-hidden="true">
     <defs><linearGradient id="fort-sky" x2="0" y2="1"><stop stopColor="#101921"/><stop offset="1" stopColor="#374046"/></linearGradient>
-      <radialGradient id="fort-glow"><stop stopColor="#edaa51" stopOpacity=".35"/><stop offset="1" stopColor="#edaa51" stopOpacity="0"/></radialGradient>
       <pattern id="fort-stone" width="48" height="24" patternUnits="userSpaceOnUse"><path d="M0 0h48v24H0z" fill="#303335"/><path d="M0 0h48M0 24h48M24 0v12M0 12h48M12 12v12M40 12v12" stroke="#1e2428" strokeWidth="2"/></pattern>
     </defs>
     <path fill="url(#fort-sky)" d="M0 0h640v360H0z"/>
@@ -66,16 +73,7 @@ export function FortStage({ exterior = false, people = 5, area }: { exterior?: b
     <path d="M58 120h17v45H58zm505 0h17v45h-17z" fill="#10181d"/>
     <path d="M49 179h35v4H49zm505 0h35v4h-35zM126 194h26v5h-26zm351-65h30v4h-30z" fill="#596055"/>
     <path d="M100 206h26v8h-26zm-9 9h32v6H91zm434 13h30v7h-30z" fill="#444b3d"/>
-    {exterior ? <><path d="M270 157h100v94H270zM284 143h72v20h-72z" fill="#10171b"/><path d="M286 167h68v84h-68z" fill="#352b27"/><path d="M318 167h4v84h-4z" fill="#0e1419"/><path d="M284 360l30-109h12l32 109z" fill="#49413b"/></>
-      : <><path d="M150 174h130v78H150zm260-13h96v89h-96z" fill="#252525"/><path d="M139 174l75-37 80 37zm257-13l62-32 63 32z" fill="#453b36"/><path d="M175 205h25v47h-25zm255-15h22v24h-22z" fill="#aa713e"/><path d="M200 276l125-40 123 40-117 42z" fill="#393534"/>
-        <ellipse cx="324" cy="275" rx="116" ry="65" fill="url(#fort-glow)"/>
-        <path d="M295 280h58v8h-58zm9-9h42v8h-42z" fill="#161c20"/><path d="M308 278l27-13 5 7-28 12zm2-13l31 11-3 8-31-11z" fill="#604733"/>
-        <g className="fort-flame"><path d="M314 272v-15h6v-15h7v-12h5v21h7v10h-3v12z" fill="#cf6935"/><path d="M321 273v-14h6v-11h5v15h3v10z" fill="#f4c16b"/></g>
-        <path d="M114 267h52v25h-52z" fill="#574537"/><path d="M118 271h44v3h-44zm0 13h44v3h-44z" fill="#796149"/>
-        <path d="M461 270h44v21h-44z" fill="#403c2e"/><path d="M467 269v-11m12 11v-17m13 17v-12" stroke="#73794e" strokeWidth="5"/>
-        <path d="M227 188h8v37h-8z" fill="#877054"/><path d="M235 188h23v23l-11-6-12 6z" fill="#705447"/>
-        <path d="M182 306h21v4h-21zm228-8h24v4h-24zm-58 29h21v3h-21z" fill="#585046"/>
-        <People count={people}/></>}
+    <g><path d="M270 157h100v94H270zM284 143h72v20h-72z" fill="#10171b"/><path d="M286 167h68v84h-68z" fill="#352b27"/><path d="M318 167h4v84h-4z" fill="#0e1419"/><path d="M284 360l30-109h12l32 109z" fill="#49413b"/></g>
     <path d="M0 315l85-13 82 28 98 30H0zm640-14l-90 8-72 31-55 20h217z" fill="#111a20"/>
   </svg>
 }

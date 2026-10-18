@@ -26,10 +26,40 @@ Use English commit subjects and descriptive bodies with validation details, with
 
 - A focus app with shelter management and survival exploration, set in a medieval world devastated by mythical creatures.
 - An abandoned border fort is a safe shelter. No fort attacks, deaths, or resource losses caused by absence from the app.
-- Pixel characters in scenes with depth, muted colors, deep shadows, and warm firelight. Begin with European folklore.
+- Pixel characters in scenes with depth, charcoal shadows, ash/bone-white light and restrained ember-red shelter light. Begin with European folklore; follow the approved visual direction below.
 - Show the fort exterior before login and the inner campfire courtyard afterward. The landing screen contains only the title and login.
 - Use GNU Unifont with its license for both English and Thai. Default to English; check Thai vowels, tone marks, and long text on phones.
 - Keep the main experience within one viewport. Open secondary information in icon dialogs without unmounting the timer. Preserve zoom and reduced-motion support.
+
+## Approved visual direction
+
+Approved on 2026-10-18. These are requirements for subsequent visual work, not a claim that the current renderer implements them. Read this section together with the README before producing assets or changing scene rendering.
+
+### World, palette and mood
+
+- Preserve the medieval world after humanity's collapse, beginning with European folklore. The abandoned border fort shelters ordinary survivors; outside are mist, ruined villages and uncertain mythical threats. Use worn stone, damaged timber, patched cloth and practical medieval equipment. Exclude industrial machinery, steampunk and modern objects.
+- Keep the emotional contrast: a small, fragile place to return to within an overwhelmingly hostile world. Darkness must not imply attacks or progress loss while the user is away.
+- Use predominantly charcoal black and layered graphite gray, with ash/bone-white moonlight and fog. Reserve muted brick/ember red and deep blood red for sparse accents. Avoid a sunny, lush, picturesque fantasy-village treatment, broad golden light or neon red.
+- Shelter light is soft and steady, with ember-red reflection and a small bone-white hot core. Threat accents are sparse, sharper and visually distinct. Preserve readable silhouettes, paths and materials through local contrast instead of darkening the whole image. Keep controls legible and never communicate state through color alone.
+
+### Scene and motion
+
+- Combine compact, readable 2D pixel sprites with environments that have spatial depth, surface texture, changes in elevation, contact shadows and foreground/background occlusion. Use an elevated three-quarter miniature-diorama composition, with focus near the survivors and restrained depth blur elsewhere.
+- Match character lighting to the ground and surroundings, including movement through lit and shaded regions. Keep pixel structure coherent at the actual display size; detailed illustrations merely reduced to thumbnails do not satisfy the sprite requirement.
+- A detailed flat background, whole-image zoom or parallax alone does not complete the depth requirement. Prove the necessary scene geometry or layered depth and occlusion in a prototype before expanding the artwork; no renderer or new dependency is mandated in advance.
+- Begin walk animation with six distinct poses at approximately eight pose changes per second, about a 0.75-second cycle. These are implementation starting targets, not verified specifications of an original sprite sheet. Animate position and camera separately from pose changes; avoid sliding feet and whole-sprite stretching as substitutes for drawn poses.
+- Keep the camp camera still and idle motion subtle. Use a following camera for travel where appropriate. Fire changes shape across frames; smoke, fog, sparks and reflected light remain restrained and suitable for concentration. Do not require every effect to share the sprite animation rate.
+- Target smooth position/camera movement at 60 FPS on capable displays, subject to measured performance. Provide reduced-motion behavior and keep animation independent of timer state and database operations.
+
+### Delivery and acceptance
+
+1. Define one camp composition: camera, ground levels, survivor scale, walkable paths, hearth, light sources and occluders. Check landscape desktop and portrait phone framing before final asset production.
+2. Prove depth, occlusion, ground contact and framing with a simple scene prototype. Then integrate one representative survivor with complete motion and lighting before expanding the party.
+3. Deliver one working animated camp in the website for visual review before expanding to travel environments. Validate world, palette, sprite readability, motion and lighting together; a standalone concept image or attractive static background is not completion.
+4. Measure frame pacing, dropped frames and combined initial scene asset bytes. Stay within 500 kB using bundled compressed assets and small sprites; replace or recompress existing assets rather than accumulating unused originals. No video/GIF background loops or remote asset requests.
+5. Preserve timer state across dialogs and rotation, accessible zoom, 16px phone inputs, GNU Unifont, English/Thai controls, saved progress and existing database budgets. Run relevant offline tests, lint and build for implementation changes, then browser checks for desktop/phone layouts, occlusion, motion and reduced motion. Report actual-device verification separately from browser emulation.
+
+Day/night systems, combat effects and multiple new environments are outside the first camp milestone. Record observed results and remaining limits honestly; do not promise game-equivalent fidelity or mobile performance before measuring the implemented scene.
 
 ## Languages and signed-in Settings
 

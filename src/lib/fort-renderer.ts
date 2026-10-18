@@ -92,7 +92,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   stairTop.map = stairTop.emissiveMap = stairTopMap
   stairTop.bumpMap = stairTopMap
   stairSide.map = stairSide.emissiveMap = stairSideMap
-  stairTop.emissiveIntensity = .24; stairSide.emissiveIntensity = .2
+  stairTop.emissiveIntensity = .4; stairSide.emissiveIntensity = .2
   const stairMaterials = [stairSide, stairSide, stairTop, stairSide, stairSide, stairSide]
   function stoneUV(mesh: THREE.Mesh, width: number, height: number, depth: number) {
     mesh.geometry = geometry(box.clone())
@@ -112,20 +112,20 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   terrainGeometry.computeVertexNormals()
   const hillside = new THREE.Mesh(terrainGeometry, [ground, foundationStone])
   hillside.name = 'continuous-fort-hillside'; hillside.receiveShadow = true; scene.add(hillside)
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < fortStairs.count; i++) {
     const { x, y: top, z } = stairPosition(i), tread = fortStairs.run + .08
     const step = solid(`stair-${i}`, stairMaterials, x, (top - 1.8) / 2, z, fortStairs.width, top + 1.8, tread)
     step.rotation.y = fortStairs.yaw
     // Keep stone size constant across risers of different total heights.
     stoneUV(step, fortStairs.width, top + 1.8, tread)
   }
-  const landing = stairPosition(11)
-  const lowerWalk = solid('lower-stone-walk', stairMaterials, landing.x, -.64 - .5, landing.z, 9, 1, 3.6)
+  const landing = stairPosition(fortStairs.count + 1)
+  const lowerWalk = solid('lower-stone-walk', stairMaterials, landing.x, landing.y - .5, landing.z, 9, 1, 3.6)
   stoneUV(lowerWalk, 9, 1, 3.6)
   lowerWalk.rotation.y = fortStairs.yaw
-  const upperLanding = stairPosition(-1)
-  const stairLanding = solid('upper-stair-landing', stairMaterials, upperLanding.x, (camp.floor - 1.8) / 2, upperLanding.z, fortStairs.width, camp.floor + 1.8, 1.15)
-  stoneUV(stairLanding, fortStairs.width, camp.floor + 1.8, 1.15)
+  const upperLanding = stairPosition(-2)
+  const stairLanding = solid('upper-stair-landing', stairMaterials, upperLanding.x, (camp.floor - 1.8) / 2, upperLanding.z, fortStairs.width, camp.floor + 1.8, .8)
+  stoneUV(stairLanding, fortStairs.width, camp.floor + 1.8, .8)
   stairLanding.rotation.y = fortStairs.yaw
   const parapetMap = stoneMap.clone(); parapetMap.repeat.set(.2, .25); textures.add(parapetMap)
   const parapetStone = material(masonry.clone()); parapetStone.map = parapetStone.emissiveMap = parapetMap
@@ -146,17 +146,19 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     pavingTransform.updateMatrix(); pavers.setMatrixAt(i, pavingTransform.matrix)
   })
   pavers.instanceMatrix.needsUpdate = true; pavers.computeBoundingSphere()
-  const treadStones = new THREE.InstancedMesh(pavingShape, pavingStone, 81)
+  const treadStone = material(pavingStone.clone()); treadStone.emissiveIntensity = .45
+  treadStone.map = treadStone.emissiveMap = treadStone.bumpMap = stairTopMap
+  const treadStones = new THREE.InstancedMesh(pavingShape, treadStone, fortStairs.count * 8)
   treadStones.name = 'chipped-stair-treads'; treadStones.castShadow = treadStones.receiveShadow = true
   scene.add(treadStones)
-  for (let row = 0; row < 9; row++) {
+  for (let row = 0; row < fortStairs.count; row++) {
     const point = stairPosition(row)
-    for (let column = 0; column < 9; column++) {
-      const across = (column - 4) * .59
-      pavingTransform.position.set(point.x + Math.cos(fortStairs.yaw) * across, point.y + .015, point.z - Math.sin(fortStairs.yaw) * across)
+    for (let column = 0; column < 8; column++) {
+      const across = (column - 3.5) * .59
+      pavingTransform.position.set(point.x + Math.cos(fortStairs.yaw) * across, point.y - .02, point.z - Math.sin(fortStairs.yaw) * across)
       pavingTransform.rotation.set(0, fortStairs.yaw + (random() - .5) * .08, 0)
-      pavingTransform.scale.set(.59, .7, .52)
-      pavingTransform.updateMatrix(); treadStones.setMatrixAt(row * 9 + column, pavingTransform.matrix)
+      pavingTransform.scale.set(.59, 2, .38)
+      pavingTransform.updateMatrix(); treadStones.setMatrixAt(row * 8 + column, pavingTransform.matrix)
     }
   }
   const wallMap = masonryMap.clone(); wallMap.repeat.set(1, 1); textures.add(wallMap)
@@ -183,7 +185,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     const columns = Math.ceil(length / .6)
     for (let column = 0; column < columns; column++) {
       const fraction = (column + .5) / columns, top = THREE.MathUtils.lerp(a.y, b.y, fraction) + random() * .15
-      for (let y = Math.max(base + .18, bodyTop - .1); y < top; y += .33) {
+      for (let y = base + .18; y < top; y += .33) {
         if (wallBlockCount >= wallBlocks.instanceMatrix.count) throw new Error('Fort masonry capacity exceeded.')
         pavingTransform.position.lerpVectors(a, b, fraction); pavingTransform.position.y = y
         pavingTransform.rotation.set((random() - .5) * .06, yaw + (random() - .5) * .1, (random() - .5) * .04)
@@ -198,8 +200,10 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   masonryRun(new THREE.Vector3(-18, 10, -5), new THREE.Vector3(-18, 8.5, 4), 1.4)
   masonryRun(new THREE.Vector3(8.2, 6.2, 14), new THREE.Vector3(11.2, 6.5, 14), 1.5)
   masonryRun(new THREE.Vector3(11.2, 6.5, 14), new THREE.Vector3(11.2, 6, 16), 1.5)
+  const terraceEdge = (across: number) => new THREE.Vector3(camp.stairX + Math.cos(fortStairs.yaw) * across, camp.floor, fortStairs.z - Math.sin(fortStairs.yaw) * across)
+  masonryRun(terraceEdge(-8), terraceEdge(-fortStairs.width / 2 - .35), .65)
   for (const side of [-1, 1]) {
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < fortStairs.count; i++) {
       const point = stairPosition(i), across = side * (fortStairs.width / 2 + .3)
       pavingTransform.position.set(point.x + Math.cos(fortStairs.yaw) * across, point.y + .1, point.z - Math.sin(fortStairs.yaw) * across)
       pavingTransform.rotation.set((random() - .5) * .15, fortStairs.yaw + (random() - .5) * .4, (random() - .5) * .12)

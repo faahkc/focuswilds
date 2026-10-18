@@ -1,38 +1,32 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="A fire still burns in an abandoned border fort. Focuswilds is a small shelter for focus, survival, and hope in a fallen world." />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0d10" />
+    <meta name="description" content="Focuswilds turns focused time into a warm home for cats. Find little friends in the garden and care for them at home." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#edf0df" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/src/fonts.css" />
-    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
-    <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-    <link rel="icon" type="image/webp" href="/app-icon.webp" sizes="512x512" />
+    <link rel="icon" type="image/svg+xml" href="/cat.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
     <title>Focuswilds</title>
     <style>
-      :root { --screen-width: 100svw; --screen-height: 100svh; --screen-rotation: 0deg; }
-      .landscape-screen {
-        position: fixed; inset: 0 auto auto 0; width: var(--screen-width); height: var(--screen-height);
-        container: screen / size; overflow: auto; transform-origin: top left;
-      }
-      @media (aspect-ratio < 1/1) {
-        :root { --screen-width: 100svh; --screen-height: 100svw; --screen-rotation: 90deg; }
-        .landscape-screen { transform: translateX(100svw) rotate(90deg); }
-      }
-      .page-loading { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; margin:0; padding:24px; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace; text-align:center }
-      .page-loading-spinner { display:inline-block; width:14px; height:14px; flex-shrink:0; border:1px solid #67514e; border-top-color:#e4e1dc; border-right-color:#b35a50; animation:page-loading-spin 1.2s linear infinite }
-      @keyframes page-loading-spin { to { transform:rotate(360deg) } }
-      .startup-recovery { position:fixed; inset:0; z-index:101; padding:24px; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace }
-      .startup-recovery button { font:inherit; min-height:44px; padding:8px 24px; background:#181417; color:inherit; border:1px solid #925853 }
+      :root { --screen-width: 100svw; --screen-height: 100svh; }
+      html, body { margin: 0; background: #edf0df; }
+      .app-screen { position: fixed; left: 0; top: 0; width: var(--screen-width); height: var(--screen-height); container: screen / size; overflow: auto; overscroll-behavior: none; touch-action: pan-y; transform-origin: top left; scrollbar-width: none; }
+      .app-screen::-webkit-scrollbar { display: none; }
+      @media (aspect-ratio > 1/1) { :root { --screen-width: 100svh; --screen-height: 100svw; } .app-screen { transform: translateX(100svw) rotate(90deg); } }
+      .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #edf0df; color: #354b39; font: 16px 'GNU Unifont',monospace; text-align: center; }
+      .startup-recovery[hidden] { display: none; }
+      .page-loading-spinner { width: 18px; height: 18px; border: 2px solid #b8c5a0; border-top-color: #3e6846; animation: loading-spin 1s linear infinite; }
+      @keyframes loading-spin { to { transform: rotate(360deg); } }
+      .startup-recovery button { min-height: 48px; padding: 10px 24px; font: inherit; }
     </style>
   </head>
   <body>
-    <div id="root"><div class="landscape-screen"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing…</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
+    <div id="root"><div class="app-screen"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing...</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
     <script type="module" src="/src/main.tsx" onerror="document.querySelector('.startup-recovery').hidden=false"></script>
   </body>
 </html>

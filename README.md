@@ -2,12 +2,14 @@
 
 *A little focus. A little care. A place for cats to call home.*
 
-Beyond the old stone walls lie mist, deserted roads, and stories whose truth remains uncertain. Inside, a small fire still burns. Among worn timber and quiet corners, there is room for a different kind of company: cats looking for a place to belong.
+A quiet garden, a small warm house, and a cat that slowly learns to trust you. Focuswilds is a personal focus game about making time for what matters and turning that effort into a welcoming home for cats.
 
-Focuswilds is becoming a personal focus game about collecting and caring for cats of different breeds. Time spent on what matters earns money, player experience, and items to spend on their care. Food, treats, play, and thoughtful gifts build each cat's affection; happy cats may return the favor with helpful effects, while neglected care during play can leave them grumpy and bring less welcome effects.
+Focused time will earn money, player experience and items, while advancing walks through the garden. Meet stray cats, get to know them over several encounters, and welcome them home when there is room. Cats include mixed breeds and familiar coat patterns as well as named breeds; every little friend belongs.
 
-Build a shared home with toys, cat houses, beds, food bowls, and water bowls. Visit the shop to buy supplies or sell spare items. As the player and their home progress, there is space to welcome more cats. Their breeds and personalities bring life to a shelter that grows with your effort.
+At home, care and play build affection. Content cats may offer helpful bonuses; a grumpy cat may offer less extra help until cared for again. Your basic focus rewards remain yours. Care follows the rounds you play, never the hours you spend away.
 
-Care follows the focus rounds you play, not the hours you spend away. Returning after a break never punishes your cats or takes away your progress. There is always somewhere to come back to.
+Buy supplies, sell spare finds, and decorate with toys, beds, cat houses and bowls. As your home grows, there is space to welcome more cats. Warm pixel art brings the house and garden to life.
 
-Designed for one player's phone, the planned experience stays portrait when the phone turns sideways, with an in-game keyboard and the feel of an installed mobile app. The cat-care game and this mobile experience are still in development; the current playable version uses the earlier survivor shelter.
+Designed for one player's phone, the experience uses a portrait layout, turning sideways when the screen is landscape. An in-game keyboard is planned for future editing screens.
+
+The current version contains only the login screen. Focus, garden walks, cat care and the shop will arrive one screen at a time.

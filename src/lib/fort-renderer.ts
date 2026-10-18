@@ -330,9 +330,14 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const shelter = card('occupied-shelter', shelterMap, -8.4, camp.floor, -3, 20, 11.25)
   const backWall = card('shelter-rear-masonry', backWallMap, -11, camp.floor, -3.5, 15, 10)
   if ('emissiveIntensity' in backWall.material) backWall.material.emissiveIntensity = 2.3
-  const archRearWall = card('arch-rear-masonry', backWallMap, -2.1, -1.44, -5.54, 4.14, 9.2)
+  const archRearWall: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial | THREE.MeshBasicMaterial> = card('arch-rear-masonry', backWallMap, -2.1, -1.44, -5.54, 4.14, 11.5)
+  const backingOutline = [[-2.07, -5.75], [2.07, -5.75], [2.07, 5.75], [-.25, 5.75], [-.25, 3.7], [-.6, 3.7], [-.6, 2.6], [-1, 2.6], [-1, 1.4], [-1.35, 1.4], [-1.35, .4], [-1.7, .4], [-1.7, -.75], [-2.07, -.75]]
+  archRearWall.geometry = geometry(new THREE.ShapeGeometry(new THREE.Shape(backingOutline.map(([x, y]) => new THREE.Vector2(x, y)))))
+  const backingPositions = archRearWall.geometry.getAttribute('position')
   const wallUV = archRearWall.geometry.getAttribute('uv')
-  for (let i = 0; i < wallUV.count; i++) wallUV.setX(i, .3 + wallUV.getX(i) * .3)
+  for (let i = 0; i < wallUV.count; i++) {
+    wallUV.setXY(i, .3 + (backingPositions.getX(i) / 4.14 + .5) * .3, backingPositions.getY(i) / 11.5 + .5)
+  }
   if ('emissiveIntensity' in archRearWall.material) archRearWall.material.emissiveIntensity = 2.3
   const arch = card('broken-arch', archMap, 4.8, camp.floor, 3.8, 10.12, 12.8)
   const supplies = card('foreground-supplies', suppliesMap, 0, -1, 6, 3, 1.94)
@@ -418,8 +423,8 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   placeCard(arch, archX, camp.floor - 1.3, archZ, 12.8, archScale)
   // Keep the outer arch edge registered while clearing the storage bay.
   arch.position.addScaledVector(cardRight, .566)
-  banner.scale.set(archScale * .7, archScale, archScale)
-  banner.position.set(archX, camp.floor - 1.3, archZ).addScaledVector(cardRight, -1.4 * archScale).addScaledVector(cardUp, 9.1 * archScale)
+  banner.scale.set(archScale * .9, archScale, archScale)
+  banner.position.set(archX, camp.floor - 1.3, archZ).addScaledVector(cardRight, -archScale).addScaledVector(cardUp, 8.8 * archScale)
   placeCard(supplies, 1.8, courtyardHeight(1.8, 7.56) + .03, 7.56, 1.94, 1.15)
   const puffCanvas = document.createElement('canvas'); puffCanvas.width = puffCanvas.height = 64
   const ctx = puffCanvas.getContext('2d')!
@@ -451,7 +456,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
     fragmentShader: `uniform sampler2D colorMap,depthMap; uniform float focus,near,far; varying vec2 vUv;
       void main(){float distance=near*far/(far-texture2D(depthMap,vUv).x*(far-near));
-      float blur=clamp((focus-distance-5.)/5.,0.,1.)*12.+clamp((distance-focus-8.)/20.,0.,1.)*2.;
+      float blur=clamp((focus-distance-5.)/10.,0.,1.)*6.+clamp((distance-focus-8.)/20.,0.,1.)*2.;
       vec4 col=texture2D(colorMap,vUv,log2(max(1.,blur)));
       gl_FragColor=col;
       #include <tonemapping_fragment>

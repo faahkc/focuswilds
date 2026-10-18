@@ -8,7 +8,7 @@
 .wilds-landing::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #08090b22, transparent 30%, transparent 70%, #08090b99), radial-gradient(ellipse at center, #08090b28, transparent 35%, #08090b44 100%); }
 .wilds-landing .wilds-header { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px; padding: 24px 16px; margin: 0; border: 0; min-height: 100svh; }
 .wilds-landing .wilds-header > [data-slot="badge"] { display: none; }
-.wilds-landing .wilds-title { margin: 0; display: block; white-space: nowrap; font-size: clamp(40px, 5vw, 64px); line-height: 1.15; letter-spacing: .035em; color: #e4e1dc; text-shadow: 0 2px 1px #08090b, 0 5px 22px #000, 0 0 50px #000; font-weight: 400; }
+.wilds-landing .wilds-title { margin: 0; display: block; white-space: nowrap; font-size: clamp(40px, 5vw, 48px); line-height: 1.15; letter-spacing: .035em; color: #e4e1dc; text-shadow: 0 2px 1px #08090b, 0 5px 22px #000, 0 0 50px #000; font-weight: 400; }
 .wilds-landing .wilds-title::after { content: ''; display: block; width: 42%; height: 1px; margin: 16px auto 0; background: linear-gradient(90deg, transparent, #98514d, transparent); }
 .wilds-landing .wilds-account { width: min(440px, 100%); align-items: center; gap: 18px; text-align: center; color: #dedbd7; }
 .wilds-landing .wilds-account [data-slot="button"] { min-width: 260px; min-height: 54px; height: auto; padding: 10px 30px; gap: 12px; font-size: 21px; font-weight: 400; background: #101012e8; color: #e4e1dc; border: 1px solid #925853; box-shadow: 0 0 0 3px #0c0c0dcc, inset 0 0 18px #52242440, 0 8px 32px #0009; text-shadow: 0 2px #000; }

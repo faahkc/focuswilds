@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { seededRandom, camp, fireFrame, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+import { seededRandom, camp, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
 
 test('the stair starts at the courtyard and descends in consistent bounded risers', () => {
   assert.equal(stepHeight(0), camp.floor)
@@ -10,13 +10,13 @@ test('the stair starts at the courtyard and descends in consistent bounded riser
 })
 
 test('portrait framing preserves a finite camera and render resolution stays bounded on every screen', () => {
-  for (const [width, height] of [[320, 568], [390, 844], [844, 390], [1440, 900], [3840, 2160]]) {
+  for (const [width, height] of [[320, 568], [390, 844], [320, 1800], [844, 390], [1440, 900], [3840, 2160], [5120, 1440], [7680, 2160]]) {
     const framing = titleFraming(width, height)
     assert.equal(framing.aspect, width / height)
     assert.ok(framing.height > 0 && Number.isFinite(framing.centerX))
     const normal = sceneRenderSize(width, height), low = sceneRenderSize(width, height, true)
     assert.ok(normal.width <= width && normal.height <= height)
-    assert.ok(normal.width <= 1920 && normal.height <= 1200)
+    assert.ok(normal.width <= 3200 && normal.height <= 1800)
     assert.ok(low.width <= normal.width && low.height <= normal.height)
     assert.ok(Math.abs(normal.width / normal.height - width / height) < .01)
   }
@@ -46,10 +46,10 @@ test('framing changes continuously at square sizes and keeps the portrait camp v
   const before = titleFraming(990, 1000), after = titleFraming(1010, 1000)
   assert.ok(Math.abs(before.centerX - after.centerX) < .2)
   const phone = titleFraming(390, 844)
-  assert.ok(phone.height * phone.aspect >= 10.8)
+  assert.ok(phone.height * phone.aspect >= 7.8)
   assert.ok(phone.centerY > titleFraming(1440, 900).centerY)
   assert.equal(phone.compact, 1)
-  assert.ok(phone.height >= 24)
+  assert.ok(phone.height >= 14.5)
   assert.ok(phone.foregroundScale < titleFraming(1440, 900).foregroundScale)
 })
 
@@ -74,5 +74,54 @@ test('fire frames loop at eight poses per second and keep all sampled pixels ins
     assert.equal(frame.pose, pose)
     assert.ok(frame.left >= 0 && frame.left + 128 <= 384)
     assert.ok(frame.bottom <= 256 && frame.bottom - frame.height >= 0)
+  }
+})
+
+test('wide and ultrawide views retain survivor scale instead of fitting the fort into the width', () => {
+  const normal = titleFraming(1920, 1080), wide = titleFraming(5120, 1440)
+  assert.equal(normal.height, wide.height)
+  assert.ok(1.7 / wide.height >= .11 && 1.7 / wide.height <= .13)
+  assert.equal(titleFraming(320, 1800).aspect, 320 / 1800)
+  assert.ok(sceneRenderSize(5120, 1440).height >= 900)
+})
+
+test('terrain keeps the occupied camp level and provides a recessed stair bed at both layouts', () => {
+  for (const x of [-10, -6, -2, 4]) assert.equal(courtyardHeight(x, 0), camp.floor)
+  for (const stairX of [camp.stairX, -5.1]) {
+    for (let i = 0; i < 9; i++) {
+      const z = 4.1 + i * .53
+      assert.ok(courtyardHeight(stairX, z, stairX) <= stepHeight(i) - .25)
+    }
+  }
+  assert.ok(courtyardHeight(0, 24) < courtyardHeight(0, 12))
+})
+
+test('terrain has valid upward-facing top triangles and continuous deep skirts instead of a box deck', () => {
+  const mesh = courtyardTerrain()
+  assert.equal(mesh.positions.length % 3, 0)
+  assert.equal(mesh.uvs.length / 2, mesh.positions.length / 3)
+  assert.equal(mesh.indices.length % 3, 0)
+  assert.ok(mesh.positions.every(Number.isFinite))
+  for (const i of mesh.indices) assert.ok(i >= 0 && i < mesh.positions.length / 3)
+  for (let i = 0; i < mesh.topIndexCount; i += 3) {
+    const [a, b, c] = mesh.indices.slice(i, i + 3).map(n => n * 3)
+    const up = (mesh.positions[b + 2] - mesh.positions[a + 2]) * (mesh.positions[c] - mesh.positions[a]) - (mesh.positions[b] - mesh.positions[a]) * (mesh.positions[c + 2] - mesh.positions[a + 2])
+    assert.ok(up > 0)
+  }
+  assert.ok(mesh.positions.some((v, i) => i % 3 === 1 && v === -60))
+  assert.ok(courtyardRightEdge(0) > courtyardRightEdge(-6) + 5)
+})
+
+test('paving follows the hillside, remains inside the edge and clears both stair layouts', () => {
+  for (const stairX of [camp.stairX, -5.1]) {
+    const stones = courtyardPavers(stairX)
+    assert.ok(stones.length > 300 && stones.length <= 528)
+    assert.deepEqual(stones, courtyardPavers(stairX))
+    for (const { x, y, z, turn } of stones) {
+      assert.ok([x, y, z, turn].every(Number.isFinite))
+      assert.equal(y, courtyardHeight(x, z, stairX))
+      assert.ok(x < courtyardRightEdge(z))
+      if (z > 3.6 && z < 9.2) assert.ok(Math.abs(x - stairX) > 2.8)
+    }
   }
 })

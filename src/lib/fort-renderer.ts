@@ -209,8 +209,18 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     }
   }
   const timberMap = suppliesMap.clone(); timberMap.repeat.set(.16, .38); timberMap.offset.set(.69, .16); textures.add(timberMap)
-  const timber = material(new THREE.MeshStandardMaterial({ map: timberMap, color: '#645556', roughness: .95 }))
+  const timber = material(new THREE.MeshStandardMaterial({ map: timberMap, color: '#8b7d75', roughness: .95 }))
   const railShape = geometry(new THREE.CylinderGeometry(.035, .05, 1, 5))
+  const postShape = geometry(new THREE.CylinderGeometry(.025, .07, 1, 5))
+  function timberSpan(name: string, a: THREE.Vector3, b: THREE.Vector3, shape = railShape) {
+    const delta = b.clone().sub(a), length = delta.length()
+    if (!(length > 0 && Number.isFinite(length))) throw new Error('Invalid perimeter timber.')
+    const mesh = new THREE.Mesh(shape, timber); mesh.name = name
+    mesh.position.copy(a).add(b).multiplyScalar(.5); mesh.scale.y = length
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.divideScalar(length))
+    mesh.castShadow = true; scene.add(mesh)
+    return mesh
+  }
   let previousPost: THREE.Vector3 | undefined
   for (let i = 0; i < 11; i++) {
     const z = -4 + i * 1.7, x = courtyardRightEdge(z) - .25, floor = courtyardHeight(x, z)
@@ -218,15 +228,42 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     if (previousPost) {
       masonryRun(previousPost, post, .55)
       for (const height of [.75, 1.55]) {
-        const a = previousPost.clone().add(new THREE.Vector3(0, height, 0)), b = post.clone().add(new THREE.Vector3(0, height, 0)), delta = b.clone().sub(a)
-        const rail = new THREE.Mesh(railShape, timber); rail.name = 'perimeter-timber-rail'
-        rail.position.copy(a).add(b).multiplyScalar(.5); rail.scale.y = delta.length(); rail.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize())
-        rail.castShadow = true; scene.add(rail)
+        timberSpan('perimeter-timber-rail', previousPost.clone().add(new THREE.Vector3(0, height, 0)), post.clone().add(new THREE.Vector3(0, height + Math.sin(i * 2) * .08, 0)))
       }
     }
-    solid('perimeter-timber-post', timber, x, post.y + .85, z, .12, 1.9, .14)
+    const tip = new THREE.Vector3(x + Math.sin(i * 3) * .07, post.y + 1.85 + Math.sin(i * 7) * .15, z)
+    timberSpan('perimeter-timber-post', new THREE.Vector3(x, floor - .1, z), tip, postShape)
+    timberSpan('perimeter-timber-fork', tip.clone().add(new THREE.Vector3(0, -.42, 0)), tip.clone().add(new THREE.Vector3(.15, -.12, .08)))
     previousPost = post
   }
+  const pennantEnds = [new THREE.Vector3(.55, courtyardHeight(.55, -2.5) + 3.05, -2.5), new THREE.Vector3(2, courtyardHeight(2, -1.8) + 2.1, -1.8)]
+  const archTimber = material(timber.clone()); archTimber.depthTest = false
+  archTimber.emissiveMap = timberMap; archTimber.emissive.set('#a49d9a'); archTimber.emissiveIntensity = .65
+  const archTie = (mesh: THREE.Mesh) => { mesh.material = archTimber; mesh.renderOrder = 5 }
+  pennantEnds.forEach((tip, i) => {
+    archTie(timberSpan('arch-pennant-post', new THREE.Vector3(tip.x, courtyardHeight(tip.x, tip.z) - .1, tip.z), tip.clone().add(new THREE.Vector3(0, .25, 0)), postShape))
+    archTie(timberSpan('arch-pennant-fork', tip.clone().add(new THREE.Vector3(0, -.15, 0)), tip.clone().add(new THREE.Vector3(i ? -.16 : .16, .18, .04))))
+  })
+  archTie(timberSpan('arch-pennant-cord', pennantEnds[0], pennantEnds[1]))
+  const pennantOutline = [[0, 0], [.18, -.14], [.46, -.2], [.76, -.15], [1, 0], [.95, -.3], [.88, -.25], [.81, -.75], [.75, -.33], [.68, -.87], [.6, -.9], [.57, -.3], [.5, -.63], [.42, -.42], [.35, -.81], [.3, -.65], [.25, -.3], [.18, -.55], [.12, -.35], [.09, -.26]]
+  const pennantShape = geometry(new THREE.ShapeGeometry(new THREE.Shape(pennantOutline.map(([x, y]) => new THREE.Vector2(x, y)))))
+  const pennantPositions = pennantShape.getAttribute('position'), pennantRest = Float32Array.from(pennantPositions.array)
+  const pennantDelta = pennantEnds[1].clone().sub(pennantEnds[0])
+  const pennantNormal = new THREE.Vector3(-pennantDelta.z, 0, pennantDelta.x).normalize()
+  // Rear arch artwork includes opaque stone; foreground ties share the actors' layer, below physical masonry.
+  const pennant = new THREE.Mesh(pennantShape, material(new THREE.MeshStandardMaterial({ map: bannerMap, alphaTest: .35, color: '#afa0a0', emissiveMap: bannerMap, emissive: '#ffffff', emissiveIntensity: .7, roughness: 1, side: THREE.DoubleSide, depthTest: false })))
+  pennant.renderOrder = 5
+  pennant.name = 'arch-tattered-pennants'; pennant.castShadow = true; pennant.receiveShadow = true; scene.add(pennant)
+  // World-space vertices keep both ties attached while the torn lower edge moves.
+  for (let i = 0; i < pennantPositions.count; i++) {
+    const x = pennantRest[i * 3], y = pennantRest[i * 3 + 1]
+    const point = pennantEnds[0].clone().addScaledVector(pennantDelta, x); point.y += y
+    if (!point.toArray().every(Number.isFinite)) throw new Error('Invalid perimeter cloth.')
+    pennantPositions.setXYZ(i, point.x, point.y, point.z)
+    pennantShape.getAttribute('uv').setXY(i, .2 + x * .6, .92 + y * .25)
+  }
+  pennantShape.computeVertexNormals(); pennantShape.computeBoundingSphere()
+  pennantShape.boundingSphere!.radius += .1
   if (wallBlockCount > wallBlocks.instanceMatrix.count) throw new Error('Fort masonry capacity exceeded.')
   wallBlocks.count = wallBlockCount; wallBlocks.computeBoundingSphere()
   const cardPitch = -Math.atan2(fortCamera.y, Math.hypot(fortCamera.x, fortCamera.z)), cardYaw = Math.atan2(fortCamera.x, fortCamera.z)
@@ -455,6 +492,12 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     }
     clothPositions.needsUpdate = true
     clothShape.computeVertexNormals()
+    for (let i = 0; i < pennantPositions.count; i++) {
+      const x = pennantRest[i * 3], y = pennantRest[i * 3 + 1]
+      const wave = Math.sin(time * 1.4 + x * 5) * -y * .09
+      pennantPositions.setXYZ(i, pennantEnds[0].x + pennantDelta.x * x + pennantNormal.x * wave, pennantEnds[0].y + pennantDelta.y * x + y, pennantEnds[0].z + pennantDelta.z * x + pennantNormal.z * wave)
+    }
+    pennantPositions.needsUpdate = true; pennantShape.computeVertexNormals()
     fog.forEach((puff,i) => { puff.position.x += delta*(.08+i%3*.02); if(puff.position.x>45)puff.position.x=-35 })
     smoke.forEach((puff,i) => {
       const phase=(time*.18+i/smoke.length)%1

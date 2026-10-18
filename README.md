@@ -10,4 +10,4 @@ Focuswilds is a place for concentration in a darkened world. Time spent attendin
 
 Beyond the walls lie mist, ruined villages, and stories whose truth remains uncertain. When you grow tired, you can return to rest. The world outside may be unkind, but the warmth of the shelter still has a place for you.
 
-The experience uses a landscape view on every screen. When held upright, the interface turns sideways automatically.
+Focuswilds is being designed for portrait play on a phone, with the feel of an installed mobile app. The planned interface stays portrait when the phone turns sideways, with an in-game keyboard that keeps writing within the shelter's world. This mobile experience is not yet complete.

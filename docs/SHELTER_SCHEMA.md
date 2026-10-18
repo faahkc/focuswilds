@@ -1,5 +1,7 @@
 # Shelter domain checkpoint
 
+Scope note (2026-10-18): this document describes the currently implemented survivor schema, commands and budgets. The replacement cat-care game is planned in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) and is not implemented here. Preserve this schema and its saved data until an explicit versioned migration/archive decision is approved; these budgets do not automatically cover the future shop, care or cat rewards.
+
 The shelter is the default signed-in interface at `/focuswilds/`; existing `/#shelter` links under the application base path also work. The previous journey has been retired; `#legacy` now opens the shelter. Shelter state started separately without migrating legacy progress; the owner subsequently reported completing the explicit legacy cleanup. The owner reported publishing the rules and passing the bounded live shelter check on 2026-10-17. This is owner-reported validation; the agent made no production database calls during implementation or routine tests.
 
 ## State and commands

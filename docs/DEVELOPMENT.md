@@ -31,6 +31,19 @@ First acceptance: one survivor with four stable idle poses in the current login 
 
 References: [Aseprite CLI](https://www.aseprite.org/docs/cli/), [animation](https://www.aseprite.org/docs/animation/), [scripting](https://www.aseprite.org/docs/scripting/).
 
+### Current export contract and measured baseline
+
+`tests/sprite-assets.test.mjs` reads the actual bundled WebP canvas headers and checks the current frame functions against their image bounds. It does not decode pixels or prove foot alignment, unique poses, transparency quality or animation quality; these still require visual review. Keep the following layouts until the corresponding renderer sampling and tests change together:
+
+| Asset | Canvas | Current sampling |
+| --- | --- | --- |
+| `title-survivors.webp` | 512 x 512 | Four character columns, four idle rows; nominal 128 x 128 cells, with trimmed vertical bounds from `survivorFrame` |
+| `title-fire.webp` | 384 x 256 | Three columns, two rows; nominal 128 x 128 cells, with crop bounds from `fireFrame` |
+| `shelter-survivors.webp` | 384 x 256 | Four columns, two rows of 96 x 128 character images, not eight animation frames |
+| `shelter-courtyard.webp` | 1672 x 941 | Static artwork scaled into the SVG's 640 x 360 scene |
+
+The two signed-in Shelter images currently total 436,890 transfer bytes (315,552 courtyard + 121,338 survivors). Their base decoded RGBA pixels total 6,686,624 bytes, excluding mipmaps and renderer overhead. This is a measured baseline, not a universal 500 kB cap or a performance guarantee. The asset check reports current Shelter transfer bytes instead of rejecting an approved replacement solely for exceeding the former cap. For each replacement batch, record the new transfer size, decoded texture estimate, total deployed asset size and load/device measurements before accepting an increase. Runtime animation still adds zero Firestore reads/writes. PNG/JSON exports require deliberate integration; the current renderer does not consume Aseprite metadata automatically.
+
 ## Current checkpoint
 
 The shelter is the only signed-in experience at `/focuswilds/`. Existing hashes, including `#legacy`, open the shelter. The retired 25/5 timer, companion/EXP screens, forest renderer, their dedicated tests and unused forest WebP/CSS have been removed. Three.js is now used by the separate login courtyard described below. No cloud data was deleted by implementation or tests.

@@ -57,8 +57,6 @@ test('fort and expedition art remain decorative and display the correct party wi
   assert.equal((courtyard.match(/class="fort-person"/g) ?? []).length, 5)
   assert.ok(courtyard.includes('fort-flame'))
   assert.ok(courtyard.includes('href="/assets/shelter-courtyard.webp"'))
-  const assetSize = ['shelter-courtyard.webp', 'shelter-survivors.webp'].reduce((total, name) => total + fs.statSync(new URL(`../src/assets/${name}`, import.meta.url)).size, 0)
-  assert.ok(assetSize <= 500_000)
   const crowded = renderToStaticMarkup(React.createElement(FortStage, { people: 20 }))
   assert.equal((crowded.match(/class="fort-person"/g) ?? []).length, 8)
   for (const area of Object.keys(areas)) {

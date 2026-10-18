@@ -71,9 +71,9 @@ Fort/courtyard and three expedition scenes are local SVG code. The forest WebP a
 
 The font subset comes from `https://unifoundry.com/pub/unifont/unifont-17.0.05/font-builds/unifont-17.0.05.otf`. To reproduce it with FontTools and Brotli, run `pyftsubset unifont-17.0.05.otf --unicodes=U+0020-00FF,U+0E00-0E7F,U+2000-206F --flavor=woff2 --name-IDs='*' --name-languages='*' --name-legacy --output-file=unifont-thai-latin.woff2`. Retain upstream copyright/name metadata and the bundled OFL notice. Do not commit the full font or temporary conversion tools. Text outside this subset can use the system fallback.
 
-The shelter/Firestore chunk loads after sign-in; cleanup performs no reads until its button is pressed. History queries run only when opened or explicitly refreshed. Vite content hashes preserve unchanged asset URLs. Host cache policy is unchanged; no service worker, unsupported header files or PWA support was added.
+The shelter/Firestore chunk loads after sign-in; cleanup performs no reads until its button is pressed. History queries run only when opened or explicitly refreshed. Vite content hashes preserve unchanged asset URLs. Host cache policy is unchanged. The installable shell uses a manifest and local icons without a service worker or offline cache.
 
-Tests use the existing network-blocking preload and in-memory stores. Cleanup tests cover bounds, all protected paths, missing/corrupt fort state, failures, lost responses, concurrent calls and resume. Intercepted browser checks exercised failed cleanup followed by four batches, leaving zero legacy records and identical fort data. UI tests for the retired journey were removed with their implementation; timer, rule-adjacent service, quota, language and accessibility checks for the shelter remain. The owner subsequently reported cleanup, post-cleanup phone checks and cross-device use passed. The agent has not independently audited production rule enforcement or detailed Thai mark placement. Installation as a web app remains unimplemented.
+Tests use the existing network-blocking preload and in-memory stores. Cleanup tests cover bounds, all protected paths, missing/corrupt fort state, failures, lost responses, concurrent calls and resume. Intercepted browser checks exercised failed cleanup followed by four batches, leaving zero legacy records and identical fort data. UI tests for the retired journey were removed with their implementation; timer, rule-adjacent service, quota, language and accessibility checks for the shelter remain. The owner subsequently reported cleanup, post-cleanup phone checks and cross-device use passed. The agent has not independently audited production rule enforcement or detailed Thai mark placement. The installable shell is implemented; physical-device installation remains unverified.
 
 Playwright artifacts belong in ignored `.playwright-mcp/`; remove unused artifacts but retain logs open in the editor. Do not commit screenshots, secrets, debug tokens, unused full-resolution artwork or font conversion tools.
 
@@ -83,7 +83,7 @@ Playwright artifacts belong in ignored `.playwright-mcp/`; remove unused artifac
 npm run app:version
 ```
 
-`package.json` is the single source of the application version. The lockfile and the website use the same value. Dev/build do not change tracked files. Vite imports package.json as a watched config dependency and automatically restarts when its version changes. Production requires a rebuild.
+`package.json` is the single source of the application version. The lockfile and the website use the same value. Dev/build do not change tracked files. The React app imports the version from package.json through normal HMR. It is not a Vite config dependency, avoiding server restarts on patch commits. Production requires a rebuild.
 
 `npm install` and `npm ci` install the repository's pre-commit hook through the `prepare` script (skipped in CI). On an existing checkout, run `npm run prepare` once. The installer refuses to replace existing custom hooks. Before each normal local commit with staged changes, the hook increments patch and stages both package files in that same commit. A retry after a failed commit preserves the already-staged increment. Partially staged package edits block the commit rather than being overwritten.
 
@@ -98,3 +98,13 @@ npm run version:major
 These commands update both package files and reset patch to zero. Stage both files and commit; the hook preserves the explicit version instead of adding patch again. Never run these commands without the owner's request.
 
 Commits made through GitHub's web UI, merges created by GitHub, and commits made with hooks disabled do not run the local hook. Make versioned changes from a configured local clone. CI builds the committed version and does not bump it. Empty commits do not bump version.
+
+## Web app installation and update recovery
+
+The manifest uses the `/focuswilds/` deployment scope, standalone display and local 192/512 PNG icons. Vite prefixes root-relative HTML asset links with the configured base; do not combine those links with `%BASE_URL%`, which duplicates the base during development. HTTPS (or localhost) is required. Settings offers an Install app button when the browser supplies an installation prompt. Otherwise use the browser installation menu, or Safari Share > Add to Home Screen on iPhone/iPad. Installation must still be checked on physical devices.
+
+This release does not cache the app for offline startup. Account loading and saving require internet; keep a tab with unsaved work open. No service worker, background sync, database requests or quota changes are introduced. See [MDN installation requirements](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
+
+A static English startup screen remains visible if the entry module fails. A localized React error boundary handles render and lazy-module failures. Both offer manual Reload without clearing stored timer data. Updates never force a reload during focus. The original reported white-screen exception was not captured; removing version-triggered config restarts and adding recovery covers the identified failure paths.
+
+Verification: 70 offline tests, lint and production build pass. Chromium parsed the development manifest without errors (installation is blocked only by the automated incognito context). Intercepted entry-module and lazy-module failures both displayed Reload and recovered after retry. Physical installation and the original uncaptured exception remain unverified.

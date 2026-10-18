@@ -4,14 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="description" content="A fire still burns in an abandoned border fort. Focuswilds is a small shelter for focus, survival, and hope in a fallen world." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="%BASE_URL%favicon.ico" sizes="16x16 32x32 48x48" />
-    <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" sizes="32x32" />
-    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" sizes="180x180" />
-    <link rel="icon" type="image/webp" href="%BASE_URL%app-icon.webp" sizes="512x512" />
+    <meta name="theme-color" content="#0b0d10" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/src/fonts.css" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="icon" type="image/webp" href="/app-icon.webp" sizes="512x512" />
     <title>Focuswilds</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><main style="min-height:100svh;background:#0b0d10;color:#ece0c5;padding:24px;font:16px 'GNU Unifont',monospace"><h1>Focuswilds</h1><p>Opening the app… If loading fails after an update, reload this tab. Existing stored timer data is not cleared.</p><button onclick="location.reload()" style="font:inherit;min-height:44px">Reload</button><noscript><p>Enable JavaScript to open Focuswilds.</p></noscript></main></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,6 +1,10 @@
 import type { Language } from './shelter.ts'
 
 const en = {
+  install: 'Install app', installed: 'Focuswilds is running as an installed app.',
+  installHint: 'Install Focuswilds from your browser menu. On iPhone or iPad, open Safari, choose Share, then Add to Home Screen. If an install button is available, it appears here.',
+  onlineRequired: 'Account loading and saving require an internet connection. Keep an unsaved timer tab open until its save is confirmed.',
+  installError: 'Could not open installation. Try your browser menu instead.',
   paused: 'Paused',
   cleanup: 'Remove previous journey data', cleanupHint: 'Permanently remove old focus history, EXP and companion progress, up to 20 records per step. Repeat until complete. Your fort, its history and saved language stay unchanged.',
   cleanupConfirm: 'Permanently remove the next batch of previous journey data? This cannot be undone. Your fort and its history will stay.',
@@ -40,6 +44,10 @@ const en = {
   jobCost: 'Materials and focused minutes', resetRisk: 'Death is permanent. The fort and knowledge remain.',
 }
 const th: typeof en = {
+  install: 'ติดตั้งแอป', installed: 'กำลังเปิด Focuswilds เป็นแอปที่ติดตั้งแล้ว',
+  installHint: 'ติดตั้ง Focuswilds จากเมนูเบราว์เซอร์ บน iPhone หรือ iPad ให้เปิด Safari เลือกแชร์ แล้วเพิ่มไปยังหน้าจอโฮม หากใช้ปุ่มติดตั้งได้ ปุ่มจะแสดงที่นี่',
+  onlineRequired: 'การโหลดและบันทึกบัญชีต้องใช้อินเทอร์เน็ต เปิดแท็บที่มีตัวจับเวลายังไม่บันทึกไว้จนกว่าจะยืนยันการบันทึกสำเร็จ',
+  installError: 'เปิดการติดตั้งไม่ได้ โปรดลองจากเมนูเบราว์เซอร์แทน',
   paused: 'พักโฟกัส',
   cleanup: 'ลบข้อมูลการเดินทางเดิม', cleanupHint: 'ลบประวัติโฟกัส EXP และความก้าวหน้าเพื่อนจากระบบเก่าถาวร ครั้งละไม่เกิน 20 รายการ ทำซ้ำจนเสร็จ ป้อม ประวัติป้อม และภาษาที่บันทึกไว้จะไม่เปลี่ยน',
   cleanupConfirm: 'ลบข้อมูลการเดินทางเดิมชุดถัดไปถาวรหรือไม่? ย้อนคืนไม่ได้ ป้อมและประวัติป้อมจะยังอยู่',

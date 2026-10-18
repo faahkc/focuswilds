@@ -2,6 +2,10 @@
 
 This document records approved requirements, not a list of fully implemented features. The README and this plan stay in English. The replacement application supports English and Thai, with English as the default.
 
+## Login checkpoint — 2026-10-18
+
+The animated ruined courtyard login is implemented with centered title/account controls, separate detailed object assets, four two-pose seated pixel survivors, elevated terrain/stairs, lighting, fire, smoke, mist, sparks and cloth motion. Loading, static recovery, responsive assets and scene disposal are connected. Offline tests, lint, production build and browser checks passed; measured asset sizes and browser performance are recorded in DEVELOPMENT.md. Physical-device performance and real production authentication remain unverified. This checkpoint does not mark the signed-in graphics migration complete or claim owner visual acceptance.
+
 ## Checkpoint — 2026-10-17
 
 Development resumed at the owner's request on 2026-10-17. Core domain, persistence and a first bilingual playable interface are implemented; the owner has reported publishing the rules and passing the bounded account check.
@@ -27,7 +31,7 @@ Use English commit subjects and descriptive bodies with validation details, with
 - A focus app with shelter management and survival exploration, set in a medieval world devastated by mythical creatures.
 - An abandoned border fort is a safe shelter. No fort attacks, deaths, or resource losses caused by absence from the app.
 - Pixel characters in scenes with depth, charcoal shadows, ash/bone-white light and restrained ember-red shelter light. Begin with European folklore; follow the approved visual direction below.
-- Show the fort exterior before login and the inner campfire courtyard afterward. The landing screen contains only the title and login.
+- Show the ruined campfire courtyard before login, with the title and login controls centered on screen. The signed-in shelter retains its existing controls and saved state.
 - Use GNU Unifont with its license for both English and Thai. Default to English; check Thai vowels, tone marks, and long text on phones.
 - Keep the main experience within one viewport. Open secondary information in icon dialogs without unmounting the timer. Preserve zoom and reduced-motion support.
 
@@ -43,6 +47,9 @@ Approved on 2026-10-18. These are requirements for subsequent visual work, not a
 - Shelter light is soft and steady, with ember-red reflection and a small bone-white hot core. Threat accents are sparse, sharper and visually distinct. Preserve readable silhouettes, paths and materials through local contrast instead of darkening the whole image. Keep controls legible and never communicate state through color alone.
 
 ### Scene and motion
+
+- Login composition update, approved on 2026-10-18: use the occupied ruined courtyard, including a timber shelter, seated survivors, hearth, broken masonry, steps and a misty landscape beyond the walls. Center the Focuswilds title and sign-in control on the viewport. Preserve the detailed materials, restrained palette and depth requirements below; the former exterior-gateway composition is superseded.
+- Login asset contract: fixed elevated three-quarter camera; one world unit represents approximately one meter; seated survivor silhouettes are approximately 1.7 units high with a consistent foot anchor. Architecture, supplies, foreground occluders, survivor poses, cloth and effects remain separate scene objects. Use locally bundled transparent cutouts for detailed objects alongside actual elevated ground, steps and occluders. Distant landscape artwork is scenery only, never a flattened replacement for the occupied courtyard. Survivor idle poses change discretely without stretching; fire uses distinct silhouettes at approximately eight changes per second. This login tableau has seated survivors and does not require a walking path.
 
 - Combine compact, readable 2D pixel sprites with environments that have spatial depth, surface texture, changes in elevation, contact shadows and foreground/background occlusion. Use an elevated three-quarter miniature-diorama composition, with focus near the survivors and restrained depth blur elsewhere.
 - Match character lighting to the ground and surroundings, including movement through lit and shaded regions. Keep pixel structure coherent at the actual display size; detailed illustrations merely reduced to thumbnails do not satisfy the sprite requirement.
@@ -64,6 +71,8 @@ Day/night systems, combat effects and multiple new environments are outside the 
 ### Production delivery plan (2026-10-18)
 
 The deliverable is a maintained, usable graphics system integrated into the existing game. Early validation is an internal checkpoint using the production architecture, not a disposable demo or a reason to stop at starter quality. This plan replaces the former hard 500 kB interpretation.
+
+The later approved login composition above supersedes the still exterior title and post-sign-in-only renderer loading described in the original sequence below. The current delivery is the animated login courtyard; migration of the signed-in camp and travel environments remains separate work. See DEVELOPMENT.md for implemented behavior, measurements and remaining verification limits.
 
 - Use React for accessible UI and existing game/timer state; plan Three.js for the spatial scene, loaded after sign-in. Keep rendering local and separate from persistence. Do not add a second renderer, physics engine or React scene wrapper without a concrete requirement. Validate the chosen package version and its production build during implementation.
 - Use one scene lifecycle with initialization, saved-state updates, resize, reduced motion, visibility suspension and disposal. Recover from graphics-context loss or provide a static scene fallback while keeping focus controls and unsaved timer state usable. Stop animation when hidden without stopping elapsed-time accounting.

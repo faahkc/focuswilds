@@ -38,13 +38,13 @@ export function AuthPanel({ onSessionChange, language = 'en' }: { onSessionChang
   }
 
   return (
-    <section aria-label={text.account} className="wilds-account flex flex-col items-start gap-2 sm:items-end">
-      {loading ? <p role="status" className="text-sm">{text.loading}</p> : user ? (
+    <section aria-label={text.account} aria-busy={loading || busy} className="wilds-account flex flex-col items-start gap-2 sm:items-end">
+      {loading ? <p role="status" className="wilds-account-loading text-sm"><span className="wilds-loading-mark" aria-hidden="true"/>{text.loading}</p> : user ? (
         <div className="flex flex-wrap items-center gap-3">
           <span className="max-w-48 truncate text-sm">{user.displayName || user.email || text.signedIn}</span>
-          <Button disabled={busy} onClick={() => void updateAccount()} variant="secondary">{busy ? text.leaving : text.out}</Button>
+          <Button disabled={busy} onClick={() => void updateAccount()} variant="secondary">{busy && <span className="wilds-loading-mark" aria-hidden="true"/>}{busy ? text.leaving : text.out}</Button>
         </div>
-      ) : <Button disabled={busy} onClick={() => void updateAccount()} className="bg-[#e8c782] text-[#14251f] hover:bg-[#f3dcae]">{busy ? text.wait : text.enter}</Button>}
+      ) : <Button disabled={busy} onClick={() => void updateAccount()}>{busy && <span className="wilds-loading-mark" aria-hidden="true"/>}{busy ? text.wait : text.enter}</Button>}
       {error !== null && <p role="alert" className="max-w-sm text-sm text-[#ffc3ab]">{authErrorMessage(error, language)}</p>}
     </section>
   )

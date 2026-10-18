@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,9 +14,18 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="icon" type="image/webp" href="/app-icon.webp" sizes="512x512" />
     <title>Focuswilds</title>
+    <style>
+      .startup-title { min-height:100svh; display:grid; place-content:center; gap:24px; padding:24px; text-align:center; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace }
+      .startup-title h1 { font-size:clamp(40px,10vw,80px); margin:0; font-weight:400 }
+      .startup-title p { max-width:420px; margin:0 auto }
+      .startup-title button { justify-self:center; font:inherit; min-height:44px; padding:8px 24px; background:#181417; color:inherit; border:1px solid #925853 }
+      .startup-title [role=status]::before { content:''; display:inline-block; width:12px; height:12px; margin-right:12px; border:1px solid #67514e; border-top-color:#e4e1dc; animation:startup-loading 1.2s linear infinite }
+      @keyframes startup-loading { to { transform:rotate(360deg) } }
+      @media(prefers-reduced-motion:reduce) { .startup-title [role=status]::before { animation:none } }
+    </style>
   </head>
   <body>
-    <div id="root"><main style="min-height:100svh;background:#0b0d10;color:#ece0c5;padding:24px;font:16px 'GNU Unifont',monospace"><h1>Focuswilds</h1><p>Opening the app… If loading fails after an update, reload this tab. Existing stored timer data is not cleared.</p><button onclick="location.reload()" style="font:inherit;min-height:44px">Reload</button><noscript><p>Enable JavaScript to open Focuswilds.</p></noscript></main></div>
+    <div id="root"><main class="startup-title"><h1>Focuswilds</h1><p role="status">Opening the gates…</p><p>If this takes longer than usual, reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button><noscript><p>Enable JavaScript to open Focuswilds.</p></noscript></main></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

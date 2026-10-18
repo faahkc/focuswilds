@@ -68,7 +68,7 @@ test('runtime metadata and account controls require a signed-in saved Thai prefe
       const { default: App } = load('App.tsx', {
         react: runtime.react, '@/components/ui/badge': { Badge: div }, '@/components/ui/button': { Button },
         '@/components/auth-panel': { AuthPanel: props => { account = props; return null } },
-        '@/components/screen-layout': { ScreenLayout: div }, '@/components/fort-stage': { FortStage: () => null },
+        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null },
       })
       renderToStaticMarkup(React.createElement(App))
       runtime.effects.forEach(effect => effect())
@@ -85,6 +85,37 @@ test('runtime metadata and account controls require a signed-in saved Thai prefe
   } finally { globalThis.document = previousDocument }
 })
 
+test('account actions show busy state, preserve cancellation/network failures and unsubscribe on unmount', async () => {
+  for (const code of ['auth/popup-closed-by-user', 'auth/popup-blocked', 'auth/network-request-failed']) {
+    const runtime = hooks([null, false, false, null])
+    let resolve, reject, onUser, onFailure, removed = 0
+    const request = new Promise((yes, no) => { resolve = yes; reject = no })
+    const { AuthPanel } = load('components/auth-panel.tsx', {
+      react: runtime.react,
+      'firebase/auth': { GithubAuthProvider: class {}, signInWithPopup: () => request, onAuthStateChanged: (_auth, next, error) => { onUser = next; onFailure = error; return () => removed++ } },
+      '@/lib/firebase': { auth: {} }, '@/lib/auth-error': { authErrorMessage }, '@/components/ui/button': { Button },
+    })
+    const changes = []
+    const tree = AuthPanel({ onSessionChange: user => changes.push(user) })
+    const stop = runtime.effects[0]()
+    tree.props.children[0].props.onClick()
+    assert.equal(runtime.values[2], true)
+    reject({ code })
+    await new Promise(done => setImmediate(done))
+    assert.equal(runtime.values[2], false)
+    assert.deepEqual(runtime.values[3], { code })
+    onUser({ uid: 'test' })
+    assert.equal(runtime.values[0].uid, 'test')
+    onFailure()
+    assert.equal(runtime.values[0], null)
+    assert.equal(changes.at(-1), null)
+    assert.equal(runtime.values[3].code, 'auth/restore-failed')
+    stop()
+    assert.equal(removed, 1)
+    resolve()
+  }
+})
+
 test('root and old links all open the fort without legacy navigation', () => {
   const previousWindow = globalThis.window
   try {
@@ -99,7 +130,7 @@ test('root and old links all open the fort without legacy navigation', () => {
         } },
         '@/components/ui/badge': { Badge: div }, '@/components/ui/button': { Button },
         '@/components/auth-panel': { AuthPanel: () => null },
-        '@/components/screen-layout': { ScreenLayout: div }, '@/components/fort-stage': { FortStage: () => null },
+        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null },
       })
       const html = renderToStaticMarkup(React.createElement(App))
       assert.ok(html.includes('data-journey="shelter"'))

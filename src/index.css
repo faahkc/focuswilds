@@ -3,6 +3,7 @@
 @import "./fonts.css";
 @import "./wilds.css";
 @import "./shelter.css";
+@import "./title-scene.css";
 
 @custom-variant dark (&:is(.dark *));
 

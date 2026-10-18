@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-The shelter is the only signed-in experience at `/focuswilds/`. Existing hashes, including `#legacy`, open the shelter. The retired 25/5 timer, companion/EXP screens, forest renderer, their dedicated tests, Three.js dependencies and unused forest WebP/CSS have been removed. No cloud data was deleted by implementation or tests.
+The shelter is the only signed-in experience at `/focuswilds/`. Existing hashes, including `#legacy`, open the shelter. The retired 25/5 timer, companion/EXP screens, forest renderer, their dedicated tests and unused forest WebP/CSS have been removed. Three.js is now used by the separate login courtyard described below. No cloud data was deleted by implementation or tests.
 
 The owner reported the initial shelter rules publication and bounded account check passed on 2026-10-17. On 2026-10-17 the owner reported cleanup-rule publication, completed production legacy cleanup, passing post-cleanup reload/history/phone checks, and successful cross-device use. These are owner-reported results, not independently observed production checks by the agent. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for scope and [SHELTER_SCHEMA.md](SHELTER_SCHEMA.md) for schema and normal operation budgets.
 
@@ -116,3 +116,40 @@ Verification: 70 offline tests, lint and production build pass. Chromium parsed 
 All deployed functionality must remain usable on free services, with Firebase Spark Billing disabled. The earlier 500 kB scene target is not an acceptance ceiling. Follow the production delivery plan in IMPLEMENTATION_PLAN.md; establish measured budgets for transfer, deployed files, Git history, decoded textures and render targets before producing the complete asset set. Larger assets are acceptable when justified by required visual quality and actual loading/device/hosting limits.
 
 Graphics files and renderer code are served by GitHub Pages, not Firestore. Keep visual playback entirely local, with no additional database operations. Report a cold-load transfer and expected full-load traffic separately from cached repeat visits; do not assume a cache hit. Recheck service quotas when budgeting a release instead of treating documented limits as a target to fill.
+
+## Animated login courtyard
+
+The login now uses a fixed elevated courtyard composition with the Focuswilds title and account control centered together. It has an occupied timber shelter, four seated pixel survivors, a local hearth, broken arch, foreground parapet, actual raised ground and nine descending stair treads. Detailed architecture uses separate alpha-tested, depth-tested object cards; terrain and stairs use meshes. The distant valley is a separate background. This is a fixed-camera hybrid scene; the cards are not full models suitable for free camera rotation. The signed-in shelter renderer has not been migrated in this change.
+
+The local Three.js module loads on the login screen. Its textures are separate from the signed-in courtyard/survivor images, which are requested only after sign-in. Surfaces and survivors receive moon/hearth light; custom depth materials preserve cutout shadow silhouettes. Survivor cells are 128×128 in a 4-column, 2-row atlas, with a fixed foot baseline and two distinct seated hand/head poses per survivor. The existing approved six-pose walk target applies to later walking characters, not this seated tableau. World scale is approximately one unit per meter; source padding leaves seated silhouettes approximately 1.7 units tall within a 2.05-unit cell. Texture density is preserved at source rather than created by reducing the whole canvas resolution.
+
+Six fire silhouettes change at eight poses per second with a bone-white core. Seated idle poses change every 2.8 seconds with staggered character phases. Independent local effects include restrained reflected light, rising smoke, sparks, drifting valley mist and a textured subdivided cloth banner. The camera stays fixed. Reduced motion freezes the tableau; hiding the document suspends its loop. Animation never reads or writes game state. Unmount disposes the renderer, target, shadow map, textures, geometry, materials and listeners.
+
+There are loading indicators for startup, scene loading and account actions. Module/texture failures and a 20-second texture timeout show the small bundled courtyard fallback; the login remains usable. WebGL context loss shows the same fallback and restoration resumes the scene. Failure of the fallback image still leaves the CSS night background and readable controls. No automatic reload, asset retry, account retry or cloud-backed asset request is added.
+
+### Login assets and generation
+
+Assets were created with the built-in imagegen tool, then resized/encoded locally. All deployed files are under `src/assets/title-*.webp`; unused full-resolution source images are not committed. The following are the production prompt summaries, with no reference material embedded in the repository:
+
+| Asset | Production prompt |
+| --- | --- |
+| `title-shelter.webp` | Isolated ruined medieval stone shelter, patched timber lean-to, tattered pale canopy, bedroll, pottery and supply crates; elevated three-quarter view; charcoal masonry, bone-white edges, restrained burgundy cloth; transparent surroundings; no people, fire, sky or UI. |
+| `title-arch.webp` | Isolated tall broken medieval stone arch and damaged piers; transparent opening and surroundings; irregular chipped charcoal stone with moonlit edges and worn dark-red banners; matching elevated camera; no landscape or people. |
+| `title-foreground.webp` | Isolated low ruined stone parapet, uneven broken piers, rubble, barrel and damaged crate; sharp detailed source; transparent background; elevated view; no complete environment. |
+| `title-valley.webp` | Distant grayscale moonlit forest valley, ruined aqueduct arches, wet winding stream, layered conifers and mist; no near fort, characters, campfire or UI. |
+| `title-survivors.webp` | Transparent 4×2 sheet of four seated medieval pixel survivors: silver-haired traveler, brown-cloaked traveler, gray hood and back-facing cloaked traveler; same character per column, two different hand/head poses, equal cells and fixed feet; no scenery or smooth painted figures. |
+| `title-stone.webp` | Seamless overhead irregular charcoal medieval flagstones, chipped gray edges, cracks and mortar; neutral material lighting, no perspective, objects, border or vignette. |
+| `title-banner.webp` | Isolated long ragged dark burgundy heraldic cloth on a short worn rod; transparent holes and exterior; straight resting pose for mesh deformation; no wall or background. |
+| `title-fallback.webp` | Compressed static courtyard fallback, shown during loading or graphics failure only. |
+
+Phone architecture and valley variants are selected when the scene mounts below 768 CSS pixels; resizing preserves the selected set rather than downloading another set during rotation. The survivor atlas stays shared and uses nearest sampling. Three.js uses its MIT license, included in `public/three-LICENSE.txt`.
+
+### Measured login budget and checks
+
+The bundled title image set totals 1,751,788 bytes including both responsive sets and the fallback. A cold desktop requests 1,328,372 image bytes; a cold phone requests 758,768. These deliberately exceed the former 500 kB baseline to retain required material detail. Current minified app/renderer JavaScript is approximately 951 kB combined, or 266 kB with gzip; CSS is approximately 36 kB, or 8 kB with gzip. Actual wire transfer depends on hosting compression and cache headers. One thousand uncached loads therefore cost approximately 1.33 GB of desktop title images or 0.76 GB of phone title images, plus code, fonts and icons; these are traffic calculations, not service quota claims. Repeat visits may reuse hashed cached files, but budgeting does not assume this.
+
+Source dimensions imply approximately 25.5 MiB desktop or 11.7 MiB phone for RGBA scene textures with mipmaps, before driver copies; fallback decoding is separate. A color/depth target uses approximately 8 bytes per render pixel (9.9 MiB at 1440×900); shadows, the browser canvas and driver allocations add memory. These are allocation estimates, not measured physical-device GPU memory. Render output is capped at 1920×1200; a slow-frame fallback caps it at 960×720, reduces shadows from 1024 to 512, halves mist and bypasses depth blur. No paid service or additional database read/write is introduced.
+
+Verification used offline account/store substitutions with external network requests blocked. Browser checks covered centered controls and no horizontal overflow at 1440×900, 1280×720, 390×844, 320×568, 844×390 and 256×568. Short/zoomed layouts can scroll accessibly. Account checks covered pending/disabled/spinner, cancellation, blocked popup, network failure, restoration failure, signed-in shelter display, sign-out and scene remount. Detached canvas frame counts stopped after sign-in. Delayed assets showed the loading animation; failed textures/modules showed the working fallback; WebGL loss/restoration recovered. Reduced motion and hidden-document tests stopped frame counts. Login resource entries contained no signed-in shelter assets.
+
+On the automated desktop browser, a 3-second sample rendered approximately 60.2 FPS; a separate 150-interval sample had a 21 ms p95 and no interval above 33.4 ms. Two screenshots 450 ms apart differed in 1,991 pixels above an 8-level RGB threshold, confirming visible motion rather than only a ticking counter. These samples do not establish real-phone performance. Physical-device graphics, real OAuth, production App Check and installation are not independently verified. The Three.js lazy chunk still produces Vite's 500 kB warning; it is not part of the main app chunk. Visual acceptance remains subject to reviewing the running scene.

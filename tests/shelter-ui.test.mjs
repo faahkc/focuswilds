@@ -17,6 +17,7 @@ function component(name) {
   new Function('require', 'module', 'exports', code)(name => {
     if (name === '@/assets/shelter-courtyard.webp') return { __esModule: true, default: '/assets/shelter-courtyard.webp' }
     if (name === '@/assets/shelter-survivors.webp') return { __esModule: true, default: '/assets/shelter-survivors.webp' }
+    if (name === '@/assets/title-fallback.webp') return { __esModule: true, default: '/assets/title-fallback.webp' }
     if (name === '@/components/ui/button') return { Button: ({ children, variant: _variant, ...props }) => React.createElement('button', props, children) }
     if (name === '@/lib/legacy-cleanup-store') return { legacyCleanupStore: {} }
     if (name.startsWith('@/lib/')) return require(`../src/lib/${name.slice(6)}.ts`)
@@ -28,6 +29,7 @@ function component(name) {
 const { ShelterCamp } = component('shelter-camp')
 const { ShelterJournal } = component('shelter-journal')
 const { FortStage } = component('fort-stage')
+const { TitleScene } = component('title-scene')
 const { LegacyCleanup } = component('legacy-cleanup')
 
 test('cleanup describes permanent deletion and preserves the fort in both languages, with a disabled control during focus', () => {
@@ -41,9 +43,12 @@ test('cleanup describes permanent deletion and preserves the fort in both langua
 })
 
 test('fort and expedition art remain decorative and display the correct party without mounting a timer', () => {
-  const exterior = renderToStaticMarkup(React.createElement(FortStage, { exterior: true }))
+  const exterior = renderToStaticMarkup(React.createElement(TitleScene))
   assert.ok(exterior.includes('aria-hidden="true"'))
   assert.ok(!exterior.includes('class="fort-person"'))
+  assert.ok(exterior.includes('role="status"'))
+  assert.ok(exterior.includes('Preparing the shelter'))
+  assert.ok(!exterior.includes('shelter-courtyard.webp'))
   const courtyard = renderToStaticMarkup(React.createElement(FortStage, { people: 5 }))
   assert.equal((courtyard.match(/class="fort-person"/g) ?? []).length, 5)
   assert.ok(courtyard.includes('fort-flame'))

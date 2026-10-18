@@ -47,33 +47,13 @@ function ExpeditionStage({ area, people }: { area: AreaId; people: number }) {
   </svg>
 }
 
-export function FortStage({ exterior = false, people = 5, area }: { exterior?: boolean; people?: number; area?: AreaId }) {
-  if (area && !exterior) return <ExpeditionStage area={area} people={people}/>
-  if (!exterior) return <svg className="fort-stage fort-courtyard" viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+export function FortStage({ people = 5, area }: { people?: number; area?: AreaId }) {
+  if (area) return <ExpeditionStage area={area} people={people}/>
+  return <svg className="fort-stage fort-courtyard" viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
     <image href={courtyard} width="640" height="360" preserveAspectRatio="none"/>
     <g shapeRendering="crispEdges"><People count={people}/></g>
     <g transform="translate(319 247) scale(.55) translate(-325 -274)">
       <g className="fort-flame"><path d="M314 272v-15h6v-15h7v-12h5v21h7v10h-3v12z" fill="#e89540"/><path d="M321 273v-14h6v-11h5v15h3v10z" fill="#ffe0a0"/></g>
     </g>
-  </svg>
-  return <svg className="fort-stage fort-exterior" viewBox="0 0 640 360" preserveAspectRatio="xMidYMax slice" shapeRendering="crispEdges" aria-hidden="true">
-    <defs><linearGradient id="fort-sky" x2="0" y2="1"><stop stopColor="#101921"/><stop offset="1" stopColor="#374046"/></linearGradient>
-      <pattern id="fort-stone" width="48" height="24" patternUnits="userSpaceOnUse"><path d="M0 0h48v24H0z" fill="#303335"/><path d="M0 0h48M0 24h48M24 0v12M0 12h48M12 12v12M40 12v12" stroke="#1e2428" strokeWidth="2"/></pattern>
-    </defs>
-    <path fill="url(#fort-sky)" d="M0 0h640v360H0z"/>
-    <path d="M449 27h25v6h8v23h-8v7h-25v-7h-7V33h7z" fill="#9aaba9"/>
-    <path d="M60 46h103v5H60zm334 37h119v4H394z" fill="#536368" opacity=".35"/>
-    <path fill="#18252b" d="M0 90l40-35 40 44 52-59 60 59 53-60 49 65 56-45 52 45 75-67 60 64 63-35 40 24v200H0z"/>
-    <path fill="#101a20" d="M0 145l48-60 44 72 53-63 44 60 60-46 54 55 70-80 56 70 55-60 58 60 58-72 40 53v180H0z"/>
-    <path d="M0 199l320-20 320 20v161H0z" fill="#333236"/>
-    <path d="M40 112h560v121H40z" fill="url(#fort-stone)"/>
-    <path d="M30 105h66v14H30zm90 0h50v14h-50zm74 0h50v14h-50zm74 0h50v14h-50zm74 0h50v14h-50zm74 0h50v14h-50zm74 0h55v14h-55zm79 0h50v14h-50z" fill="#3e4140"/>
-    <path d="M22 80h90v184H22zm506 0h90v184h-90z" fill="url(#fort-stone)"/>
-    <path d="M16 70h24v22H16zm36 0h24v22H52zm36 0h30v22H88zm434 0h24v22h-24zm36 0h24v22h-24zm36 0h30v22h-30z" fill="#454644"/>
-    <path d="M58 120h17v45H58zm505 0h17v45h-17z" fill="#10181d"/>
-    <path d="M49 179h35v4H49zm505 0h35v4h-35zM126 194h26v5h-26zm351-65h30v4h-30z" fill="#596055"/>
-    <path d="M100 206h26v8h-26zm-9 9h32v6H91zm434 13h30v7h-30z" fill="#444b3d"/>
-    <g><path d="M270 157h100v94H270zM284 143h72v20h-72z" fill="#10171b"/><path d="M286 167h68v84h-68z" fill="#352b27"/><path d="M318 167h4v84h-4z" fill="#0e1419"/><path d="M284 360l30-109h12l32 109z" fill="#49413b"/></g>
-    <path d="M0 315l85-13 82 28 98 30H0zm640-14l-90 8-72 31-55 20h217z" fill="#111a20"/>
   </svg>
 }

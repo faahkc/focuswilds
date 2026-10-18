@@ -3,7 +3,7 @@ import type { User } from 'firebase/auth'
 import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
 import { ScreenLayout } from '@/components/screen-layout'
-import { FortStage } from '@/components/fort-stage'
+import { TitleScene } from '@/components/title-scene'
 import type { Language } from '@/lib/shelter'
 import { version } from '../package.json'
 
@@ -21,11 +21,11 @@ export default function App() {
   }, [session, language])
   return (
     <ScreenLayout language={session ? language : 'en'}><main className={`wilds-shell ${session ? 'wilds-playing' : 'wilds-landing'} text-[#f4eddc]`}>
-      {!session && <FortStage exterior/>}
+      {!session && <TitleScene/>}
       <div className="mx-auto max-w-7xl">
         <header className="wilds-header flex flex-wrap items-center justify-between gap-4 pb-6">
           {session ? <span className="flex items-center gap-3 font-serif text-2xl tracking-wide"><img src={`${import.meta.env.BASE_URL}favicon.png`} alt="" width="32" height="32" className="size-8" />Focuswilds</span>
-            : <h1 className="wilds-title"><img src={`${import.meta.env.BASE_URL}favicon.png`} alt="" width="64" height="64" /><span>Focuswilds</span></h1>}
+            : <h1 className="wilds-title">Focuswilds</h1>}
           <Badge variant="outline" className="border-white/25 text-[#e8c782]">v{version}</Badge>
           <AuthPanel onSessionChange={handleSessionChange} language={session ? language : 'en'} />
         </header>

@@ -34,7 +34,6 @@
 .shelter-pack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; border: 1px solid #675846; }
 .shelter-pack p, .shelter-pack legend { grid-column: 1 / -1; }
 .shelter-welcome { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: start; gap: 18px; max-width: 540px; }
-.wilds-landing > .fort-exterior { position: absolute; inset: 0; pointer-events: none; filter: brightness(.7); }
 @media (max-width: 767px) {
   .shelter-heading { padding-top: 6px; }
   .shelter-heading h1 { font-size: 22px; }

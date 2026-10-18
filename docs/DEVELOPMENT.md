@@ -1,5 +1,36 @@
 # Development
 
+## Aseprite authoring setup (approved 2026-10-18; integration pending)
+
+Aseprite is the primary authoring tool for visual assets and frame animation under the production plan. The existing application still uses its current assets and renderer; this documentation does not claim an Aseprite migration has shipped. No new runtime dependency or database operation is required. Keep the approved detailed environment materials and compact pixel characters. Installation is local tooling; no paid runtime or cloud service is introduced.
+
+### Windows and VS Code
+
+1. Install Aseprite locally. Locate the actual `Aseprite.exe`; a standalone installation may use `C:\Program Files\Aseprite\Aseprite.exe`, while a Steam installation is inside the selected Steam library's `steamapps\common\Aseprite` directory. These are examples, not detected paths.
+2. In the VS Code PowerShell terminal, set the actual path and verify the CLI:
+
+   ```powershell
+   $asepriteExe = 'C:\Program Files\Aseprite\Aseprite.exe'
+   Test-Path -LiteralPath $asepriteExe
+   & $asepriteExe --version
+   & $asepriteExe --help
+   ```
+
+   `Test-Path` must return `True`. The variable lasts only for that terminal session. Codex can invoke the absolute executable path directly; this variable is not automatically shared with its shell. Optionally add the executable's directory to the user `Path`, restart VS Code, and verify `aseprite --version`. No MCP server or Codex configuration change is required for CLI use. Normal execution permissions still apply.
+3. Keep editable sources and their backups outside the repository, for example `D:\focuswilds-art`. Use RGB color mode with transparency, separate static architecture/props from animated people/effects, and preview at the actual display size. Do not force detailed environment artwork into the characters' coarse pixel density. For the first survivor, preserve the existing sheet dimensions, pose order and scale; inspect current frame bounds before choosing the source grid. Keep the feet on a consistent anchor. Name frame ranges such as `idle` and, only where required, `walk`.
+4. Export into an existing local scratch directory first. The following is a template; replace all paths with existing inputs/output directories, and use fresh output names because export can overwrite files:
+
+   ```powershell
+   & $asepriteExe --batch 'D:\focuswilds-art\survivor.aseprite' --sheet-type rows --sheet-columns 4 --format json-array --sheet 'D:\focuswilds-art\survivor-preview.png' --data 'D:\focuswilds-art\survivor-preview.json' --list-tags
+   ```
+
+   This demonstrates export, not the current runtime layout contract. Do not trim or repack existing sheets without updating frame bounds/anchors and their callers. JSON import and automatic PNG-to-WebP conversion are not currently wired into the application. Integrate only validated outputs, retaining or updating the existing renderer contract deliberately.
+5. For later Lua automation, use `--batch --script` with a reviewed local script. No plugin is needed for ordinary drawing or CLI export. Codex can write scripts and integrate outputs; drawn poses and visual quality still need inspection in Aseprite and the running scene.
+
+First acceptance: one survivor with four stable idle poses in the current login composition, followed by the six-frame fire and one environment object. Check alignment, silhouettes, halos, lighting, depth and desktop/phone framing before expanding. Preserve timer behavior, landscape rotation, accessible UI and zero additional Firestore operations. Measure transferred bytes and decoded texture memory; recheck real-device performance after integration. Installation, CLI execution and this export template have not yet been tested on the owner's machine.
+
+References: [Aseprite CLI](https://www.aseprite.org/docs/cli/), [animation](https://www.aseprite.org/docs/animation/), [scripting](https://www.aseprite.org/docs/scripting/).
+
 ## Current checkpoint
 
 The shelter is the only signed-in experience at `/focuswilds/`. Existing hashes, including `#legacy`, open the shelter. The retired 25/5 timer, companion/EXP screens, forest renderer, their dedicated tests and unused forest WebP/CSS have been removed. Three.js is now used by the separate login courtyard described below. No cloud data was deleted by implementation or tests.

@@ -7,6 +7,7 @@ import valleyUrl from '@/assets/title-valley.webp'
 import peopleUrl from '@/assets/title-survivors.webp'
 import stoneUrl from '@/assets/title-stone.webp'
 import bannerUrl from '@/assets/title-banner.webp'
+import fireUrl from '@/assets/title-fire.webp'
 import shelterPhoneUrl from '@/assets/title-shelter-phone.webp'
 import archPhoneUrl from '@/assets/title-arch-phone.webp'
 import foregroundPhoneUrl from '@/assets/title-foreground-phone.webp'
@@ -32,8 +33,6 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const material = <T extends THREE.Material>(value: T) => { materials.add(value); return value }
   let disposed = false, lost = false, assetsReady = false, frame = 0, elapsed = 0, lastTime = 0, accumulator = 0
   let lowQuality = false, slowFrames = 0, samples = 0
-  const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let reduced = motion.matches
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.1
@@ -64,14 +63,14 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const shelterMap = texture(phone ? shelterPhoneUrl : shelterUrl), archMap = texture(phone ? archPhoneUrl : archUrl)
   const foregroundMap = texture(phone ? foregroundPhoneUrl : foregroundUrl), valleyMap = texture(phone ? valleyPhoneUrl : valleyUrl)
   const peopleMap = texture(peopleUrl, true), stoneMap = texture(stoneUrl)
-  const bannerMap = texture(bannerUrl)
+  const bannerMap = texture(bannerUrl), fireMap = texture(fireUrl, true)
+  fireMap.repeat.set(1 / 3, .5)
   stoneMap.wrapS = stoneMap.wrapT = THREE.RepeatWrapping
   stoneMap.repeat.set(5, 2)
   const ground = material(new THREE.MeshStandardMaterial({ map: stoneMap, color: '#b0b0b4', roughness: .93, emissiveMap: stoneMap, emissive: '#ffffff', emissiveIntensity: .12 }))
   const sideStoneMap = stoneMap.clone()
   sideStoneMap.repeat.set(5, .4); textures.add(sideStoneMap)
   const masonry = material(new THREE.MeshStandardMaterial({ map: sideStoneMap, color: '#a0a0a4', roughness: 1, emissiveMap: sideStoneMap, emissive: '#ffffff', emissiveIntensity: .22 }))
-  const darkWood = material(new THREE.MeshStandardMaterial({ color: '#282326', roughness: 1 }))
   const box = geometry(new THREE.BoxGeometry(1, 1, 1))
   function solid(name: string, mat: THREE.Material | THREE.Material[], x: number, y: number, z: number, w: number, h: number, d: number) {
     const mesh = new THREE.Mesh(box, mat)
@@ -117,7 +116,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   landscape.renderOrder = -1
   card('occupied-shelter', shelterMap, -8.4, camp.floor, -3, 20, 13.33)
   card('broken-arch', archMap, 4.8, camp.floor, 3.8, 11.5, 17.25)
-  card('foreground-parapet', foregroundMap, -5, -2.3, 12, 27, 9.4)
+  const foreground = card('foreground-parapet', foregroundMap, -5, -2.3, 12, 27, 9.4)
   card('right-terrace-ruins', foregroundMap, 7.5, -1.4, 5.3, 10, 4)
 
   const moon = new THREE.DirectionalLight('#e0e2eb', 1.4)
@@ -153,22 +152,27 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     rock.position.set(camp.fireX + Math.cos(angle) * .65, .9, camp.fireZ + Math.sin(angle) * .65)
     rock.scale.set(1, .65, 1); rock.castShadow = rock.receiveShadow = true; scene.add(rock)
   }
-  for (let i = 0; i < 4; i++) {
-    const log = solid('hearth-log', darkWood, camp.fireX, .94, camp.fireZ, 1.05, .16, .18)
-    log.rotation.y = i * Math.PI / 4
+  const fire = card('animated-hearth', fireMap, camp.fireX, .86, camp.fireZ, 1.8, 1.8, false)
+  fire.material.transparent = true
+  fire.material.depthWrite = false
+  const iron = material(new THREE.MeshStandardMaterial({ color: '#333035', roughness: .8, metalness: .5 }))
+  const rod = geometry(new THREE.CylinderGeometry(.025, .035, 1, 6))
+  const apex = new THREE.Vector3(camp.fireX, 2.9, camp.fireZ)
+  for (let i = 0; i < 3; i++) {
+    const angle = i * Math.PI * 2 / 3
+    const foot = new THREE.Vector3(camp.fireX + Math.cos(angle) * .8, camp.floor, camp.fireZ + Math.sin(angle) * .8)
+    const leg = new THREE.Mesh(rod, iron)
+    leg.name = 'cooking-tripod'; leg.position.copy(foot).add(apex).multiplyScalar(.5)
+    leg.scale.y = foot.distanceTo(apex)
+    leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), apex.clone().sub(foot).normalize())
+    leg.castShadow = true; scene.add(leg)
   }
-  const flameFrames = Array.from({ length: 6 }, (_, pose) => {
-    const shape = new THREE.Shape(), lean = [-.08, .04, .1, -.04, -.1, .02][pose]
-    const tip = [1.1, 1.25, .95, 1.18, 1.3, 1.05][pose]
-    shape.moveTo(-.4, 0)
-    for (const [x, y] of [[-.4,.2],[-.3,.2],[-.3,.45],[-.2,.45],[-.2,.7],[-.1,.6],[lean,tip],[lean+.09,tip],[lean+.09,.6],[.2,.8],[.2,.35],[.32,.35],[.32,.15],[.4,.15],[.4,0]]) shape.lineTo(x, y)
-    shape.closePath(); return geometry(new THREE.ShapeGeometry(shape))
-  })
-  const flameMaterial = material(new THREE.MeshBasicMaterial({ color: '#e56349', side: THREE.DoubleSide }))
-  const fire = new THREE.Mesh(flameFrames[0], flameMaterial)
-  fire.position.set(camp.fireX, .95, camp.fireZ); fire.rotation.x = cardPitch; scene.add(fire)
-  const core = new THREE.Mesh(flameFrames[2], material(new THREE.MeshBasicMaterial({ color: '#fff0db', side: THREE.DoubleSide })))
-  core.scale.set(.52, .68, 1); core.position.z = .012; fire.add(core)
+  const pot = new THREE.Mesh(geometry(new THREE.LatheGeometry([
+    new THREE.Vector2(0, 0), new THREE.Vector2(.18, 0), new THREE.Vector2(.3, .1), new THREE.Vector2(.34, .35),
+  ], 16)), iron)
+  pot.name = 'suspended-cooking-pot'; pot.position.set(camp.fireX, 2, camp.fireZ); pot.castShadow = true; scene.add(pot)
+  const hanger = new THREE.Mesh(rod, iron)
+  hanger.position.set(camp.fireX, 2.62, camp.fireZ); hanger.scale.y = .56; scene.add(hanger)
   const glow = new THREE.PointLight('#9d271f', 7, 6, 2)
   glow.position.set(camp.fireX, 1, camp.fireZ + .2); scene.add(glow)
 
@@ -193,7 +197,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     scene.add(puff); return puff
   })
   const smokeMat = material(new THREE.SpriteMaterial({ map: puffMap, color: '#aaa1a0', transparent: true, depthWrite: false, opacity: .65 }))
-  const smoke = Array.from({ length: 8 }, () => { const puff = new THREE.Sprite(smokeMat); puff.name = 'hearth-smoke'; scene.add(puff); return puff })
+  const smoke = Array.from({ length: 8 }, () => { const puff = new THREE.Sprite(material(smokeMat.clone())); puff.name = 'hearth-smoke'; scene.add(puff); return puff })
   const sparkCount = 28, sparkPositions = new Float32Array(sparkCount * 3)
   const sparkGeometry = geometry(new THREE.BufferGeometry())
   sparkGeometry.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3))
@@ -233,6 +237,9 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     camera.top = half; camera.bottom = -half
     camera.position.set(framing.centerX, framing.centerY + 14, 30)
     camera.lookAt(framing.centerX, framing.centerY, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld()
+    foreground.scale.setScalar(framing.foregroundScale)
+    foreground.position.y = -2.3 + Math.cos(cardPitch) * 9.4 * framing.foregroundScale / 2
+    foreground.position.z = 12 + Math.sin(cardPitch) * 9.4 * framing.foregroundScale / 2
     const landscapeHeight = Math.max(framing.height + 2, (framing.height * framing.aspect + 2) / (39.1 / 22))
     landscape.scale.setScalar(landscapeHeight / 22)
     landscape.position.set(framing.centerX, framing.centerY, 0).addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 65)
@@ -246,23 +253,26 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   function render(delta: number) {
     if (disposed || lost || failedAsset) return
     elapsed += delta
-    const time = reduced ? 0 : elapsed
+    const time = elapsed
     hearth.intensity = 24 + Math.sin(time*5)*1.4 + Math.sin(time*9)*.6
     glow.intensity = 7 + Math.sin(time*4)*.5
     const firePose = Math.floor(time*8)%6
-    fire.geometry = flameFrames[firePose]; core.geometry = flameFrames[(firePose+2)%6]
+    fireMap.offset.set((firePose % 3) / 3, firePose < 3 ? .5 : 0)
     people.forEach(({ map, column }) => { map.offset.y = survivorPose(time,column) ? 0 : .5 })
     for (let i=0;i<clothPositions.count;i++) {
       const freedom = (3-clothRest[i*3+1])/6
-      clothPositions.setZ(i, Math.sin(time*1.4+clothRest[i*3+1]*2)*freedom*.16)
+      const wave = Math.sin(time*1.4+clothRest[i*3+1]*2)*freedom
+      clothPositions.setZ(i, wave*.3)
+      clothPositions.setX(i, clothRest[i*3]+wave*.13)
     }
     clothPositions.needsUpdate = true
     clothShape.computeVertexNormals()
     fog.forEach((puff,i) => { puff.position.x += delta*(.08+i%3*.02); if(puff.position.x>45)puff.position.x=-35 })
     smoke.forEach((puff,i) => {
-      const phase=(time*.12+i/smoke.length)%1
+      const phase=(time*.18+i/smoke.length)%1
       puff.position.set(camp.fireX+Math.sin(phase*4)*.45,1.3+phase*5,camp.fireZ-.15-phase*.3)
       puff.scale.set(1+phase*1.8,1+phase*2.5,1)
+      puff.material.opacity = Math.sin(phase*Math.PI)**2*.65
     })
     for(let i=0;i<sparkCount;i++) {
       const phase=(time*(.15+i%4*.02)+i/sparkCount)%1
@@ -278,7 +288,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   }
   function fail() { lost=true;window.clearTimeout(assetTimeout);cancelAnimationFrame(frame);status('fallback') }
   function tick(now:number) {
-    if(disposed||lost||document.hidden||reduced||!assetsReady)return
+    if(disposed||lost||document.hidden||!assetsReady)return
     const delta=lastTime?Math.min((now-lastTime)/1000,.1):0;lastTime=now
     if(delta>.027)slowFrames++
     if(++samples===150&&slowFrames>50&&!lowQuality) {
@@ -293,20 +303,19 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   function resume() {
     cancelAnimationFrame(frame);lastTime=0;accumulator=0
     if(disposed||lost||!assetsReady)return
-    canvas.dataset.motion=reduced?'reduced':document.hidden?'paused':'running'
-    if(document.hidden||reduced) { try { render(0) } catch { fail() } }
+    canvas.dataset.motion=document.hidden?'paused':'running'
+    if(document.hidden) { try { render(0) } catch { fail() } }
     else frame=requestAnimationFrame(tick)
   }
-  function motionChanged(){reduced=motion.matches;resume()}
   function contextLost(event:Event){event.preventDefault();fail()}
   function contextRestored(){if(disposed||failedAsset)return;lost=false;try{resize();if(assetsReady)status('ready');resume()}catch{fail()}}
   const observer=new ResizeObserver(() => { try { resize() } catch { fail() } });observer.observe(host)
-  document.addEventListener('visibilitychange',resume);motion.addEventListener('change',motionChanged)
+  document.addEventListener('visibilitychange',resume)
   canvas.addEventListener('webglcontextlost',contextLost);canvas.addEventListener('webglcontextrestored',contextRestored)
   function dispose() {
     if(disposed)return;disposed=true;window.clearTimeout(assetTimeout);cancelAnimationFrame(frame);observer.disconnect()
     manager.onLoad=()=>{};manager.onError=()=>{}
-    document.removeEventListener('visibilitychange',resume);motion.removeEventListener('change',motionChanged)
+    document.removeEventListener('visibilitychange',resume)
     canvas.removeEventListener('webglcontextlost',contextLost);canvas.removeEventListener('webglcontextrestored',contextRestored)
     textures.forEach(value=>value.dispose());geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose())
     target.dispose();moon.shadow.dispose();renderer.dispose();canvas.remove()

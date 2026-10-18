@@ -4,6 +4,7 @@ import { focusStore } from '@/lib/firestore-store'
 import { initializeShelter, loadShelter } from '@/lib/shelter-store'
 import type { Language, Shelter } from '@/lib/shelter'
 import { shelterText } from '@/lib/shelter-text'
+import { PageLoading } from '@/components/page-loading'
 import { Button } from '@/components/ui/button'
 import { ShelterCamp } from '@/components/shelter-camp'
 
@@ -30,6 +31,6 @@ export function ShelterJourney({ userId, onLanguageChange }: { userId: string; o
   return <div className="shelter-welcome">
     {error ? <><p role="alert">{t.loadError}</p><Button disabled={busy} onClick={() => setRetry(value => value + 1)}>{t.retry}</Button></>
       : state === null ? <><h1>{t.shelter}</h1><p>{t.newGame}</p><Button disabled={busy} onClick={() => void start()}>{busy ? t.saving : t.startNew}</Button></>
-        : <p role="status">{t.loading}</p>}
+        : <PageLoading/>}
   </div>
 }

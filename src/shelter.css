@@ -61,7 +61,6 @@
   .shelter-clock { font-size: 42px; }
   .shelter-scene-caption { font-size: 12px; bottom: 5px; }
 }
-@media (prefers-reduced-motion: reduce) { .fort-flame { animation: none; } }
 @media (max-height: 500px), (max-width: 300px) {
   .shelter-camp { flex: none; }
   .shelter-scene { flex: none; height: 160px; }

@@ -34,7 +34,8 @@ Take the first option that fully works:
 - Keep visual references, inspiration titles, and private design discussions out of repository files, commit messages, and public UI copy.
 - Before changing scenes, visual assets, lighting, palettes or animation, read README.md and the "Approved visual direction" section in docs/IMPLEMENTATION_PLAN.md. Preserve those requirements; distinguish approved targets from implemented and verified behavior.
 - Follow the documented, owner-approved approach. Before substituting a different approach, changing the agreed visual direction or applying a proposed improvement outside that approach, ask the owner and wait for explicit approval. Do not treat a preference for a simpler implementation as authorization to change the agreed result.
-- Design desktop layouts for wide screens and phone layouts for portrait use. Preserve accessibility zoom, reduced-motion support, and timer state during rotation. Installation as a web app is a product goal; do not claim PWA support before it exists.
+- Design desktop layouts for wide screens and phone layouts for portrait use. Preserve accessibility zoom and timer state during rotation. Owner override (2026-10-18): animations must run throughout the system regardless of OS reduced-motion settings; do not add a pause control. Suspend rendering only while the document is hidden or graphics are unavailable. Installation as a web app is a product goal; do not claim PWA support before it exists.
+- Use one shared full-screen page loading treatment: a spinner and `Preparing...` centered on a plain background. Hide underlying page controls while loading; show recovery controls only on failure.
 - Keep editable inputs, textareas, and selects at least 16px on phones to avoid focus zoom in Safari; do not disable viewport zoom.
 - Use GNU Unifont throughout the entire interface, including body text, editable fields, dialogs, headings, controls, and timers. The replacement UI supports English and Thai, defaults to English, and stores the account language in Firestore through signed-in Settings. Keep README and IMPLEMENTATION_PLAN.md in English.
 - Keep the main experience within one viewport. Open history, creatures, and progress through game-style icon dialogs; allow accessible scrolling inside long dialogs without visible scrollbars. Keep timer state mounted while dialogs open.
@@ -71,6 +72,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Every commit must have a concise English subject and a descriptive body explaining what changed, why, validation performed, and material limitations when applicable.
 - Report the commit hash and a brief summary to the user.
 - After committing verified task changes, push to the configured remote and branch unless the user asks otherwise. Report whether the push succeeded. Never force-push, amend commits, or rewrite history unless explicitly requested.
+- Publishing hold (2026-10-18): the owner has asked not to push. Keep subsequent work local until the owner explicitly authorizes pushing again.
 
 ## Instruction loading and token efficiency
 

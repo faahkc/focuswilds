@@ -15,17 +15,15 @@
     <link rel="icon" type="image/webp" href="/app-icon.webp" sizes="512x512" />
     <title>Focuswilds</title>
     <style>
-      .startup-title { min-height:100svh; display:grid; place-content:center; gap:24px; padding:24px; text-align:center; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace }
-      .startup-title h1 { font-size:clamp(40px,10vw,80px); margin:0; font-weight:400 }
-      .startup-title p { max-width:420px; margin:0 auto }
-      .startup-title button { justify-self:center; font:inherit; min-height:44px; padding:8px 24px; background:#181417; color:inherit; border:1px solid #925853 }
-      .startup-title [role=status]::before { content:''; display:inline-block; width:12px; height:12px; margin-right:12px; border:1px solid #67514e; border-top-color:#e4e1dc; animation:startup-loading 1.2s linear infinite }
-      @keyframes startup-loading { to { transform:rotate(360deg) } }
-      @media(prefers-reduced-motion:reduce) { .startup-title [role=status]::before { animation:none } }
+      .page-loading { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; margin:0; padding:24px; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace; text-align:center }
+      .page-loading-spinner { display:inline-block; width:14px; height:14px; flex-shrink:0; border:1px solid #67514e; border-top-color:#e4e1dc; border-right-color:#b35a50; animation:page-loading-spin 1.2s linear infinite }
+      @keyframes page-loading-spin { to { transform:rotate(360deg) } }
+      .startup-recovery { position:fixed; inset:0; z-index:101; padding:24px; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace }
+      .startup-recovery button { font:inherit; min-height:44px; padding:8px 24px; background:#181417; color:inherit; border:1px solid #925853 }
     </style>
   </head>
   <body>
-    <div id="root"><main class="startup-title"><h1>Focuswilds</h1><p role="status">Opening the gates…</p><p>If this takes longer than usual, reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button><noscript><p>Enable JavaScript to open Focuswilds.</p></noscript></main></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing…</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div>
+    <script type="module" src="/src/main.tsx" onerror="document.querySelector('.startup-recovery').hidden=false"></script>
   </body>
 </html>

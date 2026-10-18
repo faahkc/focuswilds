@@ -13,7 +13,8 @@ export function stepHeight(index: number) {
 
 export function titleFraming(width: number, height: number) {
   const aspect = Math.max(.25, width / Math.max(1, height))
-  return { aspect, height: aspect < 1 ? 23 : 20, centerX: aspect < 1 ? -4 : 0, centerY: 5.2 }
+  const wide = Math.max(0, Math.min(1, (aspect - .65) / .75))
+  return { aspect, height: Math.max(18 + wide * 2, 7.8 / aspect), centerX: -6 * (1 - wide), centerY: 5.2, foregroundScale: .68 + wide * .32 }
 }
 
 export function sceneRenderSize(width: number, height: number, lowQuality = false) {

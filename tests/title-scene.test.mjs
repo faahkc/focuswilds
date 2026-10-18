@@ -8,7 +8,7 @@ import ts from 'typescript'
 
 const require = createRequire(import.meta.url)
 const flush = () => new Promise(resolve => setImmediate(resolve))
-function titleScene(renderer) {
+function titleScene(renderer, onStatusChange) {
   let effect, state = 'loading'
   const host = {}
   const source = fs.readFileSync(new URL('../src/components/title-scene.tsx', import.meta.url), 'utf8')
@@ -20,26 +20,25 @@ function titleScene(renderer) {
     if (name === '@/assets/title-fallback.webp') return { __esModule: true, default: '/assets/title-fallback.webp' }
     return require(name)
   }, module, module.exports)
-  const html = renderToStaticMarkup(React.createElement(module.exports.TitleScene))
-  return { html, host, mount: () => effect(), state: () => state }
+  const html = renderToStaticMarkup(React.createElement(module.exports.TitleScene, { onStatusChange }))
+  return { html, host, mount: () => effect(), state: () => state, render: () => renderToStaticMarkup(React.createElement(module.exports.TitleScene, { onStatusChange })) }
 }
 
-test('the title has an accessible animated load status and a bundled fallback independent of signed-in camp assets', () => {
+test('the title does not flash a fallback image while its scene is loading', () => {
   const scene = titleScene(() => () => {})
-  assert.match(scene.html, /role="status"/)
-  assert.match(scene.html, /wilds-loading-mark/)
-  assert.match(scene.html, /title-fallback-image/)
-  assert.match(scene.html, /src="\/assets\/title-fallback.webp"/)
+  assert.doesNotMatch(scene.html, /<img|title-fallback-image/)
   assert.doesNotMatch(scene.html, /https:|shelter-courtyard|survivors/)
 })
 
 test('title rendering starts after mounting, reports readiness and disposes on unmount', async () => {
   let starts = 0, stops = 0
-  const scene = titleScene((host, status) => { starts++; assert.equal(host, scene.host); status('ready'); return () => stops++ })
+  const statuses = []
+  const scene = titleScene((host, status) => { starts++; assert.equal(host, scene.host); status('ready'); return () => stops++ }, value => statuses.push(value))
   const stop = scene.mount()
   await flush()
   assert.equal(starts, 1)
   assert.equal(scene.state(), 'ready')
+  assert.deepEqual(statuses, ['loading', 'ready'])
   stop()
   assert.equal(stops, 1)
 })
@@ -49,6 +48,8 @@ test('an unavailable renderer ends loading in fallback and late imports do not c
   failure.mount()
   await flush()
   assert.equal(failure.state(), 'fallback')
+  assert.match(failure.render(), /src="\/assets\/title-fallback.webp"/)
+  assert.match(failure.render(), /Scene animation could not load/)
   let starts = 0
   const abandoned = titleScene(() => { starts++; return () => {} })
   abandoned.mount()()

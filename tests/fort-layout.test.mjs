@@ -41,3 +41,11 @@ test('seeded rubble and atmosphere placement stay stable across mounts without r
     assert.ok(value >= 0 && value < 1)
   }
 })
+
+test('framing changes continuously at square sizes and keeps the portrait camp visible', () => {
+  const before = titleFraming(990, 1000), after = titleFraming(1010, 1000)
+  assert.ok(Math.abs(before.centerX - after.centerX) < .2)
+  const phone = titleFraming(390, 844)
+  assert.ok(phone.height * phone.aspect >= 7.8)
+  assert.ok(phone.foregroundScale < titleFraming(1440, 900).foregroundScale)
+})

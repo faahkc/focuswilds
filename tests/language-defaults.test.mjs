@@ -68,7 +68,7 @@ test('runtime metadata and account controls require a signed-in saved Thai prefe
       const { default: App } = load('App.tsx', {
         react: runtime.react, '@/components/ui/badge': { Badge: div }, '@/components/ui/button': { Button },
         '@/components/auth-panel': { AuthPanel: props => { account = props; return null } },
-        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null },
+        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null }, '@/components/page-loading': { PageLoading: () => null },
       })
       renderToStaticMarkup(React.createElement(App))
       runtime.effects.forEach(effect => effect())
@@ -130,7 +130,7 @@ test('root and old links all open the fort without legacy navigation', () => {
         } },
         '@/components/ui/badge': { Badge: div }, '@/components/ui/button': { Button },
         '@/components/auth-panel': { AuthPanel: () => null },
-        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null },
+        '@/components/screen-layout': { ScreenLayout: div }, '@/components/title-scene': { TitleScene: () => null }, '@/components/page-loading': { PageLoading: () => null },
       })
       const html = renderToStaticMarkup(React.createElement(App))
       assert.ok(html.includes('data-journey="shelter"'))

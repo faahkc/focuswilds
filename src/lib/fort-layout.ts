@@ -5,30 +5,43 @@ export function seededRandom(seed: number) {
   }
 }
 
-export const camp = { floor: .8, fireX: -4.5, fireZ: 2, stairX: .5 }
+export const camp = { floor: .8, fireX: -4.24, fireZ: 1.88, stairX: .54 }
 export const fortCamera = { x: 14, y: 14, z: 30 }
+export const fortStairs = { z: 2.38, yaw: -.439, run: .39, rise: .18, width: 5.4 }
+
+export function stairPosition(index: number, stairX = camp.stairX) {
+  return { x: stairX + Math.sin(fortStairs.yaw) * index * fortStairs.run, y: stepHeight(index), z: fortStairs.z + Math.cos(fortStairs.yaw) * index * fortStairs.run }
+}
+
+function stairLocal(x: number, z: number, stairX: number) {
+  const dx = x - stairX, dz = z - fortStairs.z, c = Math.cos(fortStairs.yaw), s = Math.sin(fortStairs.yaw)
+  return { across: dx * c - dz * s, along: dx * s + dz * c }
+}
 
 export function courtyardRightEdge(z: number) {
-  return 2 + Math.min(1, Math.max(0, (z + 4) / 2)) * 6.6 + Math.sin(z * .9) * .35 + Math.min(3, Math.max(0, z - 4) * .12)
+  return .6 + Math.min(1, Math.max(0, (z + 4) / 11)) * 9 + Math.sin(z * .9) * .18 + Math.max(0, z - 9) * .08
 }
 
 export function courtyardHeight(x: number, z: number, stairX = camp.stairX) {
-  const descent = Math.min(9, Math.max(0, (z - 3.8) / .53)) * .22
-  const roughness = Math.min(1, Math.max(0, z - 4)) * Math.min(1, Math.max(0, Math.abs(x - camp.stairX) - 3))
-  const stairBed = z > 3.8 && z < 9 && Math.abs(x - stairX) < 2.8 ? .4 : 0
-  return camp.floor - descent - stairBed - Math.max(0, z - 12) * .35 - Math.abs(Math.sin(x * 1.3) * Math.cos(z * .9)) * .18 * roughness
+  const local = stairLocal(x, z, stairX)
+  const stairBed = local.along > -.24 && local.along < fortStairs.run * 8 + .55 && Math.abs(local.across) < fortStairs.width / 2 + .3
+  const descent = Math.min(8, Math.max(0, (stairBed ? local.along : z - 3.8) / fortStairs.run)) * fortStairs.rise
+  const roughness = stairBed ? 0 : Math.min(1, Math.max(0, z - 4))
+  return camp.floor - descent - (stairBed ? .55 : 0) - Math.max(0, z - 9) * .35 - Math.abs(Math.sin(x * 1.3) * Math.cos(z * .9)) * .18 * roughness
 }
 
 export function courtyardTerrain(stairX = camp.stairX) {
-  const columns = 32, rows = 48, positions: number[] = [], uvs: number[] = [], indices: number[] = []
+  const columns = 48, rows = 96, positions: number[] = [], uvs: number[] = [], indices: number[] = []
   for (let row = 0; row <= rows; row++) {
-    const z = -8 + row * 1.5
+    const z = -8 + row * .75
     const left = -16 + Math.sin(z * .7) * .35
     const right = courtyardRightEdge(z)
     for (let column = 0; column <= columns; column++) {
       const x = left + (right - left) * column / columns
       positions.push(x, courtyardHeight(x, z, stairX), z); uvs.push(x / 22.5, z / 10)
       if (row < rows && column < columns) {
+        const local = stairLocal(x + (right - left) / columns / 2, z + .375, stairX)
+        if (Math.abs(local.across) < fortStairs.width / 2 + .5 && local.along > -.6 && local.along < fortStairs.run * 8 + .3) continue
         const a = row * (columns + 1) + column, c = a + columns + 1
         indices.push(a, c, a + 1, a + 1, c, c + 1)
       }
@@ -49,7 +62,7 @@ export function courtyardTerrain(stairX = camp.stairX) {
 }
 
 export function stepHeight(index: number) {
-  return camp.floor - Math.max(0, Math.min(8, index)) * .22
+  return camp.floor - Math.max(0, Math.min(8, index)) * fortStairs.rise
 }
 
 export function courtyardPavers(stairX = camp.stairX) {
@@ -59,7 +72,8 @@ export function courtyardPavers(stairX = camp.stairX) {
     for (let column = 0; column < 24; column++) {
       const x = -15 + column + (row % 2) * .5
       const jitterX = (random() - .5) * .16, jitterZ = (random() - .5) * .12, turn = random() * .4
-      if (x > courtyardRightEdge(z) - .65 || (z > 3.5 && z < 9.3 && Math.abs(x - stairX) < 3)) continue
+      const local = stairLocal(x, z, stairX)
+      if (x > courtyardRightEdge(z) - .65 || (local.along > -.5 && local.along < fortStairs.run * 8 + .85 && Math.abs(local.across) < fortStairs.width / 2 + .4)) continue
       stones.push({ x: x + jitterX, y: courtyardHeight(x + jitterX, z + jitterZ, stairX), z: z + jitterZ, turn })
     }
   }
@@ -69,8 +83,8 @@ export function courtyardPavers(stairX = camp.stairX) {
 export function titleFraming(width: number, height: number) {
   const aspect = Math.max(1, width) / Math.max(1, height)
   const wide = Math.max(0, Math.min(1, (aspect - .65) / .75))
-  const viewHeight = Math.max(14.5, 7.8 / aspect)
-  return { aspect, height: viewHeight, centerX: -.8 - 5.4 * (1 - wide), centerY: 1.7 + (1 - wide) * (1.2 + viewHeight * .17 / Math.cos(Math.atan2(fortCamera.y, Math.hypot(fortCamera.x, fortCamera.z)))), compact: 1 - wide, foregroundScale: .55 + wide * .45 }
+  const viewHeight = Math.max(14.5, 9 / aspect)
+  return { aspect, height: viewHeight, centerX: -.8, centerY: 1.7, panX: -3.6 * (1 - wide) }
 }
 
 export function sceneRenderSize(width: number, height: number, lowQuality = false) {

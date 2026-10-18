@@ -1,12 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { seededRandom, camp, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+import { BufferGeometry, Float32BufferAttribute, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from 'three'
+import { seededRandom, camp, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortStairs, stairPosition, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
 
 test('the stair starts at the courtyard and descends in consistent bounded risers', () => {
   assert.equal(stepHeight(0), camp.floor)
   assert.equal(stepHeight(-1), camp.floor)
   assert.equal(stepHeight(100), stepHeight(8))
-  for (let i = 1; i <= 8; i++) assert.ok(Math.abs(stepHeight(i - 1) - stepHeight(i) - .22) < 1e-10)
+  for (let i = 1; i <= 8; i++) {
+    assert.ok(Math.abs(stepHeight(i - 1) - stepHeight(i) - fortStairs.rise) < 1e-10)
+    const a = stairPosition(i - 1), b = stairPosition(i)
+    assert.ok(b.x < a.x && b.z > a.z)
+    assert.ok(Math.abs(Math.hypot(b.x - a.x, b.z - a.z) - fortStairs.run) < 1e-10)
+  }
 })
 
 test('portrait framing preserves a finite camera and render resolution stays bounded on every screen', () => {
@@ -21,7 +27,7 @@ test('portrait framing preserves a finite camera and render resolution stays bou
     assert.ok(Math.abs(normal.width / normal.height - width / height) < .01)
   }
   assert.equal(sceneRenderSize(0, 0).width, 1)
-  assert.ok(titleFraming(390, 844).centerX < titleFraming(1440, 900).centerX)
+  assert.ok(titleFraming(390, 844).panX < titleFraming(1440, 900).panX)
 })
 
 test('idle animation switches drawn poses discretely with an independent phase per survivor', () => {
@@ -45,12 +51,13 @@ test('seeded rubble and atmosphere placement stay stable across mounts without r
 test('framing changes continuously at square sizes and keeps the portrait camp visible', () => {
   const before = titleFraming(990, 1000), after = titleFraming(1010, 1000)
   assert.ok(Math.abs(before.centerX - after.centerX) < .2)
+  assert.ok(Math.abs(before.panX - after.panX) < .2)
   const phone = titleFraming(390, 844)
-  assert.ok(phone.height * phone.aspect >= 7.8)
-  assert.ok(phone.centerY > titleFraming(1440, 900).centerY)
-  assert.equal(phone.compact, 1)
+  assert.ok(phone.height * phone.aspect >= 9)
+  assert.equal(phone.centerY, titleFraming(1440, 900).centerY)
+  assert.equal(phone.centerX, titleFraming(1440, 900).centerX)
+  assert.ok(phone.panX < 0)
   assert.ok(phone.height >= 14.5)
-  assert.ok(phone.foregroundScale < titleFraming(1440, 900).foregroundScale)
 })
 
 test('trimmed idle frames stay inside the atlas without sampling the neighboring pose', () => {
@@ -89,8 +96,8 @@ test('terrain keeps the occupied camp level and provides a recessed stair bed at
   for (const x of [-10, -6, -2, 4]) assert.equal(courtyardHeight(x, 0), camp.floor)
   for (const stairX of [camp.stairX, -5.1]) {
     for (let i = 0; i < 9; i++) {
-      const z = 4.1 + i * .53
-      assert.ok(courtyardHeight(stairX, z, stairX) <= stepHeight(i) - .25)
+      const { x, y, z } = stairPosition(i, stairX)
+      assert.ok(courtyardHeight(x, z, stairX) <= y - .25)
     }
   }
   assert.ok(courtyardHeight(0, 24) < courtyardHeight(0, 12))
@@ -109,7 +116,9 @@ test('terrain has valid upward-facing top triangles and continuous deep skirts i
     assert.ok(up > 0)
   }
   assert.ok(mesh.positions.some((v, i) => i % 3 === 1 && v === -60))
-  assert.ok(courtyardRightEdge(0) > courtyardRightEdge(-6) + 5)
+  assert.ok(courtyardRightEdge(0) > courtyardRightEdge(-6) + 2)
+  assert.ok(courtyardRightEdge(7) > courtyardRightEdge(0) + 4)
+  for (let z = -8; z < 20; z += .1) assert.ok(Math.abs(courtyardRightEdge(z + .1) - courtyardRightEdge(z)) < .11)
 })
 
 test('paving follows the hillside, remains inside the edge and clears both stair layouts', () => {
@@ -121,7 +130,25 @@ test('paving follows the hillside, remains inside the edge and clears both stair
       assert.ok([x, y, z, turn].every(Number.isFinite))
       assert.equal(y, courtyardHeight(x, z, stairX))
       assert.ok(x < courtyardRightEdge(z))
-      if (z > 3.6 && z < 9.2) assert.ok(Math.abs(x - stairX) > 2.8)
+      const dx = x - stairX, dz = z - fortStairs.z
+      const across = dx * Math.cos(fortStairs.yaw) - dz * Math.sin(fortStairs.yaw), along = dx * Math.sin(fortStairs.yaw) + dz * Math.cos(fortStairs.yaw)
+      if (along > -.35 && along < fortStairs.run * 8 + .7) assert.ok(Math.abs(across) > fortStairs.width / 2 + .25)
     }
   }
+})
+
+test('the hillside leaves the stair flight open instead of drawing a ramp over its treads', () => {
+  const terrain = courtyardTerrain(), geometry = new BufferGeometry(), material = new MeshBasicMaterial()
+  geometry.setAttribute('position', new Float32BufferAttribute(terrain.positions, 3))
+  geometry.setIndex(terrain.indices.slice(0, terrain.topIndexCount))
+  const ground = new Mesh(geometry, material)
+  try {
+    for (let i = 0; i <= 8; i++) {
+      const point = stairPosition(i)
+      for (const across of [-1.5, 0, 1.5]) {
+        const ray = new Raycaster(new Vector3(point.x + Math.cos(fortStairs.yaw) * across, 10, point.z - Math.sin(fortStairs.yaw) * across), new Vector3(0, -1, 0))
+        assert.equal(ray.intersectObject(ground).length, 0, `terrain obstructs stair ${i} at ${across}`)
+      }
+    }
+  } finally { geometry.dispose(); material.dispose() }
 })

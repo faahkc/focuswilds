@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three'
-import { camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, seededRandom, sceneRenderSize, stairPosition, survivorFrame, survivorPose, titleFraming } from './fort-layout'
+import { camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, masonryCourses, seededRandom, sceneRenderSize, stairPosition, survivorFrame, survivorPose, titleFraming } from './fort-layout'
 import shelterUrl from '@/assets/title-shelter.webp'
 import archUrl from '@/assets/title-arch.webp'
 import suppliesUrl from '@/assets/title-supplies.webp'
@@ -135,7 +135,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const pavingShape = geometry(new THREE.ExtrudeGeometry(pavingOutline, { depth: .04, steps: 1, bevelEnabled: true, bevelSize: .025, bevelThickness: .01, bevelSegments: 1 }))
   pavingShape.rotateX(-Math.PI / 2)
   const pavingStone = material(parapetStone.clone()); pavingStone.color.set('#ccccd0'); pavingStone.emissiveIntensity = .26
-  pavingStone.bumpMap = parapetMap; pavingStone.bumpScale = .03; pavingStone.roughness = .75
+  pavingStone.bumpMap = pavingStone.roughnessMap = parapetMap; pavingStone.bumpScale = .03; pavingStone.roughness = .75
   const pavers = new THREE.InstancedMesh(pavingShape, pavingStone, 1596)
   pavers.name = 'worn-courtyard-paving'; pavers.receiveShadow = pavers.castShadow = true; scene.add(pavers)
   const pavingTransform = new THREE.Object3D()
@@ -165,7 +165,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const wallStone = material(masonry.clone()); wallStone.map = wallStone.emissiveMap = wallMap
   wallStone.bumpMap = wallMap; wallStone.bumpScale = .12; wallStone.emissiveIntensity = .2
   const blockMap = masonryMap.clone(); blockMap.repeat.set(.14, .14); blockMap.offset.set(.2, .38); textures.add(blockMap)
-  const blockStone = material(new THREE.MeshStandardMaterial({ map: blockMap, bumpMap: blockMap, bumpScale: .035, color: '#b8b8bf', roughness: .85, emissiveMap: blockMap, emissive: '#ffffff', emissiveIntensity: .14 }))
+  const blockStone = material(new THREE.MeshStandardMaterial({ map: blockMap, bumpMap: blockMap, bumpScale: .035, color: '#b8b8bf', roughness: .85, roughnessMap: blockMap, emissiveMap: blockMap, emissive: '#ffffff', emissiveIntensity: .23 }))
   const blockShape = geometry(new THREE.ExtrudeGeometry(pavingOutline, { depth: .45, steps: 1, bevelEnabled: true, bevelSize: .055, bevelThickness: .035, bevelSegments: 1 }))
   blockShape.rotateX(-Math.PI / 2); blockShape.center()
   const wallBlocks = new THREE.InstancedMesh(blockShape, blockStone, 2048)
@@ -182,20 +182,16 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
       body.rotation.y = yaw; body.renderOrder = 6
       stoneUV(body, length, bodyTop - base, thickness)
     }
-    const columns = Math.ceil(length / .6)
-    for (let column = 0; column < columns; column++) {
-      const fraction = (column + .5) / columns, top = THREE.MathUtils.lerp(a.y, b.y, fraction) + random() * .15
-      for (let y = base + .18; y < top; y += .33) {
-        if (wallBlockCount >= wallBlocks.instanceMatrix.count) throw new Error('Fort masonry capacity exceeded.')
-        pavingTransform.position.lerpVectors(a, b, fraction); pavingTransform.position.y = y
-        pavingTransform.rotation.set((random() - .5) * .06, yaw + (random() - .5) * .1, (random() - .5) * .04)
-        pavingTransform.scale.set(length / columns * .96, .62 + random() * .07, thickness / .75 * (.85 + random() * .3))
-        pavingTransform.updateMatrix(); wallBlocks.setMatrixAt(wallBlockCount, pavingTransform.matrix)
-        wallBlocks.setColorAt(wallBlockCount++, new THREE.Color().setScalar(.72 + random() * .25))
-      }
+    for (const { fraction, y, width } of masonryCourses(length, base, a.y, b.y)) {
+      if (wallBlockCount >= wallBlocks.instanceMatrix.count) throw new Error('Fort masonry capacity exceeded.')
+      pavingTransform.position.lerpVectors(a, b, fraction); pavingTransform.position.y = y + (random() - .5) * .04
+      pavingTransform.rotation.set((random() - .5) * .06, yaw + (random() - .5) * .1, (random() - .5) * .04)
+      pavingTransform.scale.set(width, .59 + random() * .13, thickness / .75 * (.85 + random() * .3))
+      pavingTransform.updateMatrix(); wallBlocks.setMatrixAt(wallBlockCount, pavingTransform.matrix)
+      wallBlocks.setColorAt(wallBlockCount++, new THREE.Color().setScalar(.72 + random() * .25))
     }
   }
-  const leftWall = [[-6, 10.5, 16], [-2.02, 9.16, 15.18], [-.86, 8.08, 14.86], [.76, 7.48, 15.57], [2, 6.88, 15.44]].map(([x, y, z]) => new THREE.Vector3(x, y, z))
+  const leftWall = [[-6, 10.5, 16], [-2.02, 9.16, 15.18], [-.86, 8.08, 14.86], [.76, 7.48, 15.57], [2, 6.88, 15.44], [3.65, 5.8, 16], [5.1, 5.9, 17.4]].map(([x, y, z]) => new THREE.Vector3(x, y, z))
   for (let i = 1; i < leftWall.length; i++) masonryRun(leftWall[i - 1], leftWall[i], 1.15)
   masonryRun(new THREE.Vector3(-18, 10, -5), new THREE.Vector3(-18, 8.5, 4), 1.4)
   masonryRun(new THREE.Vector3(8.2, 6.2, 14), new THREE.Vector3(11.2, 6.5, 14), 1.5)
@@ -392,8 +388,8 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   moon.shadow.mapSize.set(1024, 1024)
   Object.assign(moon.shadow.camera, { left: -21, right: 18, top: 18, bottom: -15, far: 65 })
   moon.shadow.normalBias = .06
-  scene.add(moon, new THREE.HemisphereLight('#b3b5bf', '#262025', .8))
-  const hearth = new THREE.PointLight('#d78d7c', 22, 10, 2)
+  scene.add(moon, new THREE.HemisphereLight('#b3b5bf', '#262025', 1.2))
+  const hearth = new THREE.PointLight('#d78d7c', 34, 10, 2)
   hearth.position.set(camp.fireX, 1.7, camp.fireZ); scene.add(hearth)
   const people: { mesh: THREE.Mesh; map: THREE.Texture; column: number }[] = []
   const places = [[-2.15, 1.21], [-1.58, -.77], [.86, -1.68], [2.94, -.56]].map(([x, z]) => [camp.fireX + x, camp.fireZ + z])
@@ -403,7 +399,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     const survivor = card(`seated-survivor-${column}`, map, x, camp.floor + .01, z, 2.05, 2.05)
     // Seated actors belong in front of the rear cutouts' baked shelves and broken wall faces.
     survivor.renderOrder = 5; survivor.material.depthTest = false
-    if ('emissiveIntensity' in survivor.material) survivor.material.emissiveIntensity = .28
+    if ('emissiveIntensity' in survivor.material) survivor.material.emissiveIntensity = .45
     people.push({ mesh: survivor, map, column })
     const shadow = new THREE.Mesh(geometry(new THREE.CircleGeometry(.58, 20)), material(new THREE.MeshBasicMaterial({ color: '#08070a', transparent: true, opacity: .45, depthWrite: false })))
     shadow.rotation.x = -Math.PI / 2; shadow.scale.y = .55; shadow.position.set(x, camp.floor + .009, z)
@@ -529,7 +525,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     if (disposed || lost || failedAsset) return
     elapsed += delta
     const time = elapsed
-    hearth.intensity = 22 + Math.sin(time*5)*.65 + Math.sin(time*9)*.25
+    hearth.intensity = 34 + Math.sin(time*5)*.65 + Math.sin(time*9)*.25
     glow.intensity = 2 + Math.sin(time*4)*.18
     const flame = fireFrame(time), firePose = flame.pose
     fireMap.offset.set(flame.left / 384, 1 - flame.bottom / 256)

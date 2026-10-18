@@ -92,6 +92,21 @@ export function courtyardDebris() {
     }))
 }
 
+export function masonryCourses(length: number, base: number, startTop: number, endTop: number) {
+  const columns = Math.ceil(length / .6), pitch = length / columns, stones = []
+  for (let row = 0, y = base + .18; y < Math.max(startTop, endTop); row++, y += .33) {
+    const shift = row % 2 * .5
+    for (let column = -1; column < columns; column++) {
+      const left = Math.max(0, (column + shift) * pitch), right = Math.min(length, (column + shift + 1) * pitch)
+      if (right <= left) continue
+      const fraction = (left + right) / (2 * length)
+      if (y >= startTop + (endTop - startTop) * fraction) continue
+      stones.push({ fraction, y, width: (right - left) * .96 })
+    }
+  }
+  return stones
+}
+
 export function titleFraming(width: number, height: number) {
   const aspect = Math.max(1, width) / Math.max(1, height)
   const wide = Math.max(0, Math.min(1, (aspect - .65) / .75))

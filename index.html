@@ -20,7 +20,7 @@
         position: fixed; inset: 0 auto auto 0; width: var(--screen-width); height: var(--screen-height);
         container: screen / size; overflow: auto; transform-origin: top left;
       }
-      @media (orientation: portrait) {
+      @media (aspect-ratio < 1/1) {
         :root { --screen-width: 100svh; --screen-height: 100svw; --screen-rotation: 90deg; }
         .landscape-screen { transform: translateX(100svw) rotate(90deg); }
       }

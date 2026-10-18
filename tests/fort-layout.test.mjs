@@ -1,7 +1,26 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { BufferGeometry, Float32BufferAttribute, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Vector3 } from 'three'
-import { seededRandom, camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, stairPosition, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+import { seededRandom, camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, masonryCourses, stairPosition, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+
+test('masonry joints alternate between courses and clipped end stones stay within the wall', () => {
+  const stones = masonryCourses(3, 0, 1, 1)
+  const first = stones.filter(stone => Math.abs(stone.y - .18) < 1e-8)
+  const second = stones.filter(stone => Math.abs(stone.y - .51) < 1e-8)
+  assert.equal(first.length, 5)
+  assert.equal(second.length, 6)
+  assert.ok(second[0].width < first[0].width * .6)
+  for (const lower of first) for (const upper of second) assert.ok(Math.abs(lower.fraction - upper.fraction) > .04)
+  for (const length of [.1, .4, 1, 10]) for (const tops of [[1, 2], [2, 1]]) {
+    for (const stone of masonryCourses(length, -.8, ...tops)) {
+      assert.ok(Object.values(stone).every(Number.isFinite))
+      assert.ok(stone.width > 0)
+      assert.ok(stone.fraction * length - stone.width / 2 >= -1e-8)
+      assert.ok(stone.fraction * length + stone.width / 2 <= length + 1e-8)
+      assert.ok(stone.y < tops[0] + (tops[1] - tops[0]) * stone.fraction)
+    }
+  }
+})
 
 test('route-edge debris is deterministic, grounded and outside the stair passage', () => {
   const stones = courtyardDebris()

@@ -1,7 +1,20 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { BufferGeometry, Float32BufferAttribute, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Vector3 } from 'three'
-import { seededRandom, camp, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, stairPosition, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+import { seededRandom, camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, stairPosition, stepHeight, sceneRenderSize, survivorFrame, survivorPose, titleFraming } from '../src/lib/fort-layout.ts'
+
+test('route-edge debris is deterministic, grounded and outside the stair passage', () => {
+  const stones = courtyardDebris()
+  assert.equal(stones.length, 12)
+  assert.deepEqual(stones, courtyardDebris())
+  for (const stone of stones) {
+    assert.ok(Object.values(stone).every(Number.isFinite))
+    assert.equal(stone.y, courtyardHeight(stone.x, stone.z))
+    assert.ok(stone.x + stone.width / 2 < courtyardRightEdge(stone.z))
+    const across = (stone.x - camp.stairX) * Math.cos(fortStairs.yaw) - (stone.z - fortStairs.z) * Math.sin(fortStairs.yaw)
+    assert.ok(Math.abs(across) - Math.max(stone.width, stone.depth) / 2 > fortStairs.width / 2)
+  }
+})
 
 test('the stair starts at the courtyard and descends in consistent bounded risers', () => {
   assert.equal(stepHeight(0), camp.floor)

@@ -83,6 +83,15 @@ export function courtyardPavers(stairX = camp.stairX) {
   return stones
 }
 
+export function courtyardDebris() {
+  const random = seededRandom(919)
+  return [[4.2, 1.2], [4.5, 3.2], [-1.9, 6.7]].flatMap(([centerX, centerZ]) =>
+    Array.from({ length: 4 }, () => {
+      const x = centerX + (random() - .5) * .5, z = centerZ + (random() - .5) * .5
+      return { x, y: courtyardHeight(x, z), z, turn: random() * Math.PI, width: .25 + random() * .35, height: .15 + random() * .2, depth: .3 + random() * .4 }
+    }))
+}
+
 export function titleFraming(width: number, height: number) {
   const aspect = Math.max(1, width) / Math.max(1, height)
   const wide = Math.max(0, Math.min(1, (aspect - .65) / .75))

@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three'
-import { camp, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, seededRandom, sceneRenderSize, stairPosition, survivorFrame, survivorPose, titleFraming } from './fort-layout'
+import { camp, courtyardDebris, courtyardHeight, courtyardPavers, courtyardRightEdge, courtyardTerrain, fireFrame, fortCamera, fortStairs, seededRandom, sceneRenderSize, stairPosition, survivorFrame, survivorPose, titleFraming } from './fort-layout'
 import shelterUrl from '@/assets/title-shelter.webp'
 import archUrl from '@/assets/title-arch.webp'
 import suppliesUrl from '@/assets/title-supplies.webp'
@@ -212,6 +212,12 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
       wallBlocks.setColorAt(wallBlockCount++, new THREE.Color().setScalar(.8 + random() * .15))
     }
   }
+  for (const { x, y, z, turn, width, height, depth } of courtyardDebris()) {
+    pavingTransform.position.set(x, y + height / 2 - .03, z); pavingTransform.rotation.set(.08, turn, -.1)
+    pavingTransform.scale.set(width, height / .45, depth / .65); pavingTransform.updateMatrix()
+    wallBlocks.setMatrixAt(wallBlockCount, pavingTransform.matrix)
+    wallBlocks.setColorAt(wallBlockCount++, new THREE.Color('#bdbbc0'))
+  }
   const timberMap = suppliesMap.clone(); timberMap.repeat.set(.16, .38); timberMap.offset.set(.69, .16); textures.add(timberMap)
   const timber = material(new THREE.MeshStandardMaterial({ map: timberMap, color: '#8b7d75', roughness: .95 }))
   const railShape = geometry(new THREE.CylinderGeometry(.035, .05, 1, 5))
@@ -224,6 +230,42 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.divideScalar(length))
     mesh.castShadow = true; scene.add(mesh)
     return mesh
+  }
+  const table = new THREE.Group()
+  table.name = 'hearth-side-table'; table.position.set(-3.35, courtyardHeight(-3.35, 4.6), 4.6); table.rotation.y = fortStairs.yaw
+  scene.add(table)
+  const tableMaterial = material(timber.clone()); tableMaterial.emissiveMap = timberMap; tableMaterial.emissive.set('#c2b9b5'); tableMaterial.emissiveIntensity = .4
+  const tableParts = [
+    [0, .65, 0, 1.3, .1, .65],
+    [-.53, .31, -.23, .1, .62, .1], [.53, .31, -.23, .1, .62, .1],
+    [-.53, .31, .23, .1, .62, .1], [.53, .31, .23, .1, .62, .1],
+    [0, .2, .23, 1.1, .1, .08], [0, .43, .23, 1.1, .1, .08], [0, .2, -.23, 1.1, .1, .08],
+  ]
+  const tableWood = new THREE.InstancedMesh(box, tableMaterial, tableParts.length)
+  tableWood.name = 'weathered-table-boards'; tableWood.castShadow = tableWood.receiveShadow = true; tableWood.renderOrder = 6
+  tableParts.forEach(([x, y, z, width, height, depth], i) => {
+    pavingTransform.position.set(x, y, z); pavingTransform.rotation.set(0, 0, 0); pavingTransform.scale.set(width, height, depth)
+    pavingTransform.updateMatrix(); tableWood.setMatrixAt(i, pavingTransform.matrix)
+  })
+  tableWood.computeBoundingSphere(); table.add(tableWood)
+  const stake = timberSpan('near-terrace-stake', new THREE.Vector3(-3.868, courtyardHeight(-3.868, 5.155) - .05, 5.155), new THREE.Vector3(-4.01, 2.1, 5.055), postShape)
+  stake.scale.x = stake.scale.z = 1.5; stake.renderOrder = 6; stake.material = tableMaterial
+  const tableBrace = timberSpan('table-leaning-brace', new THREE.Vector3(-3.75, courtyardHeight(-3.75, 5.2), 5.2), new THREE.Vector3(-3.55, table.position.y + .65, 4.65))
+  tableBrace.renderOrder = 6; tableBrace.material = tableMaterial
+  const cupMaterial = material(new THREE.MeshStandardMaterial({ color: '#484044', roughness: .8, metalness: .15 }))
+  const cupShape = geometry(new THREE.CylinderGeometry(.12, .1, .26, 10, 1, true))
+  const cupHandle = geometry(new THREE.TorusGeometry(.075, .018, 5, 10))
+  const cupRim = geometry(new THREE.TorusGeometry(.12, .013, 5, 10))
+  const cupInside = geometry(new THREE.CircleGeometry(.105, 10))
+  const cupDark = material(new THREE.MeshBasicMaterial({ color: '#0e0d10', side: THREE.DoubleSide }))
+  for (const [x, z, scale] of [[-.28, -.08, 1], [.35, .04, .75]]) {
+    const cup = new THREE.Mesh(cupShape, cupMaterial); cup.name = 'table-cup'; cup.position.set(x, .7 + .13 * scale, z); cup.scale.setScalar(scale)
+    const rim = new THREE.Mesh(cupRim, cupMaterial); rim.position.y = .13; rim.rotation.x = -Math.PI / 2
+    const handle = new THREE.Mesh(cupHandle, cupMaterial); handle.position.x = .145
+    const inside = new THREE.Mesh(cupInside, cupDark); inside.position.y = .11; inside.rotation.x = -Math.PI / 2
+    cup.add(rim, handle, inside)
+    for (const part of [cup, rim, handle, inside]) { part.castShadow = part.receiveShadow = true; part.renderOrder = 6 }
+    table.add(cup)
   }
   let previousPost: THREE.Vector3 | undefined
   for (let i = 0; i < 11; i++) {
@@ -566,7 +608,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     manager.onLoad=()=>{};manager.onError=()=>{}
     document.removeEventListener('visibilitychange',resume)
     canvas.removeEventListener('webglcontextlost',contextLost);canvas.removeEventListener('webglcontextrestored',contextRestored)
-    pavers.dispose(); treadStones.dispose(); wallBlocks.dispose(); branches.dispose()
+    pavers.dispose(); treadStones.dispose(); wallBlocks.dispose(); branches.dispose(); tableWood.dispose()
     textures.forEach(value=>value.dispose());geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose())
     target.dispose();moon.shadow.dispose();renderer.dispose();canvas.remove()
   }

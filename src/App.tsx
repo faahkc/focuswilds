@@ -2,7 +2,6 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
 import { Badge } from '@/components/ui/badge'
 import { AuthPanel } from '@/components/auth-panel'
-import { ScreenLayout } from '@/components/screen-layout'
 import { PageLoading } from '@/components/page-loading'
 import { TitleScene } from '@/components/title-scene'
 import type { Language } from '@/lib/shelter'
@@ -25,7 +24,7 @@ export default function App() {
   }, [session, language])
   const loading = checkingSession || !session && sceneStatus === 'loading'
   return (
-    <ScreenLayout language={session ? language : 'en'}><main className={`wilds-shell ${session ? 'wilds-playing' : 'wilds-landing'} text-[#f4eddc]`}>
+    <main className={`wilds-shell ${session ? 'wilds-playing' : 'wilds-landing'} text-[#f4eddc]`}>
       {!session && <TitleScene onStatusChange={setSceneStatus}/>}
       {loading && <PageLoading/>}
       <div className="mx-auto max-w-7xl" inert={loading} aria-hidden={loading || undefined}>
@@ -37,6 +36,6 @@ export default function App() {
         </header>
         {session && <Suspense fallback={<PageLoading/>}><ShelterJourney key={session.uid} userId={session.uid} onLanguageChange={setLanguage}/></Suspense>}
       </div>
-    </main></ScreenLayout>
+    </main>
   )
 }

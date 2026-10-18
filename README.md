@@ -9,3 +9,5 @@ Behind the walls of an abandoned border fort, a handful of survivors light a fir
 Focuswilds is a place for concentration in a darkened world. Time spent attending to what matters becomes a small act of keeping life moving forward. No one has to save the whole world in a day. Sometimes, keeping one light alive is enough.
 
 Beyond the walls lie mist, ruined villages, and stories whose truth remains uncertain. When you grow tired, you can return to rest. The world outside may be unkind, but the warmth of the shelter still has a place for you.
+
+The experience uses a landscape view on every screen. When held upright, the interface turns sideways automatically.

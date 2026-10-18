@@ -5,30 +5,30 @@
 .title-scene canvas { opacity: 0; transition: opacity .3s ease; }
 .title-scene-ready canvas { opacity: 1; }
 .title-scene-ready .title-fallback-image { visibility: hidden; }
-.wilds-landing::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #08090b22, transparent 30%, transparent 70%, #08090b99), radial-gradient(ellipse at center, #08090b28, transparent 35%, #08090b44 100%); }
-.wilds-landing .wilds-header { position: relative; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 20px; padding: clamp(24px, 6svh, 72px) 16px 24px; margin: 0; border: 0; min-height: 100svh; }
+.wilds-landing::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, transparent 70%, #08090b99), radial-gradient(ellipse at center, transparent 35%, #08090b26 100%); }
+.wilds-landing .wilds-header { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px; padding: 16px; margin: 0; border: 0; min-height: var(--screen-height); }
 .wilds-landing .wilds-header > [data-slot="badge"] { display: none; }
-.wilds-landing .wilds-title { margin: 0; display: block; white-space: nowrap; font-size: clamp(40px, 5vw, 48px); line-height: 1.15; letter-spacing: .035em; color: #e4e1dc; text-shadow: 0 2px 1px #08090b, 0 5px 22px #000, 0 0 50px #000; font-weight: 400; }
-.wilds-landing .wilds-title::after { content: ''; display: block; width: 42%; height: 1px; margin: 16px auto 0; background: linear-gradient(90deg, transparent, #98514d, transparent); }
+.wilds-landing .wilds-title { margin: 0; display: block; white-space: nowrap; font-size: clamp(40px, 5cqw, 48px); line-height: 1.15; letter-spacing: .035em; color: #e4e1dc; text-shadow: 0 2px 1px #08090b, 0 5px 22px #000, 0 0 50px #000; font-weight: 400; }
 .wilds-landing .wilds-account { width: min(440px, 100%); align-items: center; gap: 18px; text-align: center; color: #dedbd7; }
-.wilds-landing .wilds-account [data-slot="button"] { min-width: 260px; min-height: 54px; height: auto; padding: 10px 30px; gap: 12px; font-size: 21px; font-weight: 400; background: #101012e8; color: #e4e1dc; border: 1px solid #925853; box-shadow: 0 0 0 3px #0c0c0dcc, inset 0 0 18px #52242440, 0 8px 32px #0009; text-shadow: 0 2px #000; }
+.wilds-landing .wilds-account [data-slot="button"] { min-width: 260px; min-height: 54px; height: auto; padding: 10px 30px; gap: 12px; font-size: 21px; font-weight: 400; background: transparent; color: #e4e1dc; border: 0; box-shadow: none; text-shadow: 0 2px 2px #000, 0 0 12px #000; }
 .wilds-landing .wilds-account [data-slot="button"]::before { content: none; }
-.wilds-landing .wilds-account [data-slot="button"]:hover { background: #381c20; border-color: #c58d85; }
+.wilds-landing .wilds-account [data-slot="button"]:hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
 .wilds-landing .wilds-account [data-slot="button"]:focus-visible { outline: 2px solid #e4e1dc; outline-offset: 6px; }
 .wilds-landing .wilds-account [role="alert"] { color: #efd3cf; font-size: 16px; line-height: 1.45; max-width: 390px; padding: 10px 14px; background: #101012e8; border-left: 2px solid #b96a62; text-shadow: 0 1px #000; }
 .wilds-account-loading, .title-loading { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .title-loading { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); font-size: 14px; text-align: center; color: #c6bbb7; background: #101012d9; padding: 6px 12px; }
 .wilds-loading-mark { display: inline-block; flex-shrink: 0; width: 14px; height: 14px; border: 1px solid #b0878170; border-top-color: #e3d6d1; border-right-color: #b35a50; transform: rotate(45deg); animation: wilds-loading 1.2s linear infinite; }
 @keyframes wilds-loading { to { transform: rotate(405deg); } }
-@media (max-width: 767px) {
+@container screen (max-width: 767px) {
   .title-fallback-image { object-position: 34% center; }
-  .wilds-landing .wilds-title { font-size: clamp(32px, 10vw, 52px); letter-spacing: .02em; }
+  .wilds-landing .wilds-title { font-size: clamp(32px, 10cqw, 52px); letter-spacing: .02em; }
   .wilds-landing .wilds-account { gap: 14px; }
   .wilds-landing .wilds-account [data-slot="button"] { font-size: 19px; min-width: 240px; }
 }
-@media (max-height: 500px), (max-width: 300px) {
-  .wilds-landing .wilds-header { min-height: max(500px, 100svh); }
-  .wilds-landing .wilds-title { font-size: clamp(30px, 10vw, 64px); }
-  .wilds-landing .wilds-account [data-slot="button"] { min-width: min(240px, 100%); }
+@container screen (max-height: 500px) {
+  .wilds-landing .wilds-header { gap: 8px; }
+  .wilds-landing .wilds-title { font-size: 30px; }
+  .wilds-landing .wilds-account { gap: 6px; }
+  .wilds-landing .wilds-account [data-slot="button"] { min-height: 44px; padding: 6px 20px; font-size: 18px; }
   .title-loading { bottom: 8px; }
 }

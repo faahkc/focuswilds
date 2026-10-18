@@ -160,7 +160,7 @@ test('terrain has valid upward-facing top triangles and continuous deep skirts i
 test('paving follows the hillside, remains inside the edge and clears both stair layouts', () => {
   for (const stairX of [camp.stairX, -5.1]) {
     const stones = courtyardPavers(stairX)
-    assert.ok(stones.length > 300 && stones.length <= 528)
+    assert.ok(stones.length > 800 && stones.length <= 1596)
     assert.deepEqual(stones, courtyardPavers(stairX))
     for (const { x, y, z, turn } of stones) {
       assert.ok([x, y, z, turn].every(Number.isFinite))

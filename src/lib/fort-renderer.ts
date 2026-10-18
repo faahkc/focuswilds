@@ -61,7 +61,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     textures.add(value)
     return value
   }
-  const phone = host.getBoundingClientRect().width < 768
+  const phone = Math.min(host.clientWidth, host.clientHeight) < 600
   const shelterMap = texture(phone ? shelterPhoneUrl : shelterUrl), archMap = texture(phone ? archPhoneUrl : archUrl)
   const valleyMap = texture(phone ? valleyPhoneUrl : valleyUrl)
   const suppliesMap = texture(suppliesUrl)
@@ -136,13 +136,13 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   pavingShape.rotateX(-Math.PI / 2)
   const pavingStone = material(parapetStone.clone()); pavingStone.color.set('#ccccd0'); pavingStone.emissiveIntensity = .26
   pavingStone.bumpMap = parapetMap; pavingStone.bumpScale = .03; pavingStone.roughness = .75
-  const pavers = new THREE.InstancedMesh(pavingShape, pavingStone, 528)
+  const pavers = new THREE.InstancedMesh(pavingShape, pavingStone, 1596)
   pavers.name = 'worn-courtyard-paving'; pavers.receiveShadow = pavers.castShadow = true; scene.add(pavers)
   const pavingTransform = new THREE.Object3D()
   const paving = courtyardPavers()
   pavers.count = paving.length
   paving.forEach(({ x, y, z, turn }, i) => {
-    pavingTransform.position.set(x, y - .02, z); pavingTransform.rotation.set(0, turn, 0); pavingTransform.scale.set(1, 1, 1)
+    pavingTransform.position.set(x, y - .02, z); pavingTransform.rotation.set(0, turn, 0); pavingTransform.scale.set(.58, .85 + random() * .3, .72)
     pavingTransform.updateMatrix(); pavers.setMatrixAt(i, pavingTransform.matrix)
   })
   pavers.instanceMatrix.needsUpdate = true; pavers.computeBoundingSphere()
@@ -330,8 +330,15 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   const shelter = card('occupied-shelter', shelterMap, -8.4, camp.floor, -3, 20, 11.25)
   const backWall = card('shelter-rear-masonry', backWallMap, -11, camp.floor, -3.5, 15, 10)
   if ('emissiveIntensity' in backWall.material) backWall.material.emissiveIntensity = 2.3
-  const arch = card('broken-arch', archMap, 4.8, camp.floor, 3.8, 11.5, 12.8)
+  const archRearWall = card('arch-rear-masonry', backWallMap, -2.1, -1.44, -5.54, 4.14, 9.2)
+  const wallUV = archRearWall.geometry.getAttribute('uv')
+  for (let i = 0; i < wallUV.count; i++) wallUV.setX(i, .3 + wallUV.getX(i) * .3)
+  if ('emissiveIntensity' in archRearWall.material) archRearWall.material.emissiveIntensity = 2.3
+  const arch = card('broken-arch', archMap, 4.8, camp.floor, 3.8, 10.12, 12.8)
   const supplies = card('foreground-supplies', suppliesMap, 0, -1, 6, 3, 1.94)
+  const rearCrate = card('rear-supply-crate', suppliesMap, 1.75, courtyardHeight(1.75, 6.8) + .03, 6.8, 1.65, 1.94 * 253 / 262)
+  const crateUV = rearCrate.geometry.getAttribute('uv')
+  for (let i = 0; i < crateUV.count; i++) crateUV.setXY(i, .45 + crateUV.getX(i) * .55, 9 / 262 + crateUV.getY(i) * 253 / 262)
 
   const moon = new THREE.DirectionalLight('#e0e2eb', 1.5)
   moon.position.set(15, 22, 14); moon.castShadow = true
@@ -409,9 +416,11 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   placeCard(backWall, -10.4, camp.floor - .4, -2, 10, .98)
   const archX = 1.8, archZ = 1.5, archScale = .82
   placeCard(arch, archX, camp.floor - 1.3, archZ, 12.8, archScale)
+  // Keep the outer arch edge registered while clearing the storage bay.
+  arch.position.addScaledVector(cardRight, .566)
   banner.scale.set(archScale * .7, archScale, archScale)
   banner.position.set(archX, camp.floor - 1.3, archZ).addScaledVector(cardRight, -1.4 * archScale).addScaledVector(cardUp, 9.1 * archScale)
-  placeCard(supplies, .8, courtyardHeight(.8, 6.4) + .05, 6.4, 1.94)
+  placeCard(supplies, 1.8, courtyardHeight(1.8, 7.56) + .03, 7.56, 1.94, 1.15)
   const puffCanvas = document.createElement('canvas'); puffCanvas.width = puffCanvas.height = 64
   const ctx = puffCanvas.getContext('2d')!
   const gradient = ctx.createRadialGradient(32,32,0,32,32,32)
@@ -442,7 +451,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
     vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
     fragmentShader: `uniform sampler2D colorMap,depthMap; uniform float focus,near,far; varying vec2 vUv;
       void main(){float distance=near*far/(far-texture2D(depthMap,vUv).x*(far-near));
-      float blur=clamp((focus-distance-5.)/5.,0.,1.)*8.+clamp((distance-focus-8.)/20.,0.,1.)*2.;
+      float blur=clamp((focus-distance-5.)/5.,0.,1.)*12.+clamp((distance-focus-8.)/20.,0.,1.)*2.;
       vec4 col=texture2D(colorMap,vUv,log2(max(1.,blur)));
       gl_FragColor=col;
       #include <tonemapping_fragment>
@@ -452,7 +461,7 @@ export function createFortRenderer(host: HTMLDivElement, status: Status) {
   postScene.add(new THREE.Mesh(geometry(new THREE.PlaneGeometry(2,2)), postMaterial))
   renderer.info.autoReset = false
   function resize() {
-    const { width, height } = host.getBoundingClientRect()
+    const width = host.clientWidth, height = host.clientHeight
     if (!width || !height || disposed || lost) return
     const framing = titleFraming(width, height)
     camera.position.set(framing.centerX + fortCamera.x, framing.centerY + fortCamera.y, fortCamera.z)

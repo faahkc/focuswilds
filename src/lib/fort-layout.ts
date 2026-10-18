@@ -70,11 +70,11 @@ export function stepHeight(index: number) {
 
 export function courtyardPavers(stairX = camp.stairX) {
   const random = seededRandom(407), stones = []
-  for (let row = 0; row < 22; row++) {
-    const z = -5 + row * .85
-    for (let column = 0; column < 24; column++) {
-      const x = -15 + column + (row % 2) * .5
-      const jitterX = (random() - .5) * .16, jitterZ = (random() - .5) * .12, turn = random() * .4
+  for (let row = 0; row < 38; row++) {
+    const z = -5 + row * .5
+    for (let column = 0; column < 42; column++) {
+      const x = -15 + column * .6 + (row % 2) * .3
+      const jitterX = (random() - .5) * .08, jitterZ = (random() - .5) * .06, turn = (random() - .5) * .12
       const local = stairLocal(x, z, stairX)
       if (x > courtyardRightEdge(z) - .65 || (local.along > -.5 && local.along < fortStairs.run * (fortStairs.count - 1) + .85 && Math.abs(local.across) < fortStairs.width / 2 + .4)) continue
       stones.push({ x: x + jitterX, y: courtyardHeight(x + jitterX, z + jitterZ, stairX), z: z + jitterZ, turn })

@@ -45,16 +45,12 @@ test('game windows close with Escape and restore focus to the opening control', 
     globalThis.HTMLElement = previousHTMLElement
   }
 })
-test('only small touch screens in physical landscape are blocked, without unmounting the app', () => {
-  const previous = globalThis.window
-  try {
-    for (const [width, height, coarse, blocked] of [[844, 390, true, true], [390, 844, true, false], [1440, 900, false, false], [1024, 768, true, false]]) {
-      globalThis.window = { screen: { width, height }, matchMedia: () => ({ matches: coarse }) }
-      const { ScreenLayout } = component('screen-layout', { react: { ...React, useSyncExternalStore: (_subscribe, get) => get() } })
-      const html = renderToStaticMarkup(React.createElement(ScreenLayout, null, React.createElement('span', null, 'Timer stays mounted')))
-      assert.equal(html.includes('Rotate your phone upright'), blocked)
-      assert.equal(html.includes('inert=""'), blocked)
-      assert(html.includes('Timer stays mounted'))
-    }
-  } finally { globalThis.window = previous }
+test('the shared landscape frame keeps app content mounted and interactive', () => {
+  const { ScreenLayout } = component('screen-layout')
+  const content = React.createElement('span', null, 'Timer stays mounted')
+  const frame = ScreenLayout({ children: content })
+  assert.equal(frame.props.children, content)
+  const html = renderToStaticMarkup(frame)
+  assert.match(html, /class="landscape-screen"/)
+  assert.ok(!html.includes('inert'))
 })

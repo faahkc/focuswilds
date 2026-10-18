@@ -141,8 +141,9 @@ test('root and old links all open the fort without legacy navigation', () => {
   } finally { globalThis.window = previousWindow }
 })
 
-test('rotation guidance defaults to English and translates only after selecting Thai', () => {
-  const { ScreenLayout } = load('components/screen-layout.tsx', { react: { ...React, useSyncExternalStore: () => true } })
+test('the landscape frame preserves the selected language content', () => {
+  const { ScreenLayout } = load('components/screen-layout.tsx', { react: React })
   noThai(renderToStaticMarkup(React.createElement(ScreenLayout, null, 'Timer')))
-  assert.match(renderToStaticMarkup(React.createElement(ScreenLayout, { language: 'th' }, 'Timer')), /หมุนโทรศัพท์/)
+  const thai = 'เวลา'
+  assert.ok(renderToStaticMarkup(React.createElement(ScreenLayout, null, thai)).includes(thai))
 })

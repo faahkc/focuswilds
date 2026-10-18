@@ -7,7 +7,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.startup-screen { min-height: 100svh; background: #0b0d10; color: #ece0c5; padding: 24px; font: 16px 'GNU Unifont', monospace; }
+.startup-screen { min-height: var(--screen-height); background: #0b0d10; color: #ece0c5; padding: 24px; font: 16px 'GNU Unifont', monospace; }
 .startup-screen p { max-width: 600px; margin-block: 16px; }
 .startup-screen button { border: 1px solid #bd925b; padding: 8px 16px; min-height: 44px; font: inherit; }
 

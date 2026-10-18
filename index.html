@@ -15,6 +15,15 @@
     <link rel="icon" type="image/webp" href="/app-icon.webp" sizes="512x512" />
     <title>Focuswilds</title>
     <style>
+      :root { --screen-width: 100svw; --screen-height: 100svh; --screen-rotation: 0deg; }
+      .landscape-screen {
+        position: fixed; inset: 0 auto auto 0; width: var(--screen-width); height: var(--screen-height);
+        container: screen / size; overflow: auto; transform-origin: top left;
+      }
+      @media (orientation: portrait) {
+        :root { --screen-width: 100svh; --screen-height: 100svw; --screen-rotation: 90deg; }
+        .landscape-screen { transform: translateX(100svw) rotate(90deg); }
+      }
       .page-loading { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; margin:0; padding:24px; background:#111214; color:#e4e1dc; font:16px 'GNU Unifont',monospace; text-align:center }
       .page-loading-spinner { display:inline-block; width:14px; height:14px; flex-shrink:0; border:1px solid #67514e; border-top-color:#e4e1dc; border-right-color:#b35a50; animation:page-loading-spin 1.2s linear infinite }
       @keyframes page-loading-spin { to { transform:rotate(360deg) } }
@@ -23,7 +32,7 @@
     </style>
   </head>
   <body>
-    <div id="root"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing…</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div>
+    <div id="root"><div class="landscape-screen"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing…</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again. Existing stored timer data is not cleared.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
     <script type="module" src="/src/main.tsx" onerror="document.querySelector('.startup-recovery').hidden=false"></script>
   </body>
 </html>

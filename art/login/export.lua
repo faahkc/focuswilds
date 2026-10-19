@@ -14,7 +14,7 @@ for i,frame in ipairs(source.frames) do
  end
  if not first then first=Image(im) end
  for y=0,111 do for x=0,127 do
-  if x<47 or x>=79 or y<52 or y>=85 then assert(im:getPixel(x,y)==first:getPixel(x,y),'Only the cat may animate') end
+  if x<47 or x>=85 or y<44 or y>=87 then assert(im:getPixel(x,y)==first:getPixel(x,y),'Only the cat may animate') end
  end end
  atlas:drawImage(im,Point((i-1)*128,0))
 end

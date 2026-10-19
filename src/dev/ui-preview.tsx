@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PageLoading from '@/screens/system/loading'
 import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Select } from '@/components/select'
 import { createCatalog, type ScreenModule, type PreviewModule } from './preview-catalog'
 import './ui-preview.css'
 
@@ -12,6 +14,7 @@ const catalog = createCatalog(
 type LoadedScreen = Awaited<ReturnType<typeof catalog[number]['load']>>
 
 export default function UIPreview() {
+  const tools = useRef<HTMLDetailsElement>(null)
   const [selected, setSelected] = useState(catalog[0])
   const [variant, setVariant] = useState('')
   const [query, setQuery] = useState('')
@@ -27,10 +30,10 @@ export default function UIPreview() {
   const groups = [...new Set(visible.map(screen => screen.group))]
   const Screen = loaded && (loaded.cases[variant] ?? loaded.Default)
   return <>
-    <details className="ui-preview-tools">
+    <details className="ui-preview-tools" ref={tools}>
       <summary>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
-        <label>Search screens<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or group"/></label>
+        <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
         <nav className="ui-preview-list" aria-label="Preview screens" tabIndex={0}>
           {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
@@ -43,10 +46,11 @@ export default function UIPreview() {
           }}>{screen.name}</Button>)}</section>)}
           {!visible.length && <p role="status">No matching screens.</p>}
         </nav>
-        {loaded && <label>State<select aria-label="State" value={variant} onChange={event => {
-          setVariant(event.target.value)
-          event.currentTarget.closest('details')?.removeAttribute('open')
-        }}><option value="">Default</option>{Object.keys(loaded.cases).map(name => <option key={name} value={name}>{name}</option>)}</select></label>}
+        {loaded && <Select label="State" value={variant} options={[{ value: '', label: 'Default' }, ...Object.keys(loaded.cases).map(name => ({ value: name, label: name }))]} onChange={value => {
+          setVariant(value)
+          tools.current?.removeAttribute('open')
+          tools.current?.querySelector('summary')?.focus()
+        }}/>}
         <p>Preview only. Account actions are simulated.</p>
         <a href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>

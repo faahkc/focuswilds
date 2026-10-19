@@ -70,7 +70,7 @@ This latest owner-approved direction supersedes earlier landscape-first and page
 
 For every Aseprite artwork or animation change, prepare a draft and show a preview for owner review. Do not integrate, replace live assets or publish the draft until the owner explicitly approves it. Keep unapproved sources and exports outside deployed assets. Approval of this visual direction does not approve individual assets.
 
-The owner approved the rounded black-cat head with a compact rotating pixel ring, two pixels thick in charcoal gray #454750. The head stays stationary and blinks; there are no shoulders or body. Use the same centered 128x128 mark on cream before React startup and during application loading. The 32x32 Aseprite source has two layers and 23 synchronized frames over 3.37 seconds, combining eight eye poses with 16 ring steps. Keep startup text-free with an accessible Loading label; other full-screen waits can supply a real text message. Pause only while the document is hidden. This replaces the seated-cat loading illustration. The editable source is `art/loading/loading-cat.aseprite`; runtime uses a local PNG atlas and discrete CSS timing, not a GIF/video loop.
+The owner approved the rounded black-cat head with a compact rotating pixel ring, two pixels thick in charcoal gray #454750. The head stays stationary and blinks; there are no shoulders or body. Use the same centered 128x128 mark on cream before React startup and during application loading. The 32x32 Aseprite source has two layers and 23 synchronized frames over 3.37 seconds, combining eight eye poses with 16 ring steps. Keep ordinary startup text-free with an accessible Loading label; named operations, including a detected startup update, can supply the real text message defined below. Pause only while the document is hidden. This replaces the seated-cat loading illustration. The editable source is `art/loading/loading-cat.aseprite`; runtime uses a local PNG atlas and discrete CSS timing, not a GIF/video loop.
 
 Use a contemporary city and a welcoming small apartment. The city is the game's "wilds": a concrete jungle seen through quiet everyday encounters. The player takes imagined neighborhood walks, befriends stray cats and brings them back to a room that gradually becomes their shared home. Keep the experience gentle; the setting does not introduce danger, combat or animal injury/death systems.
 
@@ -98,6 +98,32 @@ Decorative titles and intro text are nonselectable. Error/version text remains c
 ## Shared controls
 
 Every React button uses `src/components/button.tsx`; future screens reuse it and pass native disabled/busy/accessibility props. Keep the approved charcoal pixel corners, visible keyboard focus and discrete press response. Layout belongs to the caller. The pre-React recovery button uses the same stylesheet and class in static HTML. Authentication waits name their operation; future actions should do the same without replacing unrelated screen state.
+
+Buttons use bold 20px GNU Unifont, not the superseded 24px treatment. Suppress native blue tap highlights and decorative/button text selection while retaining visible keyboard focus. Hover styling applies only to devices supporting hover. Keep error and version text copyable with the shared pale-gold selection highlight.
+
+## Account message states
+
+Use one message area between the illustration and account action. The following states are implemented; this replaces the earlier below-button error placement.
+
+| State | Message area | Action |
+| --- | --- | --- |
+| Signed out | A little focus. / A home for cats. | Sign in |
+| Signing in | Signing you in… / Please wait a moment. | Signing in…; disabled |
+| Signing out | Signing you out… / Please wait a moment. | Signing out…; disabled |
+| Owner signed in | You are signed in. / Your cat home is coming soon. | Sign out |
+| Access denied or account failure | One safe error replacing the normal intro or owner confirmation | Sign in or Sign out, matching the actual account state |
+
+While busy, hide stale errors. Otherwise errors take precedence over owner confirmation. Do not repeat an error below the button, show the ordinary tagline during an account operation, or label an action Try again unless it actually retries that operation. Signed-in owner confirmation remains a temporary login-milestone state, not a completed home screen.
+
+## Typography, spacing and scrolling
+
+Reuse the head-loaded shared font and control styles. GNU Unifont uses inherited 1px letter spacing; new screens must not reset or tighten tracking to fit content. Current sizing is 18px body/error/recovery copy, 20px ordinary login intro (18px on short screens), bold 48px login title (40px on short screens), bold 28px recovery title, bold 20px buttons and a muted 12px version footer. Preserve Thai combining marks as shaped text, not individually spaced characters. Status copy uses natural wrapping to avoid isolated trailing words; errors/headings use balanced wrapping. Adjust layout rather than clipping copy or shrinking editable fields below 16px.
+
+Reuse AppVersion, sourced from package.json, on screens that show a version. Pre-React recovery uses its build-time equivalent. Keep the version bottom-centered with safe-area clearance and reserve room so messages and actions cannot cover it. Loading has no version footer or redundant slogan.
+
+The shared scrollbars.css hides tracks/thumbs for all app and preview scroll regions while preserving actual scrolling. Keep native text editor and select scrollbar behavior. Long regions need an accessible name and keyboard access; verify wheel, touch, Home/End or equivalent navigation, and access to the last item. Do not use overflow:hidden to conceal a scrolling problem.
+
+Before accepting shared UI changes, inspect every affected screen and every preview state after fonts load at 320x568 and 390x844. Include ordinary, owner, busy, denied, error, loading, update and recovery states; check Latin glyph collisions (including complete/mp), Thai marks, long-copy wrapping, footer/button overlap and scrolling. Check the pre-React equivalent whenever shared startup styles change. Existing browser checks and offline tests establish only their measured behavior; physical Safari/Android navigation, rendering and safe areas require separate device acceptance. A single Login screenshot is not evidence for other screens.
 
 ## Shared loading states
 

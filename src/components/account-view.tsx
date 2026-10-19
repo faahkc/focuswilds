@@ -1,4 +1,5 @@
 import { authErrorMessage } from '@/lib/auth-error'
+import { Button } from '@/components/button'
 
 export function AccountView({ signedIn, owner, busy, error, onAction }: {
   signedIn: boolean
@@ -11,7 +12,7 @@ export function AccountView({ signedIn, owner, busy, error, onAction }: {
     {signedIn && (owner
       ? <p role="status">You are signed in.<br/>Your cat home is coming soon.</p>
       : <p role="alert">This account does not have access to Focuswilds.</p>)}
-    <button disabled={busy} onClick={onAction}>{busy ? 'Please wait...' : signedIn ? 'Sign out' : 'Sign in'}</button>
+    <Button disabled={busy} aria-busy={busy} onClick={onAction}>{busy ? signedIn ? 'Signing out…' : 'Signing in…' : signedIn ? 'Sign out' : 'Sign in'}</Button>
     {error !== null && <p role="alert">{authErrorMessage(error)}</p>}
   </section>
 }

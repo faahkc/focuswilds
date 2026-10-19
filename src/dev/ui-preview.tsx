@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import PageLoading from '@/screens/system/loading'
 import { AppErrorBoundary } from '@/components/app-error-boundary'
+import { Button } from '@/components/button'
 import { createCatalog, type ScreenModule, type PreviewModule } from './preview-catalog'
 import './ui-preview.css'
 
@@ -32,14 +33,14 @@ export default function UIPreview() {
         <label>Search screens<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
         <nav className="ui-preview-list" aria-label="Preview screens">
-          {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
+          {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
             setSelected(screen)
             setVariant('')
             setLoaded(null)
             setFailed(false)
             setRetry(value => value + 1)
             event.currentTarget.closest('details')?.removeAttribute('open')
-          }}>{screen.name}</button>)}</section>)}
+          }}>{screen.name}</Button>)}</section>)}
           {!visible.length && <p role="status">No matching screens.</p>}
         </nav>
         {loaded && <label>State<select aria-label="State" value={variant} onChange={event => {
@@ -50,6 +51,6 @@ export default function UIPreview() {
         <a href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>
     </details>
-    {!selected ? <p>No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p>Unable to load preview.</p><button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}
+    {!selected ? <p>No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p>Unable to load preview.</p><Button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</Button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}
   </>
 }

@@ -28,6 +28,10 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },
   }
+  const buttonModule = { exports: {} }
+  const buttonCode = ts.transpileModule(readFileSync(new URL('../src/components/button.tsx', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
+  new Function('require', 'module', 'exports', buttonCode)(name => { assert.ok(name in dependencies); return dependencies[name] }, buttonModule, buttonModule.exports)
+  dependencies['@/components/button'] = buttonModule.exports
   const viewModule = { exports: {} }
   const viewCode = ts.transpileModule(readFileSync(new URL('../src/components/account-view.tsx', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   new Function('require', 'module', 'exports', viewCode)(name => { assert.ok(name in dependencies); return dependencies[name] }, viewModule, viewModule.exports)
@@ -61,6 +65,8 @@ test('only the owner receives the signed-in message; other accounts can sign out
     assert.equal(view.props.children[0].props.role, uid === OWNER_UID ? 'status' : 'alert')
     assert.equal(view.props.children[1].props.children, 'Sign out')
     view.props.children[1].props.onClick()
+    assert.equal(login.view().props.children[1].props.children, 'Signing out…')
+    assert.equal(login.view().props.children[1].props.disabled, true)
     await flush()
     assert.equal(login.calls().signOuts, 1)
     assert.equal(login.calls().signIns, 0)
@@ -86,6 +92,8 @@ test('restore, redirect and callback failures recover without exposing provider 
 test('the sign-in button starts same-window GitHub navigation', async () => {
   const login = await panel()
   login.view().props.children[1].props.onClick()
+  assert.equal(login.view().props.children[1].props.children, 'Signing in…')
+  assert.equal(login.view().props.children[1].props.disabled, true)
   assert.equal(login.calls().signIns, 1)
   await flush()
 })

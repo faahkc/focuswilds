@@ -83,6 +83,10 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 - Run animations regardless of OS reduced-motion settings; suspend rendering only while hidden or graphics are unavailable. Rendering and viewport changes add zero database operations. Keep timer state independent of scene lifecycle.
 - Measure transfer size, deployed files, decoded memory, frame-time percentiles and dropped frames on actual devices before claiming performance. The former 500 kB baseline is not a hard cap. Review one cat, a care interaction and a room object in portrait before expanding the artwork. Day/night or weather simulation and multiple neighborhood routes are deferred.
 
+## Shared controls
+
+Every React button uses `src/components/button.tsx`; future screens reuse it and pass native disabled/busy/accessibility props. Keep the approved charcoal pixel corners, visible keyboard focus and discrete press response. Layout belongs to the caller. The pre-React recovery button uses the same stylesheet and class in static HTML. Authentication waits name their operation; future actions should do the same without replacing unrelated screen state.
+
 ## Shared loading states
 
 Use the shared `PageLoading` screen for initial startup, authentication restoration and future whole-screen data preparation. Its optional `message` is real text below the animation; omit it for ordinary startup. The optional accessible `label` defaults to Loading. Callers supply translated text in the active UI language; do not bake text into Aseprite frames. Keep errors and retry controls in the existing recovery screens, never a successful loading state.

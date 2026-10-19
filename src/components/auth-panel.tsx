@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
 import { OWNER_UID } from '@/lib/account'
-import { authErrorMessage } from '@/lib/auth-error'
+import { AccountView } from '@/components/account-view'
 import { PageLoading } from '@/components/page-loading'
 
 export function AuthPanel() {
@@ -46,11 +46,5 @@ export function AuthPanel() {
   }
 
   if (loading) return <PageLoading/>
-  return <section className="login-account" aria-label="Account" aria-busy={busy}>
-    {user && (user.uid === OWNER_UID
-      ? <p role="status">You are signed in.<br/>Your cat home is coming soon.</p>
-      : <p role="alert">This account does not have access to Focuswilds.</p>)}
-    <button disabled={busy} onClick={() => void updateAccount()}>{busy ? 'Please wait...' : user ? 'Sign out' : 'Sign in with GitHub'}</button>
-    {error !== null && <p role="alert">{authErrorMessage(error)}</p>}
-  </section>
+  return <AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/>
 }

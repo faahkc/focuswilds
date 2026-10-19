@@ -1,0 +1,6 @@
+.ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; max-height: calc(100% - 16px); overflow: auto; padding: 8px; border: 1px solid #3e6846; border-radius: 4px; background: #edf0df; font-size: 16px; }
+.ui-preview-tools summary { cursor: pointer; }
+.ui-preview-tools nav { display: grid; gap: 8px; padding-top: 8px; }
+.ui-preview-tools button { box-shadow: none; }
+.ui-preview-tools button[aria-pressed="true"] { outline: 2px solid #b1743a; outline-offset: -4px; }
+.ui-preview-tools a { color: inherit; }

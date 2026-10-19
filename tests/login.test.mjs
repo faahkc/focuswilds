@@ -28,8 +28,16 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/components/page-loading': { PageLoading: () => null },
   }
+  const viewModule = { exports: {} }
+  const viewCode = ts.transpileModule(readFileSync(new URL('../src/components/account-view.tsx', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
+  new Function('require', 'module', 'exports', viewCode)(name => { assert.ok(name in dependencies); return dependencies[name] }, viewModule, viewModule.exports)
+  dependencies['@/components/account-view'] = viewModule.exports
   new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies, `Unexpected dependency: ${name}`); return dependencies[name] }, module, module.exports)
-  const view = () => { cursor = 0; return module.exports.AuthPanel() }
+  const view = () => {
+    cursor = 0
+    const element = module.exports.AuthPanel()
+    return element.type === viewModule.exports.AccountView ? element.type(element.props) : element
+  }
   const initial = view()
   const unmount = subscribe()
   await flush()

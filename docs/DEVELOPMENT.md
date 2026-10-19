@@ -8,6 +8,16 @@ Login only, with a warm pixel cat mark, GNU Unifont, a shared portrait frame and
 
 Use Node 24 and npm. Run `npm ci`, `npm run prepare`, `npm run dev`, `npm test`, `npm run lint` and `npm run build`. Tests use the network-blocking preload and never production services. The pre-commit hook increments the patch version in package.json and package-lock.json together. GitHub Pages uses the existing `/focuswilds/` base path.
 
+### Local UI preview
+
+Run `npm run dev`, then open `http://localhost:5173/focuswilds/?preview=ui`. Expand the **UI preview** menu at the top to select Login, Owner signed in, Access denied, Signing in, Account error, Loading or App error. The menu closes after selection; open it again to switch states. Use **Exit preview** to return to real sign-in. Account buttons in preview only update a local notice in the menu; Reload on the recovery screen reloads the preview.
+
+Preview uses the same login layout, account presentation, loading and recovery components as the real app. It imports no Firebase or authentication services, reads no account storage and performs zero database operations. It is available only in Vite development on `localhost`, `127.0.0.1` or IPv6 loopback with the explicit query above. Production builds, including `npm run preview` and GitHub Pages, exclude its module, styles and menu; the query cannot enable it there. Preview source is tracked in Git for development, but is absent from the deployed `dist` artifact.
+
+For phone layout checks, use browser device emulation in portrait (390x844 or 320x568). Landscape and square viewports show the normal orientation notice; return to portrait to keep inspecting the selected state. Preview verifies presentation, not real authentication or physical-device installation behavior.
+
+Verification: 25 offline tests, lint and production build passed, including tests for loopback/development restrictions and absence of preview code/styles from the production bundle. Browser checks covered all seven states, landscape/square notices and preserved state after returning to 320x568 portrait, with no horizontal document overflow, external requests, Auth module imports or page errors. Real-device behavior was not retested.
+
 ## Authentication and Firebase
 
 The existing Firebase project is `focuswilds`. Public web configuration and App Check setup remain in src/lib/firebase.ts; do not commit OAuth secrets, admin credentials or debug tokens. Auth persists across closing the app/browser using browserLocalPersistence, with session persistence only when local storage is unavailable. Existing session persistence is included in the initialization list for migration. Persistence is per browser profile/storage container, not shared automatically between GitHub mobile, Safari and installed PWAs. Clearing storage, private browsing or revoked credentials may require another sign-in. Keep the existing GitHub provider, authorized domains and App Check security configuration. The owner UID is defined in src/lib/account.ts. Accounts other than the owner show an access-denied message and cannot reach game content. This is an application access check, not an Auth-server signup allowlist: GitHub Authentication can still create a non-owner account, but grants no application or database access. Firestore rules do not control Authentication sign-in.

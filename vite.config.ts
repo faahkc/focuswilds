@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   base: '/focuswilds/',
+  server: { strictPort: true },
   plugins: [react()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
 })

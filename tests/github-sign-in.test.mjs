@@ -113,3 +113,23 @@ test('ordinary visits restore Firebase without additional OAuth requests', async
   assert.equal(login.requests.length, 0)
   assert.equal(login.credentials.length, 0)
 })
+
+test('localhost and loopback sign-in return to the same development origin and preserve the owner UID', async () => {
+  for (const origin of ['http://localhost:5173', 'http://127.0.0.1:5173']) {
+    const localCallback = `${origin}/focuswilds/?focuswilds-auth=1`
+    const start = flow({ url: `${origin}/focuswilds/`, response: { authUri: authorization, sessionId: 'server-session' } })
+    await start.startGitHubSignIn()
+    assert.equal(JSON.parse(start.requests[0].options.body).continueUri, localCallback)
+    const pending = JSON.parse(start.store.get(storageKey))
+    assert.equal(pending.callback, localCallback)
+    const finish = flow({
+      url: `${localCallback}&code=dev-code&state=challenge`, pending,
+      response: { localId: OWNER_UID, providerId: 'github.com', oauthAccessToken: 'mock-token' },
+    })
+    await finish.finishGitHubSignIn()
+    assert.equal(finish.location.href, `${origin}/focuswilds/`)
+    assert.equal(JSON.parse(finish.requests[0].options.body).requestUri, `${localCallback}&code=dev-code&state=challenge`)
+    assert.deepEqual(finish.credentials, [{ token: 'mock-token' }])
+    assert.equal(finish.navigations.length, 0)
+  }
+})

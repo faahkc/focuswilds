@@ -61,13 +61,22 @@ The REST exchanges attach App Check tokens; SDK credential sign-in and refresh r
 ### Required owner configuration before real sign-in
 
 1. In Firebase Console > Authentication > Sign-in method > GitHub, identify the existing OAuth application's public Client ID. Do not copy its secret into this repository or chat.
-2. In GitHub > Settings > Developer settings > OAuth Apps, open that same application and change **Authorization callback URL** to:
-   `https://faahkc.github.io/focuswilds/?focuswilds-auth=1`
-3. Keep the existing Client ID/secret in Firebase and the authorized domain `faahkc.github.io`. Keep App Check enforcement enabled. No Firestore rules change is required.
+2. In GitHub > Settings > Developer settings > OAuth Apps, open that same application (public Client ID `Ov23liq8ha2pKTNJMnkN`). Keep the production callback and use **Add redirect URI** / **Add callback URL** to register the local callbacks as additional entries:
+   - `https://faahkc.github.io/focuswilds/?focuswilds-auth=1`
+   - `http://localhost:5173/focuswilds/?focuswilds-auth=1`
+   - `http://127.0.0.1:5173/focuswilds/?focuswilds-auth=1`
+   Save the application. GitHub supports multiple OAuth callback URLs; do not replace production with localhost or introduce wildcard matching for this setup. See [GitHub's multiple-redirect support](https://github.blog/changelog/2026-08-14-multiple-redirect-uris-and-token-refresh-for-oauth-apps/).
+3. Keep the existing Client ID/secret in Firebase. In Authentication > Settings > Authorized domains, retain `faahkc.github.io` and add `localhost` and `127.0.0.1` if absent (hostnames only, without ports or paths). Keep App Check enforcement enabled. No Firestore rules change is required.
 4. After deployment, sign in as the existing owner on desktop and mobile. Confirm the same tab navigates to GitHub and returns, no new window opens, the callback query disappears, and closing/reopening retains the account. Also test cancellation, sign-out and a denied non-owner account. On an installed iOS PWA, verify that the OS returns to the same storage container; external authentication may open browser UI and does not inherit the GitHub mobile app's session. Never promise silent initial login.
 
-Changing the OAuth callback replaces the old Firebase helper callback for this OAuth app; older popup builds using it will stop working. Do not create a second Firebase user or replace the owner UID. Local localhost OAuth sign-in also requires a matching OAuth callback configuration; routine local checks use mocks. The agent has not changed the OAuth application's remote settings.
+Use `npm run dev` and open `http://localhost:5173/focuswilds/` to test before deployment. The callback is derived from the current origin, so local sign-in returns to localhost and production returns to GitHub Pages. Vite refuses to silently choose a different port when 5173 is busy; stop the previous server or explicitly register a callback for a different chosen port. Firebase sessions remain separate between these origins even though they identify the same owner account. Routine tests still use mocks and never production Auth or Firestore. A deliberate manual local login uses the existing production Auth account; this milestone still has zero database access.
+
+If Auth enforcement requires local App Check attestation, use the existing `VITE_APPCHECK_DEBUG_TOKEN` mechanism in an ignored `.env.local`, register that private debug token in Firebase Console > App Check > the web app > Manage debug tokens, and restart Vite. Do not publish the token, enable production debug mode or turn off enforcement. This is separate from the GitHub redirect URI error.
+
+Do not create a second Firebase user or replace the owner UID. The agent has not changed the OAuth application's remote settings or Firebase's authorized domains. Earlier instructions replacing a single callback omitted local development; the additional entries above supersede them.
 
 Reference contracts: [createAuthUri](https://cloud.google.com/identity-platform/docs/reference/rest/v1/accounts/createAuthUri), [signInWithIdp](https://cloud.google.com/identity-platform/docs/reference/rest/v1/accounts/signInWithIdp), [Auth persistence](https://firebase.google.com/docs/auth/web/auth-state-persistence).
 
 Verification for the same-window update: 21 offline tests, lint and production build passed. Mocked browser navigation stayed in one window, completed the owner callback, removed callback parameters and restored the mocked account after reload. All non-local browser requests were intercepted; no production OAuth exchange was tested. Application JS measured 318.44 kB minified / 98.23 kB gzip. Real sign-in and installed-PWA return/storage behavior remain unverified until the owner updates the callback URL.
+
+Local development verification (2026-10-19): 22 offline tests, lint and build passed. The additional regression check covers authorization and owner callback completion on both localhost:5173 and 127.0.0.1:5173 without routing through production. These are mocked checks; real OAuth acceptance still requires the owner to add the callback URLs and authorized domains in the service consoles.

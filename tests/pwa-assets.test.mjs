@@ -35,6 +35,7 @@ test('app icons use stable content hashes and preserve installed-app identity an
   for (const icon of first.icons) assert.match(icon.src, /^icon-(192|512)\.png\?v=[a-f0-9]{12}$/)
   const firstHtml = transform()
   assert.match(firstHtml, />v0\.1\.99<\/footer>/)
+  assert.match(firstHtml, /name="application-version" content="0\.1\.99"/)
   assert.doesNotMatch(firstHtml, /%APP_VERSION%/)
   assert.equal(transform(), firstHtml)
   for (const name of ['icon-16', 'icon-32', 'icon-48', 'apple-touch-icon']) assert.match(firstHtml, new RegExp(`${name}\\.png\\?v=[a-f0-9]{12}`))
@@ -48,6 +49,7 @@ test('app icons use stable content hashes and preserve installed-app identity an
 
   writeFileSync(join(directory, 'package.json'), JSON.stringify({ version: '0.1.100' }))
   assert.match(transform(), />v0\.1\.100<\/footer>/)
+  assert.match(transform(), /name="application-version" content="0\.1\.100"/)
 
   let middleware
   plugin.configureServer({ middlewares: { use: value => { middleware = value } } })

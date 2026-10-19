@@ -5,7 +5,6 @@ import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
 import { OWNER_UID } from '@/lib/account'
 import { AccountView } from '@/components/account-view'
 import PageLoading from '@/screens/system/loading'
-import { AppUpdate } from '@/components/app-update'
 
 export function AuthPanel() {
   const [user, setUser] = useState<User | null>(null)
@@ -47,5 +46,5 @@ export function AuthPanel() {
   }
 
   if (loading) return <PageLoading/>
-  return <><AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/><AppUpdate/></>
+  return <AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/>
 }

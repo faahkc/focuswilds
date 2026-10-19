@@ -8,3 +8,5 @@
 .app-screen .page-loading { gap: 16px; font: 18px/1.5 'GNU Unifont', monospace; }
 .page-loading > span:not(.loading-cat) { max-width: 320px; text-wrap: balance; overflow-wrap: anywhere; }
 .orientation-notice { text-wrap: balance; }
+.recovery-actions { width: min(100%, 320px); display: grid; gap: 12px; }
+.recovery-actions .pixel-button { text-wrap: balance; }

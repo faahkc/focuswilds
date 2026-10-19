@@ -1,7 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import React from 'react'
 import ts from 'typescript'
 
 function checker(fetch, timers = { setTimeout, clearTimeout }) {
@@ -69,21 +68,16 @@ test('stalled update checks are bounded to five seconds', async () => {
   assert.equal(cleared, true)
 })
 
-test('update notice offers explicit reload and later actions with shared buttons', () => {
-  const source = readFileSync(new URL('../src/components/update-notice.tsx', import.meta.url), 'utf8')
-  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
-  const dependencies = { 'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement }, '@/components/button': { Button: () => null } }
-  const module = { exports: {} }
-  new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports)
-  let reloads = 0, dismissals = 0
-  const view = module.exports.UpdateNotice({ version: '0.1.105', onReload: () => reloads++, onLater: () => dismissals++ })
-  assert.equal(reloads, 0)
-  assert.equal(view.props.children[0].props.role, 'status')
-  const [reload, later] = view.props.children[1].props.children
-  assert.equal(reload.type, dependencies['@/components/button'].Button)
-  later.props.onClick()
-  assert.equal(dismissals, 1)
-  assert.equal(reloads, 0)
-  reload.props.onClick()
-  assert.equal(reloads, 1)
+test('fresh HTML preflight has a ten-second timeout and clears its timer', async () => {
+  let expire, cleared = false
+  const { loadUpdate } = checker((_url, { signal }) => new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => reject(new Error('Aborted')))
+  }), {
+    setTimeout: (callback, ms) => { assert.equal(ms, 10000); expire = callback; return 1 },
+    clearTimeout: id => { assert.equal(id, 1); cleared = true },
+  })
+  const result = loadUpdate('https://example.com/focuswilds/', '0.1.110')
+  expire()
+  await assert.rejects(result, /Aborted/)
+  assert.equal(cleared, true)
 })

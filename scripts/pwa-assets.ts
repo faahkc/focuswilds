@@ -28,7 +28,7 @@ export function pwaAssets(): Plugin {
       order: 'pre',
       handler(html) {
         const { version } = JSON.parse(readFileSync(packagePath, 'utf8'))
-        return html.replace('%APP_VERSION%', version).replace(/href="\/((?:icon-(?:16|32|48)|apple-touch-icon)\.png)"/g, (_, name: string) => `href="/${iconUrl(name)}"`)
+        return html.replaceAll('%APP_VERSION%', version).replace(/href="\/((?:icon-(?:16|32|48)|apple-touch-icon)\.png)"/g, (_, name: string) => `href="/${iconUrl(name)}"`)
       },
     },
     configureServer(server) {

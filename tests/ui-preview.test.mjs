@@ -27,15 +27,19 @@ test('preview entry is restricted to development on loopback hosts with an expli
       './components/screen-layout': { ScreenLayout: () => null },
       './components/app-error-boundary': { AppErrorBoundary: () => null },
       './screens/system/app-error': { default: () => null },
+      './screens/system/update-error': { default: () => null },
+      './screens/system/loading': { default: () => null },
+      '../package.json': { version: '0.1.109' },
+      './lib/app-update': { checkForUpdate: async () => null, updateTarget: () => null },
       './dev/ui-preview': { default: () => null },
       './App': { default: () => null },
     }
-    const code = ts.transpileModule(main.replaceAll('import.meta.env.DEV', String(dev)), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
-    new Function('require', 'exports', 'location', 'document', code)(name => { assert.ok(name in dependencies, name); loaded.push(name); return dependencies[name] }, {}, new URL(url), { getElementById: () => ({}) })
+    const code = ts.transpileModule(main.replaceAll('import.meta.env.DEV', String(dev)).replaceAll('import.meta.env.BASE_URL', JSON.stringify('/focuswilds/')), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
+    new Function('require', 'exports', 'location', 'document', 'window', code)(name => { assert.ok(name in dependencies, name); loaded.push(name); return dependencies[name] }, {}, new URL(url), { getElementById: () => ({}) }, { location: { href: url } })
     await new Promise(resolve => setImmediate(resolve))
     assert.equal(loaded.includes('./dev/ui-preview'), preview, url)
     assert.equal(loaded.includes('./App'), !preview, url)
-    assert.equal(rendered, 1)
+    assert.equal(rendered, preview ? 1 : 2)
   }
 })
 
@@ -77,7 +81,6 @@ test('login preview fixtures use shared account UI without account services', ()
   const dependencies = {
     'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: React.createElement },
     '@/components/account-view': { AccountView: () => null },
-    '@/components/update-notice': { UpdateNotice: () => null },
   }
   const source = readFileSync(new URL('../src/screens/login.preview.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
@@ -86,7 +89,7 @@ test('login preview fixtures use shared account UI without account services', ()
   for (const [name, Component] of Object.entries({ Default: module.exports.default.Default, ...module.exports.default.cases })) {
     const preview = Component()
     const screen = preview.type(preview.props)
-    const panel = screen.props.children[0]
+    const panel = screen
     assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
     assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied', 'Signing out'].includes(name))
     assert.equal(panel.props.owner, ['Owner signed in', 'Signing out'].includes(name))

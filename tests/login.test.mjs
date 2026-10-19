@@ -25,7 +25,6 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
       finishGitHubSignIn: async () => { if (callbackError) throw callbackError },
     },
     '@/lib/account': { OWNER_UID },
-    '@/components/app-update': { AppUpdate: () => null },
     '@/screens/login': { __esModule: true, default: function LoginPage() {} },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },

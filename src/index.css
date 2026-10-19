@@ -15,11 +15,4 @@ h2 { font-size: 22px; margin-bottom: 12px; }
 .login-account button { width: 100%; }
 .login-account { width: 100%; max-width: 292px; display: grid; gap: 12px; }
 .login-intro.login-error { max-width: 292px; font-size: 18px; line-height: 1.5; color: #93462d; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
-.app-screen:has(> .update-notice) { display: flex; flex-direction: column; }
-.app-screen:has(> .update-notice) .login-page { flex: 1; min-height: 0; gap: 12px; padding-top: max(20px, env(safe-area-inset-top)); padding-bottom: 16px; }
-.app-screen:has(> .update-notice) .login-scene { max-width: min(336px, max(0px, calc((100cqh - 460px) * 8 / 7))); }
-.app-screen:has(> .update-notice) .app-version { position: fixed; }
-.update-notice { flex-shrink: 0; align-self: center; box-sizing: border-box; width: min(400px, calc(100% - 32px)); margin-bottom: max(52px, calc(env(safe-area-inset-bottom) + 36px)); padding: 16px; border: 2px solid var(--text); background: var(--page-bg); box-shadow: 0 4px 0 var(--text); text-align: center; }
-.update-notice p { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; text-wrap: balance; }
-.update-notice > div { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
 @container screen (max-height: 650px) { .login-page { gap: 16px; padding-top: 20px; padding-bottom: max(52px, calc(env(safe-area-inset-bottom) + 36px)); } .login-scene { max-width: 256px; } h1 { font-size: 40px; } .login-intro { font-size: 18px; } }

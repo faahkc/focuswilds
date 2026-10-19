@@ -85,9 +85,13 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 
 App recovery reuses the approved open-eye cat head from the loading atlas as a static crop with no ring or animation. Both React and pre-React recovery show Something went wrong, Please reload to try again, the shared Reload button treatment and bottom version. Keep the fallback independent of the application bundle, hide Loading when failure is shown and do not add automatic retries.
 
-## Application update notification
+## Startup application updates
 
-Keep the ordinary startup Loading treatment. After account restoration, check the deployed static version once per document load, with deduplication, a five-second timeout and no polling or focus/visibility checks. When a valid newer version is detected, offer Reload and Later using shared buttons; never reload automatically. Network/metadata failures leave the current app usable. This notification uses no database reads/writes or service worker and does not claim offline updates. Future focus/draft screens must preserve their state and handle unsaved work before enabling an explicit reload. Do not show Updating unless an actual update operation is implemented.
+Before loading account services or showing Login, check the deployed static version once per ordinary document load, with deduplication, a five-second timeout and no polling or focus/visibility checks. Missing, invalid, offline or timed-out metadata lets the current version continue.
+
+When a newer release is found, keep the existing animated Aseprite cat and show Loading the latest version. Fetch fresh same-origin HTML with a ten-second timeout, verify its embedded release version, then navigate to a cache-busted URL while preserving authentication callback parameters. Keep the same updating message before React starts on that return. Do not add progress percentages or artificial delays.
+
+A target-version marker permits one automatic update navigation. If the returned bundle is still older than the target, stop at a full-screen Update unavailable recovery with Try again and Continue with current version; do not navigate again automatically. Fetch failures also use this recovery. Successful startup or explicit continuation removes only update markers. There is no login-page update panel, service worker, offline update cache or database operation. Never update automatically during active use. Real-device navigation and installed-icon behavior require separate verification; browser/CDN navigation can still briefly repaint.
 
 Decorative titles and intro text are nonselectable. Error/version text remains copyable with a pale-gold selection highlight; editing fields retain ordinary selection and hardware-keyboard behavior.
 

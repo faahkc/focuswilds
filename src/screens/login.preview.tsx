@@ -1,11 +1,10 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export state metadata, not a Fast Refresh boundary. */
 import { AccountView } from '@/components/account-view'
-import { UpdateNotice } from '@/components/update-notice'
 
-function AccountPreview({ signedIn = false, owner = false, busy = false, error = null, update = false }: {
-  signedIn?: boolean; owner?: boolean; busy?: boolean; error?: unknown; update?: boolean
+function AccountPreview({ signedIn = false, owner = false, busy = false, error = null }: {
+  signedIn?: boolean; owner?: boolean; busy?: boolean; error?: unknown
 }) {
-  return <><AccountView signedIn={signedIn} owner={owner} busy={busy} error={error} onAction={() => {}}/>{update && <UpdateNotice version="0.2.0" onReload={() => {}} onLater={() => {}}/>}</>
+  return <AccountView signedIn={signedIn} owner={owner} busy={busy} error={error} onAction={() => {}}/>
 }
 
 function LoginPreview() { return <AccountPreview/> }
@@ -16,5 +15,4 @@ export default { Default: LoginPreview, cases: {
   'Signing in': () => <AccountPreview busy/>,
   'Signing out': () => <AccountPreview signedIn owner busy/>,
   'Account error': () => <AccountPreview error={{ code: 'auth/restore-failed' }}/>,
-  'Update available': () => <AccountPreview update/>,
 } }

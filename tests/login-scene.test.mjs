@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import React from 'react'
 import ts from 'typescript'
 
-test('owner confirmation replaces the login intro while other visitors keep the tagline', () => {
+test('login intro shows errors before owner confirmation and the default tagline', () => {
   const source = readFileSync(new URL('../src/screens/login.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const dependencies = {
@@ -20,6 +20,12 @@ test('owner confirmation replaces the login intro while other visitors keep the 
     assert.equal(intro.props.children[0], ownerSignedIn ? 'You are signed in.' : 'A little focus.')
     assert.equal(intro.props.children[2], ownerSignedIn ? 'Your cat home is coming soon.' : 'A home for cats.')
     assert.equal(intro.props.role, ownerSignedIn ? 'status' : undefined)
+    const action = React.createElement('button', null, 'Account action')
+    const failed = module.exports.default({ ownerSignedIn, errorMessage: 'Safe account error', children: action })
+    assert.equal(failed.props.children[2].props.role, 'alert')
+    assert.equal(failed.props.children[2].props.children, 'Safe account error')
+    assert.equal(failed.props.children[3], action)
+    assert.doesNotMatch(JSON.stringify(failed), /A little focus|You are signed in/)
   }
 })
 

@@ -4,7 +4,7 @@
 .app-version { position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom)); font: 12px/1.5 'GNU Unifont', monospace; text-align: center; color: var(--muted); }
 ::selection { background: var(--accent); color: var(--text); }
 .startup-recovery h1, .orientation-notice { -webkit-user-select: none; user-select: none; }
-.app-version, .login-account [role="alert"], .startup-recovery p { -webkit-user-select: text; user-select: text; }
+.app-version, .login-error, .startup-recovery p { -webkit-user-select: text; user-select: text; }
 .app-screen .page-loading { gap: 16px; font: 18px/1.5 'GNU Unifont', monospace; }
 .page-loading > span:not(.loading-cat) { max-width: 320px; text-wrap: balance; overflow-wrap: anywhere; }
 .orientation-notice { text-wrap: balance; }

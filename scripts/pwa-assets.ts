@@ -6,6 +6,7 @@ import type { Plugin } from 'vite'
 export function pwaAssets(): Plugin {
   let publicDir: string
   let base: string
+  let packagePath: string
   function iconUrl(name: string) {
     if (!/^(icon-(16|32|48|192|512)|apple-touch-icon)\.png$/.test(name)) throw new Error(`Unexpected app icon: ${name}`)
     const hash = createHash('sha256').update(readFileSync(join(publicDir, name))).digest('hex').slice(0, 12)
@@ -18,11 +19,12 @@ export function pwaAssets(): Plugin {
   }
   return {
     name: 'focuswilds-pwa-assets',
-    configResolved(config) { publicDir = config.publicDir; base = config.base },
+    configResolved(config) { publicDir = config.publicDir; base = config.base; packagePath = join(config.root, 'package.json') },
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        return html.replace(/href="\/((?:icon-(?:16|32|48)|apple-touch-icon)\.png)"/g, (_, name: string) => `href="/${iconUrl(name)}"`)
+        const { version } = JSON.parse(readFileSync(packagePath, 'utf8'))
+        return html.replace('%APP_VERSION%', version).replace(/href="\/((?:icon-(?:16|32|48)|apple-touch-icon)\.png)"/g, (_, name: string) => `href="/${iconUrl(name)}"`)
       },
     },
     configureServer(server) {

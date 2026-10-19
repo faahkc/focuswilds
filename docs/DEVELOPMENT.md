@@ -87,7 +87,7 @@ The owner approved a stationary rounded cat head with a compact rotating pixel r
 
 Runtime displays the 32x32 art at 128x128 using integer scaling. The HTML startup shell and React share the atlas, timing and cream background. Startup has no visible caption; React supports optional real-text messages and accessible labels. The visibility listener pauses while hidden; reduced-motion settings do not disable animation per owner direction. Recovery and portrait notices retain their behavior.
 
-The PNG atlas is 736x32 and 1,322 compressed bytes, with 94,208 decoded RGBA bytes. The native source is 9,006 bytes and is not deployed; generated CSS is 1,578 bytes. Compared with the retired seated-cat atlas, PNG transfer increases by 381 bytes and decoded memory by 48,128 bytes. Built startup CSS is about 5.42 kB / 2.76 kB gzip, versus 4.38 kB / 2.27 kB gzip previously. No runtime GIF/video, JavaScript rendering loop, dependency or database operation is added. These are file sizes, not physical-device performance measurements.
+The PNG atlas is 736x32 and 1,322 compressed bytes, with 94,208 decoded RGBA bytes. The native source is 9,006 bytes and is not deployed; generated CSS includes a static recovery crop from the same atlas. Compared with the retired seated-cat atlas, PNG transfer increases by 381 bytes and decoded memory by 48,128 bytes. Built startup CSS is about 5.42 kB / 2.76 kB gzip, versus 4.38 kB / 2.27 kB gzip previously. No runtime GIF/video, JavaScript rendering loop, dependency or database operation is added. These are file sizes, not physical-device performance measurements.
 
 ### Approved animated login window
 
@@ -170,8 +170,16 @@ Validation: 33 offline tests, lint and build passed. Tests cover native prop for
 
 ### Shared version footer
 
-Every screen that displays an application version uses `src/components/app-version.tsx`, which reads package.json and renders v followed by the version. Currently Login is the only screen with a version; its owner, denied, busy and error previews all share the same component. The redundant footer slogan is removed. Future screens displaying a version should reuse this component in a positioned screen container and reserve bottom space instead of writing their own copy.
+Every screen that displays an application version uses `src/components/app-version.tsx`, which reads package.json and renders v followed by the version. Login and App error use this component; all Login states share it. Pre-React recovery uses the same footer class and a build-time version from package.json. The redundant footer slogan is removed. Future screens displaying a version should reuse this component in a positioned screen container and reserve bottom space instead of writing their own copy.
 
 The footer uses muted 12px GNU Unifont, bottom-center alignment and a safe-area-aware inset. Login reserves space on both ordinary and short viewports so status text and actions do not overlap it. Loading remains text-free by default and gains no version label.
 
 Verification: 34 offline tests, lint and build passed. Browser checks covered default, owner, denied and error Login states at 390x844, 375x667 and 320x568; the version stayed at the same bottom position for each viewport, remained visible and never overlapped account controls or messages. Real-device safe areas were not retested.
+
+### Shared application recovery
+
+App error and pre-React entry-module failure display the same static approved cat head, Something went wrong, Please reload to try again, Reload action and bottom version. The head reuses the open-eye pose at frame nine of the Aseprite loading atlas, cropped to its central 16x16 pixels and scaled to 64x64. No artwork pixels or native source were changed. The Aseprite exporter asserts that the crop excludes the ring; the crop has no CSS animation. Both treatments use head-loaded recovery styles and the shared button styles. Pre-React failure hides the Loading status before exposing the recovery alert.
+
+React uses AppVersion; the HTML fallback uses %APP_VERSION%, replaced from package.json by the existing Vite HTML transform on each request/build, avoiding a configuration-level JSON import. Tests verify updated package versions are reflected without cached values. Shared footer styles load before React so the fallback does not depend on application CSS. Reload remains a manual page reload, with no automatic retries or database requests.
+
+Verification: 37 offline tests, lint and build passed. Localhost checks covered App error at 390x844 and 320x568 and an actual blocked entry-module request before React. Both showed the same head crop, copy and version; the head did not animate, Loading was hidden on startup failure, and controls/version did not overlap or overflow. Built startup CSS is about 6.12 kB / 2.95 kB gzip (previously 5.69 kB / 2.85 kB gzip); there is no new image file. Physical devices and production authentication were not retested.

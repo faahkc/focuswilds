@@ -11,8 +11,9 @@ test('app icons use stable content hashes and preserve installed-app identity an
   for (const file of ['manifest.webmanifest', 'icon-16.png', 'icon-32.png', 'icon-48.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png']) {
     copyFileSync(new URL(`../public/${file}`, import.meta.url), join(directory, file))
   }
+  writeFileSync(join(directory, 'package.json'), JSON.stringify({ version: '0.1.99' }))
   const plugin = pwaAssets()
-  plugin.configResolved({ publicDir: directory, base: '/focuswilds/' })
+  plugin.configResolved({ root: directory, publicDir: directory, base: '/focuswilds/' })
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   const transform = () => plugin.transformIndexHtml.handler(html)
   function manifest() {
@@ -29,6 +30,8 @@ test('app icons use stable content hashes and preserve installed-app identity an
   assert.equal(first.display, 'standalone')
   for (const icon of first.icons) assert.match(icon.src, /^icon-(192|512)\.png\?v=[a-f0-9]{12}$/)
   const firstHtml = transform()
+  assert.match(firstHtml, />v0\.1\.99<\/footer>/)
+  assert.doesNotMatch(firstHtml, /%APP_VERSION%/)
   assert.equal(transform(), firstHtml)
   for (const name of ['icon-16', 'icon-32', 'icon-48', 'apple-touch-icon']) assert.match(firstHtml, new RegExp(`${name}\\.png\\?v=[a-f0-9]{12}`))
   assert.match(firstHtml, /href="\/manifest.webmanifest"/)
@@ -38,6 +41,9 @@ test('app icons use stable content hashes and preserve installed-app identity an
   assert.equal(transform(), firstHtml)
   writeFileSync(join(directory, 'apple-touch-icon.png'), Buffer.concat([readFileSync(join(directory, 'apple-touch-icon.png')), Buffer.from([1])]))
   assert.notEqual(transform(), firstHtml)
+
+  writeFileSync(join(directory, 'package.json'), JSON.stringify({ version: '0.1.100' }))
+  assert.match(transform(), />v0\.1\.100<\/footer>/)
 
   let middleware
   plugin.configureServer({ middlewares: { use: value => { middleware = value } } })

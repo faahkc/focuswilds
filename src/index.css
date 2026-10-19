@@ -15,5 +15,4 @@ h2 { font-size: 22px; margin-bottom: 12px; }
 .login-account { width: 100%; max-width: 292px; display: grid; gap: 16px; }
 .login-account p { font-size: 16px; }
 .login-account [role="alert"] { color: #93462d; }
-.app-version { position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom)); font-size: 12px; line-height: 1.5; text-align: center; color: var(--muted); }
 @container screen (max-height: 650px) { .login-page { gap: 16px; padding-top: 20px; padding-bottom: max(52px, calc(env(safe-area-inset-bottom) + 36px)); } .login-scene { max-width: 256px; } h1 { font-size: 40px; } .login-intro { font-size: 18px; } .login-page:has(.login-account p) .login-scene { max-width: min(256px, calc((100cqh - 380px) * 8 / 7)); } }

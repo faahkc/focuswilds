@@ -83,6 +83,8 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 - Run animations regardless of OS reduced-motion settings; suspend rendering only while hidden or graphics are unavailable. Rendering and viewport changes add zero database operations. Keep timer state independent of scene lifecycle.
 - Measure transfer size, deployed files, decoded memory, frame-time percentiles and dropped frames on actual devices before claiming performance. The former 500 kB baseline is not a hard cap. Review one cat, a care interaction and a room object in portrait before expanding the artwork. Day/night or weather simulation and multiple neighborhood routes are deferred.
 
+App recovery reuses the approved open-eye cat head from the loading atlas as a static crop with no ring or animation. Both React and pre-React recovery show Something went wrong, Please reload to try again, the shared Reload button treatment and bottom version. Keep the fallback independent of the application bundle, hide Loading when failure is shown and do not add automatic retries.
+
 ## Shared controls
 
 Every React button uses `src/components/button.tsx`; future screens reuse it and pass native disabled/busy/accessibility props. Keep the approved charcoal pixel corners, visible keyboard focus and discrete press response. Layout belongs to the caller. The pre-React recovery button uses the same stylesheet and class in static HTML. Authentication waits name their operation; future actions should do the same without replacing unrelated screen state.

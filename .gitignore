@@ -9,6 +9,7 @@ coverage/
 .vite/
 .cache/
 .playwright-mcp/
+art/drafts/
 *.tsbuildinfo
 .eslintcache
 .stylelintcache

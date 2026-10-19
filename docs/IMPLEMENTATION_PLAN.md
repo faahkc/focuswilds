@@ -68,6 +68,8 @@ This latest owner-approved direction supersedes earlier landscape-first and page
 
 ## Approved visual direction
 
+For every Aseprite artwork or animation change, prepare a draft and show a preview for owner review. Do not integrate, replace live assets or publish the draft until the owner explicitly approves it. Keep unapproved sources and exports outside deployed assets. Approval of this visual direction does not approve individual assets.
+
 Use a contemporary city and a welcoming small apartment. The city is the game's "wilds": a concrete jungle seen through quiet everyday encounters. The player takes imagined neighborhood walks, befriends stray cats and brings them back to a room that gradually becomes their shared home. Keep the experience gentle; the setting does not introduce danger, combat or animal injury/death systems.
 
 - All game artwork remains pixel art: cats, apartment, city streets, props and effects. Keep readable cat silhouettes and detailed pixel environments with layered depth, contact shadows and foreground occlusion. Aseprite is the primary art/animation tool. No old artwork is retained merely to fill the new scene.

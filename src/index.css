@@ -8,10 +8,11 @@ input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-sele
 button, input, textarea, select { font: inherit; font-size: max(16px, 1em); }
 .login-page { position: relative; min-height: 100%; width: min(100%, 440px); margin: auto; padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 40px)); }
 h1, h2, p { margin: 0; font-weight: normal; }
-h1 { font-weight: 700; font-size: 48px; line-height: 1.1; letter-spacing: .02em; text-wrap: balance; }
+h1 { font-weight: 700; font-size: 48px; line-height: 1.1; text-wrap: balance; }
 h2 { font-size: 22px; margin-bottom: 12px; }
 .login-scene { width: 100%; max-width: 336px; aspect-ratio: 8 / 7; flex-shrink: 0; }
 .login-intro { font-size: 20px; line-height: 1.5; text-wrap: balance; }
+.login-intro[role="status"] { text-wrap: pretty; }
 .login-account button { width: 100%; }
 .login-account { width: 100%; max-width: 292px; display: grid; gap: 12px; }
 .login-intro.login-error { max-width: 292px; font-size: 18px; line-height: 1.5; color: #93462d; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }

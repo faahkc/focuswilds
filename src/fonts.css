@@ -5,3 +5,7 @@
   font-display: swap;
   src: url('./assets/fonts/unifont-thai-latin.woff2') format('woff2');
 }
+
+/* Leave room for Unifont glyph edges at the interface's small text sizes. */
+:root { letter-spacing: 1px; }
+button, input, textarea, select { letter-spacing: inherit; }

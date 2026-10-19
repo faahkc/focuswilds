@@ -209,3 +209,9 @@ Request budget: one small static version.json per ordinary load (about 22 bytes,
 Titles and decorative intro copy cannot be selected. Errors and version text remain selectable; editable fields retain normal selection. The shared head-loaded selection rule uses pale gold #e0cb83 with charcoal text instead of the browser default highlight, including pre-React recovery.
 
 Verification: offline tests cover startup gating, metadata failures/timeouts, fresh HTML verification/timeout, automatic navigation, duplicate retry prevention, stale-bundle loop protection, explicit continuation and OAuth URL preservation. Local browser checks use mocked same-origin releases and account presentation, never production account/database services. Physical iOS/Android navigation, installed-app rendering and icon refresh remain unverified.
+
+### Shared font spacing
+
+GNU Unifont uses 1px letter spacing inherited from the root in the head-loaded fonts.css, including pre-React startup/recovery. Form controls explicitly inherit this spacing. New screens should use that default instead of resetting tracking or adding negative tracking to fit text. Keep Thai combining marks in their shaped text clusters; do not insert spaces or wrap individual characters in spans.
+
+When changing font size, weight or the bundled font, review Account error (especially complete), Access denied, loading messages, headings and buttons at 320x568 and 390x844 after document.fonts.ready. Check a high-density phone as well. Use DOM Range advances and Canvas text ink bounds to compare adjacent Latin glyphs, including mp, and inspect the rendered result: font metrics alone do not prove visual separation across browsers. Recheck Thai marks, line wrapping and button/screen overflow. The shared spacing prevents the observed collision at 18px in Chromium; other font changes and browser rasterizers still require review.

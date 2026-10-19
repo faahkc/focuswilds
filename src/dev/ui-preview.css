@@ -7,5 +7,8 @@
 .ui-preview-list { min-height: 0; max-height: 40svh; overflow: auto; overscroll-behavior: contain; }
 .ui-preview-list section { display: grid; gap: 8px; padding: 4px; }
 .ui-preview-list h2 { font-size: 18px; margin: 4px 0; }
-.ui-preview-tools button[aria-pressed="true"] { outline: 2px solid #87612e; outline-offset: -4px; }
+.ui-preview-list .pixel-button { position: relative; padding-left: 44px; padding-right: 44px; }
+.ui-preview-list .pixel-choice-mark { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+.ui-preview-tools button[aria-pressed="true"] { background: var(--page-bg); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
+.ui-preview-tools button[aria-pressed="true"]:focus-visible { box-shadow: inset 0 0 0 4px var(--text); }
 .ui-preview-tools a { color: inherit; }

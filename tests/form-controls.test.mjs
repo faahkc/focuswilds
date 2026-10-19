@@ -10,6 +10,7 @@ function load(name, hooks = {}) {
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => {
     if (name === 'react') return hooks
+    if (name === 'react-dom') return { createPortal: element => element }
     if (name === '../form-controls.css') return {}
     assert.equal(name, 'react/jsx-runtime')
     return { jsx: React.createElement, jsxs: React.createElement }
@@ -27,6 +28,22 @@ test('Input forwards native editing, validation, accessibility and refs', () => 
   for (const [key, expected] of Object.entries({ type: 'search', value: 'แมว', onChange, ref, disabled: true, 'aria-invalid': true, 'aria-describedby': 'error' })) assert.equal(input.props[key], expected)
 })
 
+test('controlled search has an accessible themed clear action and keeps focus without scrolling', () => {
+  const { Input } = load('input')
+  let clears = 0
+  const props = { type: 'search', value: 'complete', onClear: () => clears++, clearLabel: 'ล้างการค้นหา' }
+  const view = Input(props)
+  const clear = view.props.children[1]
+  assert.equal(clear.props['aria-label'], 'ล้างการค้นหา')
+  let focusOptions
+  clear.props.onClick({ currentTarget: { previousElementSibling: { focus: options => { focusOptions = options } } } })
+  assert.equal(clears, 1)
+  assert.deepEqual(focusOptions, { preventScroll: true })
+  assert.equal(Input({ ...props, value: '' }).props.children[1], false)
+  assert.equal(Input({ ...props, disabled: true }).props.children[1].props.disabled, true)
+  assert.equal(Input({ ...props, readOnly: true }).props.children[1].props.disabled, true)
+})
+
 test('Select supports keyboard navigation, selection, cancellation, typeahead and disabled actions', () => {
   const slots = []
   let cursor = 0
@@ -35,6 +52,7 @@ test('Select supports keyboard navigation, selection, cancellation, typeahead an
     useRef: value => { const index = cursor++; return slots[index] ??= { current: value } },
     useState: value => { const index = cursor++; slots[index] ??= value; return [slots[index], next => { slots[index] = next }] },
     useEffect: () => {},
+    useLayoutEffect: () => {},
   })
   const changed = []
   const props = { label: 'State', value: 'a', options: [{ value: 'a', label: 'Account' }, { value: 'b', label: 'Busy' }, { value: 'cat', label: 'แมว' }], onChange: value => changed.push(value) }
@@ -71,4 +89,35 @@ test('Select supports keyboard navigation, selection, cancellation, typeahead an
   key('ArrowDown')
   assert.equal(trigger().props.disabled, true)
   assert.deepEqual(changed, ['cat'])
+})
+
+test('opening Select prevents focus scrolling and scrolls only its own options', () => {
+  const slots = []
+  let cursor = 0
+  let effects = []
+  const { Select } = load('select', {
+    useId: () => 'position-test',
+    useRef: value => { const index = cursor++; return slots[index] ??= { current: value } },
+    useState: value => { const index = cursor++; slots[index] ??= value; return [slots[index], next => { slots[index] = next }] },
+    useEffect: callback => effects.push(callback),
+    useLayoutEffect: () => {},
+  })
+  const render = () => { cursor = 0; effects = []; return Select({ label: 'State', value: 'a', options: [{ value: 'a', label: 'Account' }], onChange: () => {} }) }
+  let view = render()
+  view.props.children[1].props.onClick()
+  view = render()
+  const focusCalls = []
+  const menu = { contains: () => false, focus: options => focusCalls.push(options), children: [{ getBoundingClientRect: () => ({ top: 140, bottom: 200 }) }], getBoundingClientRect: () => ({ top: 20, bottom: 120 }), scrollTop: 0 }
+  view.props.children[2].props.ref.current = menu
+  const previousDocument = globalThis.document
+  let pointerDown
+  globalThis.document = { addEventListener: (name, handler) => { assert.equal(name, 'pointerdown'); pointerDown = handler }, removeEventListener: () => {} }
+  try {
+    for (const effect of effects) effect()
+    assert.deepEqual(focusCalls, [{ preventScroll: true }])
+    assert.equal(menu.scrollTop, 86)
+    pointerDown({ target: {} })
+    view = render()
+    assert.equal(view.props.children[1].props['aria-expanded'], false)
+  } finally { globalThis.document = previousDocument }
 })

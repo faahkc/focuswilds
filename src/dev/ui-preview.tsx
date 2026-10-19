@@ -33,7 +33,7 @@ export default function UIPreview() {
     <details className="ui-preview-tools" ref={tools}>
       <summary>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
-        <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or group"/></label>
+        <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
         <nav className="ui-preview-list" aria-label="Preview screens" tabIndex={0}>
           {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
@@ -43,7 +43,7 @@ export default function UIPreview() {
             setFailed(false)
             setRetry(value => value + 1)
             event.currentTarget.closest('details')?.removeAttribute('open')
-          }}>{screen.name}</Button>)}</section>)}
+          }}><span>{screen.name}</span><span className="pixel-choice-mark" aria-hidden="true">{selected?.id === screen.id ? '✓' : ''}</span></Button>)}</section>)}
           {!visible.length && <p role="status">No matching screens.</p>}
         </nav>
         {loaded && <Select label="State" value={variant} options={[{ value: '', label: 'Default' }, ...Object.keys(loaded.cases).map(name => ({ value: name, label: name }))]} onChange={value => {

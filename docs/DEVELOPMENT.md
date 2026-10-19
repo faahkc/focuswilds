@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-Login only, with a warm pixel cat mark, GNU Unifont, a shared portrait frame and owner-only GitHub account status. Landscape and square viewports hide the mounted application and show a portrait-mode notice, including before startup. No automatic rotation. The page remains the same after sign-in. There are no game routes, timer, shop, garden scene, custom keyboard or database calls yet. Future gameplay is described in IMPLEMENTATION_PLAN.md.
+Login only, with a warm pixel cat mark, GNU Unifont, a shared portrait frame and owner-only GitHub account status. Landscape and square viewports hide the mounted application and show a portrait-mode notice, including before startup. No automatic rotation. The page remains the same after sign-in. There are no game routes, timer, shop, city/apartment scenes, custom keyboard or database calls yet. The approved setting is now city exploration and cat care in a small apartment, as described in IMPLEMENTATION_PLAN.md. This documentation update does not change existing garden-themed login copy or artwork; those remain pending for later UI work.
 
 ## Local development
 
@@ -32,7 +32,7 @@ When game screens arrive, define versioned account summaries and atomic/idempote
 
 The manifest requests standalone portrait display and uses new cat icons. It is not proof of physical-device installation. There is no service worker or offline startup. Viewport/gesture controls request fixed scale; browsers and OS accessibility settings may override them. Verify real iOS/Android behavior separately from emulation. External provider pages keep their own keyboard and orientation. The custom keyboard is deferred until an editable first-party screen exists.
 
-The login icon is a small code-native SVG. Future game art is warm pixel art produced with Aseprite: cats, home, garden and props. Install Aseprite locally and verify the actual executable path with `& 'C:\Program Files\Aseprite\Aseprite.exe' --version` in PowerShell (replace the example path). No MCP or Codex configuration change is needed for CLI use. Store editable sources/backups outside deployed assets. Define the first cat's frame dimensions, foot anchors, timings and transparency before writing its export/import code. No previous sprite layout is a requirement for new cats.
+The login icon is a small code-native SVG. Future game art is warm pixel art produced with Aseprite: cats, apartment, city neighborhoods and props. Install Aseprite locally and verify the actual executable path with `& 'C:\Program Files\Aseprite\Aseprite.exe' --version` in PowerShell (replace the example path). No MCP or Codex configuration change is needed for CLI use. Store editable sources/backups outside deployed assets. Define the first cat's frame dimensions, foot anchors, timings and transparency before writing its export/import code. No previous sprite layout is a requirement for new cats.
 
 ## Git and cleanup
 

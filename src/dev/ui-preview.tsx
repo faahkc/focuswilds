@@ -30,7 +30,7 @@ export default function UIPreview() {
   const groups = [...new Set(visible.map(screen => screen.group))]
   const Screen = loaded && (loaded.cases[variant] ?? loaded.Default)
   return <>
-    <details className="ui-preview-tools" ref={tools}>
+    <details className="pixel-frame ui-preview-tools" ref={tools}>
       <summary>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
         <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Name or group"/></label>

@@ -1,0 +1,17 @@
+.pixel-frame, .pixel-button, .pixel-select-options [role="option"], .pixel-search-clear {
+  --pixel-cut: 2px;
+  --pixel-outline: polygon(var(--pixel-cut) 0, calc(100% - var(--pixel-cut)) 0, calc(100% - var(--pixel-cut)) var(--pixel-cut), 100% var(--pixel-cut), 100% calc(100% - var(--pixel-cut)), calc(100% - var(--pixel-cut)) calc(100% - var(--pixel-cut)), calc(100% - var(--pixel-cut)) 100%, var(--pixel-cut) 100%, var(--pixel-cut) calc(100% - var(--pixel-cut)), 0 calc(100% - var(--pixel-cut)), 0 var(--pixel-cut), var(--pixel-cut) var(--pixel-cut));
+}
+:where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"]) {
+  --frame-border: var(--text, #2e3037); --frame-surface: var(--page-bg, #f2ebdc); --frame-inset: 2px; --frame-depth: 2px;
+  position: relative; isolation: isolate; border: 0; border-radius: 0; background: transparent; box-shadow: none;
+}
+:where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::before,
+:where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::after {
+  content: ''; position: absolute; pointer-events: none; clip-path: var(--pixel-outline);
+}
+:where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::before { inset: 0; z-index: -2; background: var(--frame-border); }
+:where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::after { inset: var(--frame-inset) var(--frame-inset) calc(var(--frame-inset) + var(--frame-depth)); z-index: -1; background: var(--frame-surface); }
+.pixel-frame:focus-within, .pixel-frame:focus-visible, .pixel-button[aria-pressed="true"]:focus-visible { --frame-inset: 4px; outline: none; }
+.pixel-frame[data-invalid="true"], .pixel-frame[aria-invalid="true"] { --frame-border: #93462d; }
+.pixel-frame[data-disabled="true"], .pixel-frame:disabled { opacity: .6; }

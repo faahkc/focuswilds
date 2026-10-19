@@ -22,7 +22,10 @@ test('Input forwards native editing, validation, accessibility and refs', () => 
   const { Input } = load('input')
   const onChange = () => {}
   const ref = { current: null }
-  const input = Input({ type: 'search', value: 'แมว', onChange, ref, disabled: true, 'aria-invalid': true, 'aria-describedby': 'error', className: 'search' })
+  const frame = Input({ type: 'search', value: 'แมว', onChange, ref, disabled: true, 'aria-invalid': true, 'aria-describedby': 'error', className: 'search' })
+  const input = frame.props.children[0]
+  assert.equal(frame.props['data-invalid'], true)
+  assert.equal(frame.props['data-disabled'], true)
   assert.equal(input.type, 'input')
   assert.equal(input.props.className, 'pixel-input search')
   for (const [key, expected] of Object.entries({ type: 'search', value: 'แมว', onChange, ref, disabled: true, 'aria-invalid': true, 'aria-describedby': 'error' })) assert.equal(input.props[key], expected)
@@ -63,19 +66,19 @@ test('Select supports keyboard navigation, selection, cancellation, typeahead an
   assert.equal(trigger().props['aria-expanded'], false)
   assert.equal(key('ArrowDown'), true)
   assert.equal(trigger().props['aria-expanded'], true)
-  assert.equal(view.props.children[2].props['aria-activedescendant'], 'select-test-option-0')
+  assert.equal(view.props.children[2].props.children.props['aria-activedescendant'], 'select-test-option-0')
   key('End')
-  assert.equal(view.props.children[2].props['aria-activedescendant'], 'select-test-option-2')
+  assert.equal(view.props.children[2].props.children.props['aria-activedescendant'], 'select-test-option-2')
   key('Enter')
   assert.deepEqual(changed, ['cat'])
   assert.equal(trigger().props['aria-expanded'], false)
   key(' ')
   key('ArrowUp')
-  assert.equal(view.props.children[2].props['aria-activedescendant'], 'select-test-option-2')
+  assert.equal(view.props.children[2].props.children.props['aria-activedescendant'], 'select-test-option-2')
   key('Escape')
   assert.deepEqual(changed, ['cat'])
   key('B')
-  assert.equal(view.props.children[2].props['aria-activedescendant'], 'select-test-option-1')
+  assert.equal(view.props.children[2].props.children.props['aria-activedescendant'], 'select-test-option-1')
   assert.equal(key('Tab'), false)
   assert.equal(trigger().props['aria-expanded'], false)
   props.disabled = true
@@ -106,9 +109,16 @@ test('opening Select prevents focus scrolling and scrolls only its own options',
   let view = render()
   view.props.children[1].props.onClick()
   view = render()
+  const frame = view.props.children[2]
+  let prevented = false
+  frame.props.onPointerDown({ currentTarget: frame, target: frame, preventDefault: () => { prevented = true } })
+  assert.equal(prevented, true, 'frame padding keeps list focus')
+  prevented = false
+  frame.props.onPointerDown({ currentTarget: frame, target: {}, preventDefault: () => { prevented = true } })
+  assert.equal(prevented, false, 'option pointer events remain available for selection and touch scrolling')
   const focusCalls = []
   const menu = { contains: () => false, focus: options => focusCalls.push(options), children: [{ getBoundingClientRect: () => ({ top: 140, bottom: 200 }) }], getBoundingClientRect: () => ({ top: 20, bottom: 120 }), scrollTop: 0 }
-  view.props.children[2].props.ref.current = menu
+  view.props.children[2].props.children.props.ref.current = menu
   const previousDocument = globalThis.document
   let pointerDown
   globalThis.document = { addEventListener: (name, handler) => { assert.equal(name, 'pointerdown'); pointerDown = handler }, removeEventListener: () => {} }

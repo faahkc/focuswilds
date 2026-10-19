@@ -46,7 +46,7 @@ export function Select({ label, value, options, onChange, disabled = false, inva
     if (!expanded) return
     list.current?.focus({ preventScroll: true })
     const outside = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node) && !list.current?.contains(event.target as Node)) setOpen(false)
+      if (!root.current?.contains(event.target as Node) && !list.current?.parentElement?.contains(event.target as Node)) setOpen(false)
     }
     document.addEventListener('pointerdown', outside)
     return () => document.removeEventListener('pointerdown', outside)
@@ -104,13 +104,13 @@ export function Select({ label, value, options, onChange, disabled = false, inva
     if (!root.current?.contains(event.relatedTarget) && !list.current?.contains(event.relatedTarget)) setOpen(false)
   }
 
-  const popup = expanded && <div ref={list} id={`${id}-list`} className="pixel-select-options" style={position} role="listbox" aria-labelledby={`${id}-label`} tabIndex={-1} aria-activedescendant={options[active] ? `${id}-option-${active}` : undefined} onKeyDown={event => { event.stopPropagation(); keyDown(event) }} onBlur={blur}>
+  const popup = expanded && <div className="pixel-frame pixel-select-popup" style={position} onPointerDown={event => { if (event.target === event.currentTarget) event.preventDefault() }}><div ref={list} id={`${id}-list`} className="pixel-select-options" role="listbox" aria-labelledby={`${id}-label`} tabIndex={-1} aria-activedescendant={options[active] ? `${id}-option-${active}` : undefined} onKeyDown={event => { event.stopPropagation(); keyDown(event) }} onBlur={blur}>
     {options.map((option, index) => <button key={option.value} id={`${id}-option-${index}`} type="button" role="option" tabIndex={-1} aria-selected={option.value === value} data-active={index === active} onClick={() => choose(index)} onFocus={() => setActive(index)}><span>{option.label}</span><span className="pixel-choice-mark" aria-hidden="true">{option.value === value ? '✓' : ''}</span></button>)}
-  </div>
+  </div></div>
 
   return <div className="pixel-select" ref={root} onKeyDown={keyDown} onBlur={blur}>
     <span id={`${id}-label`}>{label}</span>
-    <button ref={trigger} type="button" className="pixel-select-trigger" role="combobox" aria-labelledby={`${id}-label ${id}-value`} aria-controls={`${id}-list`} aria-haspopup="listbox" aria-expanded={expanded} aria-invalid={invalid || undefined} aria-describedby={describedBy} disabled={disabled || !options.length} onClick={() => {
+    <button ref={trigger} type="button" className="pixel-frame pixel-select-trigger" role="combobox" aria-labelledby={`${id}-label ${id}-value`} aria-controls={`${id}-list`} aria-haspopup="listbox" aria-expanded={expanded} aria-invalid={invalid || undefined} aria-describedby={describedBy} disabled={disabled || !options.length} onClick={() => {
       setActive(Math.max(0, selected)); setOpen(!expanded)
     }}><span id={`${id}-value`}>{options[selected]?.label ?? 'Select…'}</span><span className="pixel-select-arrow" aria-hidden="true"/></button>
     {portalTarget && popup ? createPortal(popup, portalTarget) : popup}

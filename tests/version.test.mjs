@@ -12,7 +12,7 @@ test('package-only version updates do not restart the Vite configuration', async
   const config = await resolveConfig({ configFile: fileURLToPath(new URL('../vite.config.ts', import.meta.url)) }, 'serve')
   const packagePath = fileURLToPath(new URL('../package.json', import.meta.url)).replaceAll('\\', '/')
   assert.ok(!config.configFileDependencies.some(path => path.replaceAll('\\', '/') === packagePath))
-  const app = readFileSync(new URL('../src/screens/login.tsx', import.meta.url), 'utf8')
+  const app = readFileSync(new URL('../src/components/app-version.tsx', import.meta.url), 'utf8')
   assert.ok(app.includes("import { version } from '../../package.json'"))
   assert.ok(!app.includes('__APP_VERSION__'))
 })

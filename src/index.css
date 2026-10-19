@@ -4,7 +4,7 @@
 html, body, #root { margin: 0; width: 100%; height: 100%; overflow: hidden; }
 body { color: var(--text); background: var(--page-bg); font: 18px/1.5 'GNU Unifont', monospace; }
 button, input, textarea, select { font: inherit; font-size: max(16px, 1em); }
-.login-page { min-height: 100%; width: min(100%, 440px); margin: auto; padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; text-align: center; }
+.login-page { position: relative; min-height: 100%; width: min(100%, 440px); margin: auto; padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; text-align: center; padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 40px)); }
 h1, h2, p { margin: 0; font-weight: normal; }
 h1 { font-size: 48px; line-height: 1.1; letter-spacing: .02em; }
 h2 { font-size: 22px; margin-bottom: 12px; }
@@ -15,6 +15,5 @@ h2 { font-size: 22px; margin-bottom: 12px; }
 .login-account { width: 100%; max-width: 292px; display: grid; gap: 16px; }
 .login-account p { font-size: 16px; }
 .login-account [role="alert"] { color: #93462d; }
-footer { font-size: 14px; color: var(--muted); }
-footer span { display: block; margin-top: 4px; font-size: 12px; }
-@container screen (max-height: 650px) { .login-page { gap: 16px; padding-block: 20px; } .login-scene { max-width: 256px; } h1 { font-size: 40px; } .login-intro { font-size: 18px; } .login-page:has(.login-account p) .login-scene { max-width: min(256px, calc((100cqh - 380px) * 8 / 7)); } }
+.app-version { position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom)); font-size: 12px; line-height: 1.5; text-align: center; color: var(--muted); }
+@container screen (max-height: 650px) { .login-page { gap: 16px; padding-top: 20px; padding-bottom: max(52px, calc(env(safe-area-inset-bottom) + 36px)); } .login-scene { max-width: 256px; } h1 { font-size: 40px; } .login-intro { font-size: 18px; } .login-page:has(.login-account p) .login-scene { max-width: min(256px, calc((100cqh - 380px) * 8 / 7)); } }

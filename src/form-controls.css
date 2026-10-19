@@ -8,6 +8,8 @@
 .pixel-input::-webkit-search-decoration, .pixel-input::-webkit-search-cancel-button, .pixel-input::-webkit-search-results-button, .pixel-input::-webkit-search-results-decoration { -webkit-appearance: none; display: none; }
 .pixel-search .pixel-input { padding-right: 56px; }
 .pixel-search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text, #2e3037); font: inherit; font-size: 24px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+.pixel-search-clear-mark { position: relative; display: block; width: 12px; height: 12px; }
+.pixel-search-clear-mark::before { content: ''; position: absolute; left: 0; top: 0; width: 2px; height: 2px; background: currentColor; box-shadow: 10px 0 currentColor, 2px 2px currentColor, 8px 2px currentColor, 4px 4px currentColor, 6px 4px currentColor, 4px 6px currentColor, 6px 6px currentColor, 2px 8px currentColor, 8px 8px currentColor, 0 10px currentColor, 10px 10px currentColor; }
 .pixel-search-clear:focus-visible { outline: none; background: var(--text, #2e3037); color: var(--page-bg, #f2ebdc); clip-path: var(--pixel-outline); }
 .pixel-search-clear:disabled { opacity: .6; cursor: not-allowed; }
 .pixel-input::placeholder { color: var(--muted, #67616a); opacity: 1; }

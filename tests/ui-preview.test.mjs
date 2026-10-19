@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import React from 'react'
 import ts from 'typescript'
 import { build } from 'vite'
+import { createCatalog } from '../src/dev/preview-catalog.ts'
 
 test('preview entry is restricted to development on loopback hosts with an explicit query', async () => {
   const main = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8')
@@ -24,7 +25,8 @@ test('preview entry is restricted to development on loopback hosts with an expli
       'react-dom/client': { createRoot: () => ({ render: () => rendered++ }) },
       './index.css': {},
       './components/screen-layout': { ScreenLayout: () => null },
-      './components/app-error-boundary': { AppErrorBoundary: () => null, AppRecovery: () => null },
+      './components/app-error-boundary': { AppErrorBoundary: () => null },
+      './screens/system/app-error': { default: () => null },
       './dev/ui-preview': { default: () => null },
       './App': { default: () => null },
     }
@@ -37,43 +39,61 @@ test('preview entry is restricted to development on loopback hosts with an expli
   }
 })
 
-test('UI preview switches shared screens without importing account services', () => {
-  const values = []
-  let cursor = 0
-  const dependencies = {
-    react: { useState: initial => { const index = cursor++; values[index] ??= initial; return [values[index], value => { values[index] = value }] } },
-    'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement, Fragment: React.Fragment },
-    '@/components/login-page': { LoginPage: () => null },
-    '@/components/account-view': { AccountView: () => null },
-    '@/components/page-loading': { PageLoading: () => null },
-    '@/components/app-error-boundary': { AppRecovery: () => null },
-    './ui-preview.css': {},
+test('catalog discovers new and nested screens without a central list and loads only the selected module', async () => {
+  const loaded = []
+  const Default = () => null
+  const Fixture = () => null
+  const Owner = () => null
+  const screens = {
+    '../screens/login.tsx': async () => { loaded.push('real login'); return { default: Default } },
+    '../screens/system/loading.tsx': async () => { loaded.push('loading'); return { default: Default } },
   }
-  const source = readFileSync(new URL('../src/dev/ui-preview.tsx', import.meta.url), 'utf8').replaceAll('import.meta.env.BASE_URL', "'/focuswilds/'")
+  const fixtures = { '../screens/login.preview.tsx': async () => { loaded.push('login fixture'); return { default: { Default: Fixture, cases: { Owner } } } } }
+  screens['../screens/cats/new-arrival.tsx'] = async () => { loaded.push('new arrival'); return { default: Default } }
+  const catalog = createCatalog(screens, fixtures)
+  assert.deepEqual(loaded, [])
+  assert.deepEqual(catalog.map(({ group, name }) => [group, name]), [['Cats', 'New Arrival'], ['Screens', 'Login'], ['System', 'Loading']])
+  assert.deepEqual(await catalog[1].load(), { Default: Fixture, cases: { Owner } })
+  assert.deepEqual(loaded, ['login fixture'])
+  assert.deepEqual(await catalog[0].load(), { Default, cases: {} })
+  assert.deepEqual(loaded, ['login fixture', 'new arrival'])
+})
+
+test('catalog handles hundreds of screens and permits retry after a failed lazy import', async () => {
+  let calls = 0
+  const Default = () => null
+  const screens = Object.fromEntries(Array.from({ length: 500 }, (_, index) => [`../screens/group-${index % 5}/screen-${index}.tsx`, async () => ({ default: Default })]))
+  screens['../screens/retry.tsx'] = async () => { if (++calls === 1) throw new Error('load failed'); return { default: Default } }
+  const catalog = createCatalog(screens, {})
+  assert.equal(catalog.length, 501)
+  assert.equal(new Set(catalog.map(screen => screen.id)).size, 501)
+  const retry = catalog.find(screen => screen.name === 'Retry')
+  await assert.rejects(retry.load(), /load failed/)
+  assert.equal((await retry.load()).Default, Default)
+  assert.deepEqual(createCatalog({}, {}), [])
+})
+
+test('login preview fixtures use shared account UI without account services', () => {
+  const dependencies = {
+    'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement },
+    './login': { __esModule: true, default: () => null },
+    '@/components/account-view': { AccountView: () => null },
+  }
+  const source = readFileSync(new URL('../src/screens/login.preview.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies, `Preview must not import ${name}`); return dependencies[name] }, module, module.exports)
-  const render = () => { cursor = 0; return module.exports.default() }
-  const buttons = render().props.children[0].props.children[1].props.children[0]
-  for (const button of buttons) {
-    let closed = false
-    button.props.onClick({ currentTarget: { closest: () => ({ removeAttribute: name => { assert.equal(name, 'open'); closed = true } }) } })
-    assert.ok(closed)
-    const screen = render().props.children[1]
-    const name = button.props.children
-    if (name === 'Loading' || name === 'App error') {
-      assert.equal(screen.type, name === 'Loading' ? dependencies['@/components/page-loading'].PageLoading : dependencies['@/components/app-error-boundary'].AppRecovery)
-    } else {
-      assert.equal(screen.type, dependencies['@/components/login-page'].LoginPage)
-      const panel = screen.props.children
-      assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
-      assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied'].includes(name))
-      assert.equal(panel.props.owner, name === 'Owner signed in')
-      assert.equal(panel.props.busy, name === 'Signing in')
-      assert.equal(panel.props.error?.code ?? null, name === 'Account error' ? 'auth/restore-failed' : null)
-      panel.props.onAction()
-      assert.match(values[1], /No sign-in or sign-out/)
-    }
+  for (const [name, Component] of Object.entries({ Default: module.exports.default.Default, ...module.exports.default.cases })) {
+    const preview = Component()
+    const screen = preview.type(preview.props)
+    assert.equal(screen.type, dependencies['./login'].default)
+    const panel = screen.props.children
+    assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
+    assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied'].includes(name))
+    assert.equal(panel.props.owner, name === 'Owner signed in')
+    assert.equal(panel.props.busy, name === 'Signing in')
+    assert.equal(panel.props.error?.code ?? null, name === 'Account error' ? 'auth/restore-failed' : null)
+    assert.doesNotThrow(() => panel.props.onAction())
   }
 })
 
@@ -81,7 +101,8 @@ test('production build excludes UI preview code and styles', async () => {
   const result = await build({ logLevel: 'silent', build: { write: false } })
   const files = (Array.isArray(result) ? result : [result]).flatMap(bundle => bundle.output)
   for (const file of files) {
-    assert.doesNotMatch(file.fileName, /ui-preview/)
+    assert.doesNotMatch(file.fileName, /ui-preview|\.preview\./)
+    if (file.type === 'chunk') for (const path of Object.keys(file.modules)) assert.doesNotMatch(path.replaceAll('\\', '/'), /\/src\/dev\/|\.preview\.tsx$/)
     const content = file.type === 'chunk' ? file.code : typeof file.source === 'string' ? file.source : ''
     assert.doesNotMatch(content, /UI preview:|Preview only\.|ui-preview-tools|preview=ui|\.\/dev\/ui-preview/)
   }

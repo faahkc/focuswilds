@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { version } from '../../package.json'
 
-export function LoginPage({ children }: { children: ReactNode }) {
+export default function LoginPage({ children }: { children?: ReactNode }) {
   return <main className="login-page">
     <header><span className="eyebrow">A little focus. A little care.</span><h1>Focuswilds</h1></header>
     <img className="login-cat" src={`${import.meta.env.BASE_URL}cat.png`} width="128" height="128" alt="A little black cat waiting to come home"/>

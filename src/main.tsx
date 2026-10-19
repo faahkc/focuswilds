@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { ScreenLayout } from './components/screen-layout'
-import { AppErrorBoundary, AppRecovery } from './components/app-error-boundary'
+import { AppErrorBoundary } from './components/app-error-boundary'
+import AppRecovery from './screens/system/app-error'
 import type { ReactNode } from 'react'
 
 const root = createRoot(document.getElementById('root')!)

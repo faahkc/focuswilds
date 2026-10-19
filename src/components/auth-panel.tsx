@@ -4,7 +4,7 @@ import { auth } from '@/lib/firebase'
 import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
 import { OWNER_UID } from '@/lib/account'
 import { AccountView } from '@/components/account-view'
-import { PageLoading } from '@/components/page-loading'
+import PageLoading from '@/screens/system/loading'
 
 export function AuthPanel() {
   const [user, setUser] = useState<User | null>(null)

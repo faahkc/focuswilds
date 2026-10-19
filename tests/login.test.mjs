@@ -26,7 +26,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
     },
     '@/lib/account': { OWNER_UID },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
-    '@/components/page-loading': { PageLoading: () => null },
+    '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },
   }
   const viewModule = { exports: {} }
   const viewCode = ts.transpileModule(readFileSync(new URL('../src/components/account-view.tsx', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText

@@ -10,13 +10,36 @@ Use Node 24 and npm. Run `npm ci`, `npm run prepare`, `npm run dev`, `npm test`,
 
 ### Local UI preview
 
-Run `npm run dev`, then open `http://localhost:5173/focuswilds/?preview=ui`. Expand the **UI preview** menu at the top to select Login, Owner signed in, Access denied, Signing in, Account error, Loading or App error. The menu closes after selection; open it again to switch states. Use **Exit preview** to return to real sign-in. Account buttons in preview only update a local notice in the menu; Reload on the recovery screen reloads the preview.
+Run `npm run dev`, then open `http://localhost:5173/focuswilds/?preview=ui`. Expand the **UI preview** menu at the top. Search by screen or folder name and choose a screen from its group. Select **State** for that screen's additional fixtures. The menu closes after selecting a screen or state; reopen it to switch again. The current catalog includes Login with four additional account states, plus System / Loading and System / App Error. The screen list scrolls within a bounded area on small displays and shows matching/total counts and an empty-search message. Use **Exit preview** to return to real sign-in. Account buttons in preview perform no sign-in or sign-out; Reload on the recovery screen reloads the preview.
 
 Preview uses the same login layout, account presentation, loading and recovery components as the real app. It imports no Firebase or authentication services, reads no account storage and performs zero database operations. It is available only in Vite development on `localhost`, `127.0.0.1` or IPv6 loopback with the explicit query above. Production builds, including `npm run preview` and GitHub Pages, exclude its module, styles and menu; the query cannot enable it there. Preview source is tracked in Git for development, but is absent from the deployed `dist` artifact.
 
 For phone layout checks, use browser device emulation in portrait (390x844 or 320x568). Landscape and square viewports show the normal orientation notice; return to portrait to keep inspecting the selected state. Preview verifies presentation, not real authentication or physical-device installation behavior.
 
-Verification: 25 offline tests, lint and production build passed, including tests for loopback/development restrictions and absence of preview code/styles from the production bundle. Browser checks covered all seven states, landscape/square notices and preserved state after returning to 320x568 portrait, with no horizontal document overflow, external requests, Auth module imports or page errors. Real-device behavior was not retested.
+### Automatically discovered screens
+
+Put each full-screen presentation component in `src/screens/**/*.tsx` with a default export. Its filename becomes the display name, and its folders become the group. For example, `src/screens/cats/new-arrival.tsx` automatically appears as **Cats / New Arrival**, without a central registration list. Vite updates discovery when files are added or removed. Keep helper components in `src/components/` so they are not treated as screens. Load only the selected screen, rather than importing every screen during preview startup.
+
+A screen requiring props, simulated data or extra states gets a matching sidecar, such as `src/screens/cats/new-arrival.preview.tsx`. It is discovered automatically and supplies the default fixture and optional state components:
+
+```tsx
+import NewArrival from './new-arrival'
+
+function DefaultPreview() {
+  return <NewArrival catName="Mochi"/>
+}
+
+export default {
+  Default: DefaultPreview,
+  cases: {
+    'Empty name': () => <NewArrival catName=""/>,
+  },
+}
+```
+
+Without a sidecar, preview renders the screen's default export without props. Automatic discovery does not invent required props or business data: provide safe fixtures when needed. Keep service orchestration outside screen presentation, and never import Firebase, real account containers or production write operations into preview fixtures. Production code must not import `*.preview.tsx` or `src/dev/` modules. Tests inspect production chunk modules as well as output text to verify their exclusion.
+
+Verification: 27 offline tests, lint and production build passed. Catalog tests cover 501 entries, nested/new screens, lazy loading, fixture overrides and failed imports. Browser checks temporarily added 120 screens: all 123 entries appeared without menu edits, search/empty results worked, and the list scrolled at 320x568 without document overflow. Only the selected temporary screen was requested. All seven existing UI states and landscape/square notices worked, with no external requests or Auth module loads. Temporary screens were removed afterward. Real-device behavior was not retested.
 
 ## Authentication and Firebase
 

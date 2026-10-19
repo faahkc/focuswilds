@@ -43,6 +43,7 @@ Take the first option that fully works:
 - Use GNU Unifont throughout the entire interface, including body text, editable fields, dialogs, headings, controls, and timers. The replacement UI supports English and Thai, defaults to English, and stores the account language in Firestore through signed-in Settings. Keep README and IMPLEMENTATION_PLAN.md in English.
 - Keep the main experience within one viewport. Open history, creatures, and progress through game-style icon dialogs; allow accessible scrolling inside long dialogs without visible scrollbars. Keep timer state mounted while dialogs open.
 - Follow the existing project structure and coding conventions.
+- Put full-screen presentation components in `src/screens/**/*.tsx` with a default export so the localhost UI preview discovers them automatically. Keep helper components elsewhere. Screens must not initialize account services or perform real writes when previewed; keep service orchestration outside presentation. For required props, mock data or additional states, add a matching `*.preview.tsx` exporting `{ Default, cases }` as its default export. Preview modules must remain outside production imports and builds. See docs/DEVELOPMENT.md.
 - Use the package manager indicated by the project's lockfile.
 - Use the project's existing build, lint, and test commands when available.
 - Run checks relevant to the changes and report their results.

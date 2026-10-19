@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="description" content="Focuswilds turns focused time into a warm home for cats. Find little friends in the garden and care for them at home." />
+    <meta name="description" content="Focuswilds turns focused time into a warm home for cats. Meet stray cats around the city and welcome them into your apartment." />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#edf0df" />
+    <meta name="theme-color" content="#f2ebdc" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -16,15 +16,15 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <title>Focuswilds</title>
     <style>
-      :root { --screen-width: 100svw; --screen-height: 100svh; }
-      html, body { margin: 0; background: #edf0df; }
+      :root { --page-bg: #f2ebdc; --text: #2e3037; --muted: #67616a; --accent: #e0cb83; --screen-width: 100svw; --screen-height: 100svh; }
+      html, body { margin: 0; background: #f2ebdc; }
       .app-screen { position: fixed; left: 0; top: 0; width: var(--screen-width); height: var(--screen-height); container: screen / size; overflow: auto; overscroll-behavior: none; touch-action: pan-y; transform-origin: top left; scrollbar-width: none; }
       .app-screen::-webkit-scrollbar { display: none; }
-      .orientation-notice { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; background: #edf0df; color: #354b39; font: 20px/1.5 'GNU Unifont',monospace; text-align: center; }
+      .orientation-notice { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; background: #f2ebdc; color: var(--text); font: 20px/1.5 'GNU Unifont',monospace; text-align: center; }
       @media (min-aspect-ratio: 1/1) { #root { display: none; } .orientation-notice { display: flex; } }
-      .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #edf0df; color: #354b39; font: 16px 'GNU Unifont',monospace; text-align: center; }
+      .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #f2ebdc; color: var(--text); font: 16px 'GNU Unifont',monospace; text-align: center; }
       .startup-recovery[hidden] { display: none; }
-      .page-loading-spinner { width: 18px; height: 18px; border: 2px solid #b8c5a0; border-top-color: #3e6846; animation: loading-spin 1s linear infinite; }
+      .page-loading-spinner { width: 18px; height: 18px; border: 2px solid #c9bfa8; border-top-color: var(--text); animation: loading-spin 1s linear infinite; }
       @keyframes loading-spin { to { transform: rotate(360deg); } }
       .startup-recovery button { min-height: 48px; padding: 10px 24px; font: inherit; }
     </style>

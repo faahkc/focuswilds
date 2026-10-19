@@ -49,7 +49,7 @@ test('login waits for redirect completion and auth restore, stays on one screen 
   assert.equal(login.initial.type.name, 'PageLoading')
   const view = login.view()
   assert.equal(view.props['aria-label'], 'Account')
-  assert.equal(view.props.children[1].props.children, 'Sign in with GitHub')
+  assert.equal(view.props.children[1].props.children, 'Sign in')
   login.unmount()
   assert.equal(login.calls().stop, 1)
 })

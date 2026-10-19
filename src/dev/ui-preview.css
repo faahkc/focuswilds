@@ -1,4 +1,4 @@
-.ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; padding: 8px; border: 1px solid #3e6846; border-radius: 4px; background: #edf0df; font-size: 16px; }
+.ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; padding: 8px; border: 1px solid var(--text); border-radius: 4px; background: var(--page-bg); font-size: 16px; }
 .ui-preview-tools summary { cursor: pointer; }
 .ui-preview-menu { display: flex; flex-direction: column; gap: 8px; max-height: calc(100svh - env(safe-area-inset-top) - 80px); overflow: auto; padding-top: 8px; }
 .ui-preview-menu label { display: grid; gap: 4px; }
@@ -7,5 +7,5 @@
 .ui-preview-list section { display: grid; gap: 8px; padding: 4px; }
 .ui-preview-list h2 { font-size: 18px; margin: 4px 0; }
 .ui-preview-tools button { box-shadow: none; }
-.ui-preview-tools button[aria-pressed="true"] { outline: 2px solid #b1743a; outline-offset: -4px; }
+.ui-preview-tools button[aria-pressed="true"] { outline: 2px solid #87612e; outline-offset: -4px; }
 .ui-preview-tools a { color: inherit; }

@@ -2,22 +2,23 @@
 
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-body { color: #354b39; background: #edf0df; font: 18px/1.5 'GNU Unifont', monospace; }
+body { color: var(--text); background: var(--page-bg); font: 18px/1.5 'GNU Unifont', monospace; }
 button, input, textarea, select { font: inherit; font-size: max(16px, 1em); }
-button { min-height: 48px; padding: 12px 24px; border: 2px solid #3e6846; border-radius: 4px; background: #3e6846; color: #fff9ea; cursor: pointer; box-shadow: 0 4px 0 #29482f; }
-button:hover { background: #31573a; }
+button { min-height: 48px; padding: 12px 24px; border: 2px solid var(--text); border-radius: 4px; background: var(--text); color: var(--page-bg); cursor: pointer; box-shadow: 0 4px 0 #202329; }
+button:hover { background: #44454d; }
 button:disabled { cursor: wait; opacity: .7; }
-button:focus-visible { outline: 3px solid #b1743a; outline-offset: 5px; }
+button:focus-visible { outline: 3px solid #87612e; outline-offset: 5px; }
 .login-page { min-height: 100%; width: min(100%, 480px); margin: auto; padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(16px, 3cqh, 28px); text-align: center; }
 h1, h2, p { margin: 0; font-weight: normal; }
 h1 { font-size: clamp(40px, 10cqw, 56px); line-height: 1.15; letter-spacing: .02em; }
 h2 { font-size: 22px; margin-bottom: 12px; }
-.eyebrow { display: block; font-size: 16px; margin-bottom: 6px; color: #6d7657; }
+.eyebrow { display: block; font-size: 16px; margin-bottom: 6px; color: var(--muted); }
 .login-cat { image-rendering: pixelated; flex-shrink: 0; width: clamp(96px, 18cqh, 144px); height: auto; }
-.login-intro p { color: #6c735c; }
+.login-intro p { color: var(--muted); }
+.login-account button { border-color: var(--accent); }
 .login-account { width: 100%; display: grid; gap: 16px; }
 .login-account p { font-size: 16px; }
 .login-account [role="alert"] { color: #93462d; }
-footer { font-size: 14px; color: #777c65; }
+footer { font-size: 14px; color: var(--muted); }
 footer span { display: block; margin-top: 4px; font-size: 12px; }
 @container screen (max-height: 650px) { .login-page { gap: 12px; padding-block: 18px; } .login-cat { width: 80px; } h1 { font-size: 40px; } h2 { font-size: 20px; margin-bottom: 6px; } .login-intro p { font-size: 16px; } }

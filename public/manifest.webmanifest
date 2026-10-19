@@ -8,8 +8,8 @@
   "scope": "/focuswilds/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#edf0df",
-  "theme_color": "#edf0df",
+  "background_color": "#f2ebdc",
+  "theme_color": "#f2ebdc",
   "icons": [
     {
       "src": "icon-192.png",

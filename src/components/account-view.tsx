@@ -11,7 +11,7 @@ export function AccountView({ signedIn, owner, busy, error, onAction }: {
     {signedIn && (owner
       ? <p role="status">You are signed in.<br/>Your cat home is coming soon.</p>
       : <p role="alert">This account does not have access to Focuswilds.</p>)}
-    <button disabled={busy} onClick={onAction}>{busy ? 'Please wait...' : signedIn ? 'Sign out' : 'Sign in with GitHub'}</button>
+    <button disabled={busy} onClick={onAction}>{busy ? 'Please wait...' : signedIn ? 'Sign out' : 'Sign in'}</button>
     {error !== null && <p role="alert">{authErrorMessage(error)}</p>}
   </section>
 }

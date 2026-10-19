@@ -21,7 +21,7 @@ for _,export in ipairs(exports) do
    if not apple or app.pixelColor.rgbaA(pixel)>0 then result:drawPixel(x,y,pixel) end
   end
  end end
- local path='public/'..name..'.png'
+ local path=(name=='cat' and 'src/assets/' or 'public/')..name..'.png'
  result:saveAs(path)
  local saved=Image{fromFile=path}
  assert(saved.width==size and saved.height==size)

@@ -18,7 +18,11 @@ test('app icons use stable content hashes and preserve installed-app identity an
   const transform = () => plugin.transformIndexHtml.handler(html)
   function manifest() {
     let emitted
-    plugin.generateBundle.call({ emitFile: file => { emitted = file } })
+    plugin.generateBundle.call({ emitFile: file => {
+      if (file.fileName === 'version.json') {
+        assert.deepEqual(JSON.parse(file.source), JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')))
+      } else emitted = file
+    } })
     assert.equal(emitted.fileName, 'manifest.webmanifest')
     return JSON.parse(emitted.source)
   }
@@ -58,4 +62,12 @@ test('app icons use stable content hashes and preserve installed-app identity an
   assert.equal(body, undefined)
   middleware({ url: '/focuswilds/other', method: 'GET' }, response, () => { next = true })
   assert.equal(next, true)
+  next = false
+  middleware({ url: '/focuswilds/version.json', method: 'GET' }, response, () => { next = true })
+  assert.deepEqual(JSON.parse(body), { version: '0.1.100' })
+  assert.equal(headers.get('Cache-Control'), 'no-store')
+  assert.equal(headers.get('Content-Type'), 'application/json')
+  assert.equal(next, false)
+  middleware({ url: '/focuswilds/version.json', method: 'HEAD' }, response, () => { next = true })
+  assert.equal(body, undefined)
 })

@@ -2,3 +2,6 @@
 .startup-recovery h1 { margin: 0; max-width: 100%; font: 28px/1.25 'GNU Unifont', monospace; }
 .startup-recovery p { margin: 0; max-width: 320px; font: 18px/1.5 'GNU Unifont', monospace; }
 .app-version { position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom)); font: 12px/1.5 'GNU Unifont', monospace; text-align: center; color: var(--muted); }
+::selection { background: var(--accent); color: var(--text); }
+.startup-recovery h1, .orientation-notice { -webkit-user-select: none; user-select: none; }
+.app-version, .login-account [role="alert"], .startup-recovery p { -webkit-user-select: text; user-select: text; }

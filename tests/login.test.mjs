@@ -14,7 +14,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   const module = { exports: {} }
   const dependencies = {
     react: { ...React, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn } },
-    'react/jsx-runtime': { jsx: React.createElement, jsxs: (type, props) => React.createElement(type, props) },
+    'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: (type, props) => React.createElement(type, props) },
     'firebase/auth': {
       onAuthStateChanged: (_auth, next, error) => { if (restoreError) error(); else next(initialUser); return () => stop++ },
       signOut: async () => { signOuts++ },
@@ -25,6 +25,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
       finishGitHubSignIn: async () => { if (callbackError) throw callbackError },
     },
     '@/lib/account': { OWNER_UID },
+    '@/components/app-update': { AppUpdate: () => null },
     '@/screens/login': { __esModule: true, default: function LoginPage() {} },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },
@@ -41,7 +42,8 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   let screenProps
   const view = () => {
     cursor = 0
-    const element = module.exports.AuthPanel()
+    const result = module.exports.AuthPanel()
+    const element = result.type === React.Fragment ? result.props.children[0] : result
     if (element.type !== viewModule.exports.AccountView) return element
     const screen = element.type(element.props)
     screenProps = screen.props

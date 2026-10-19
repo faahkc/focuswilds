@@ -75,8 +75,9 @@ test('catalog handles hundreds of screens and permits retry after a failed lazy 
 
 test('login preview fixtures use shared account UI without account services', () => {
   const dependencies = {
-    'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement },
+    'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: React.createElement },
     '@/components/account-view': { AccountView: () => null },
+    '@/components/update-notice': { UpdateNotice: () => null },
   }
   const source = readFileSync(new URL('../src/screens/login.preview.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
@@ -85,7 +86,7 @@ test('login preview fixtures use shared account UI without account services', ()
   for (const [name, Component] of Object.entries({ Default: module.exports.default.Default, ...module.exports.default.cases })) {
     const preview = Component()
     const screen = preview.type(preview.props)
-    const panel = screen
+    const panel = screen.props.children[0]
     assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
     assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied'].includes(name))
     assert.equal(panel.props.owner, name === 'Owner signed in')

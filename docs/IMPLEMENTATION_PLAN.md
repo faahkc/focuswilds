@@ -85,6 +85,12 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 
 App recovery reuses the approved open-eye cat head from the loading atlas as a static crop with no ring or animation. Both React and pre-React recovery show Something went wrong, Please reload to try again, the shared Reload button treatment and bottom version. Keep the fallback independent of the application bundle, hide Loading when failure is shown and do not add automatic retries.
 
+## Application update notification
+
+Keep the ordinary startup Loading treatment. After account restoration, check the deployed static version once per document load, with deduplication, a five-second timeout and no polling or focus/visibility checks. When a valid newer version is detected, offer Reload and Later using shared buttons; never reload automatically. Network/metadata failures leave the current app usable. This notification uses no database reads/writes or service worker and does not claim offline updates. Future focus/draft screens must preserve their state and handle unsaved work before enabling an explicit reload. Do not show Updating unless an actual update operation is implemented.
+
+Decorative titles and intro text are nonselectable. Error/version text remains copyable with a pale-gold selection highlight; editing fields retain ordinary selection and hardware-keyboard behavior.
+
 ## Shared controls
 
 Every React button uses `src/components/button.tsx`; future screens reuse it and pass native disabled/busy/accessibility props. Keep the approved charcoal pixel corners, visible keyboard focus and discrete press response. Layout belongs to the caller. The pre-React recovery button uses the same stylesheet and class in static HTML. Authentication waits name their operation; future actions should do the same without replacing unrelated screen state.

@@ -7,6 +7,10 @@ export function pwaAssets(): Plugin {
   let publicDir: string
   let base: string
   let packagePath: string
+  function versionInfo() {
+    const { version } = JSON.parse(readFileSync(packagePath, 'utf8'))
+    return JSON.stringify({ version }) + '\n'
+  }
   function iconUrl(name: string) {
     if (!/^(icon-(16|32|48|192|512)|apple-touch-icon)\.png$/.test(name)) throw new Error(`Unexpected app icon: ${name}`)
     const hash = createHash('sha256').update(readFileSync(join(publicDir, name))).digest('hex').slice(0, 12)
@@ -29,6 +33,12 @@ export function pwaAssets(): Plugin {
     },
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
+        if (request.url?.split('?')[0] === `${base}version.json`) {
+          response.setHeader('Content-Type', 'application/json')
+          response.setHeader('Cache-Control', 'no-store')
+          response.end(request.method === 'HEAD' ? undefined : versionInfo())
+          return
+        }
         if (request.url?.split('?')[0] !== `${base}manifest.webmanifest`) return next()
         response.setHeader('Content-Type', 'application/manifest+json')
         response.setHeader('Cache-Control', 'no-cache')
@@ -36,6 +46,7 @@ export function pwaAssets(): Plugin {
       })
     },
     generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: versionInfo() })
       this.emitFile({ type: 'asset', fileName: 'manifest.webmanifest', source: manifest() })
     },
   }

@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/src/loading.css" />
     <link rel="stylesheet" href="/src/fonts.css" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
@@ -24,14 +25,19 @@
       @media (min-aspect-ratio: 1/1) { #root { display: none; } .orientation-notice { display: flex; } }
       .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #f2ebdc; color: var(--text); font: 16px 'GNU Unifont',monospace; text-align: center; }
       .startup-recovery[hidden] { display: none; }
-      .page-loading-spinner { width: 18px; height: 18px; border: 2px solid #c9bfa8; border-top-color: var(--text); animation: loading-spin 1s linear infinite; }
-      @keyframes loading-spin { to { transform: rotate(360deg); } }
       .startup-recovery button { min-height: 48px; padding: 10px 24px; font: inherit; }
     </style>
+    <script id="loading-visibility">
+      function updateLoadingVisibility() {
+        document.documentElement.style.setProperty('--loading-animation-state', document.hidden ? 'paused' : 'running');
+      }
+      updateLoadingVisibility();
+      document.addEventListener('visibilitychange', updateLoadingVisibility);
+    </script>
   </head>
   <body>
     <div class="orientation-notice" role="status">Please use portrait mode.<br/>Turn your device upright or make this window taller than it is wide.</div>
-    <div id="root"><div class="app-screen"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing...</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
+    <div id="root"><div class="app-screen"><main class="page-loading" role="status" aria-label="Loading"><span class="loading-cat" aria-hidden="true"></span></main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
     <script type="module" src="/src/main.tsx" onerror="document.querySelector('.startup-recovery').hidden=false"></script>
   </body>
 </html>

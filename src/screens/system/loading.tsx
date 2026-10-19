@@ -1,3 +1,3 @@
 export default function PageLoading() {
-  return <div className="page-loading" role="status"><span className="page-loading-spinner" aria-hidden="true"/>Preparing…</div>
+  return <div className="page-loading" role="status" aria-label="Loading"><span className="loading-cat" aria-hidden="true"/></div>
 }

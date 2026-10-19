@@ -70,6 +70,8 @@ This latest owner-approved direction supersedes earlier landscape-first and page
 
 For every Aseprite artwork or animation change, prepare a draft and show a preview for owner review. Do not integrate, replace live assets or publish the draft until the owner explicitly approves it. Keep unapproved sources and exports outside deployed assets. Approval of this visual direction does not approve individual assets.
 
+The owner approved a text-free loading screen with the black cat sitting, breathing, moving its tail and briefly opening its eyes. Use this same centered animation on the cream background both before React startup and during application loading. The approved loop has nine frames over 3.04 seconds. Retain an accessible Loading label without visible text or a spinner, and pause animation while the document is hidden. This replaces the former spinner and Preparing text requirement. The editable source is `art/loading/loading-cat.aseprite`; runtime uses a local PNG atlas with discrete frame timing, not a GIF/video loop.
+
 Use a contemporary city and a welcoming small apartment. The city is the game's "wilds": a concrete jungle seen through quiet everyday encounters. The player takes imagined neighborhood walks, befriends stray cats and brings them back to a room that gradually becomes their shared home. Keep the experience gentle; the setting does not introduce danger, combat or animal injury/death systems.
 
 - All game artwork remains pixel art: cats, apartment, city streets, props and effects. Keep readable cat silhouettes and detailed pixel environments with layered depth, contact shadows and foreground occlusion. Aseprite is the primary art/animation tool. No old artwork is retained merely to fill the new scene.

@@ -18,20 +18,20 @@ function initialize(env) {
       return { name: 'app-check' }
     },
     ReCaptchaEnterpriseProvider: class { constructor(key) { this.key = key } },
-    initializeAuth: () => { calls.push('auth') },
-    browserSessionPersistence: {}, browserPopupRedirectResolver: {},
-    getToken: async check => { calls.push({ tokenFor: check.name }) },
+    initializeAuth: (_app, options) => { calls.push('auth'); assert.equal(options.persistence[0], context.browserLocalPersistence); assert.equal(options.persistence[1], context.browserSessionPersistence); assert.equal(options.popupRedirectResolver, undefined) },
+    browserSessionPersistence: {}, browserLocalPersistence: {},
+    getToken: async check => { calls.push({ tokenFor: check.name }); return { token: 'test-attestation' } },
   }
   runInNewContext(source, context)
-  return { calls, self, prepareSignIn: context.prepareSignIn }
+  return { calls, self, authHeaders: context.authHeaders }
 }
 
-test('sign-in preparation warms production attestation without turning on background refresh', async () => {
+test('redirect requests include App Check without turning on background refresh', async () => {
   const production = initialize({ PROD: true, DEV: false })
-  await production.prepareSignIn()
+  assert.equal((await production.authHeaders())['X-Firebase-AppCheck'], 'test-attestation')
   assert.equal(production.calls.at(-1).tokenFor, 'app-check')
   const development = initialize({ PROD: false, DEV: true })
-  await development.prepareSignIn()
+  assert.equal(Object.keys(await development.authHeaders()).length, 0)
   assert.deepEqual(development.calls, ['app', 'auth'])
 })
 

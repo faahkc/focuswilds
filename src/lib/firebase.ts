@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getToken, initializeAppCheck, ReCaptchaEnterpriseProvider, type AppCheck } from 'firebase/app-check'
-import { browserPopupRedirectResolver, browserSessionPersistence, initializeAuth } from 'firebase/auth'
+import { browserLocalPersistence, browserSessionPersistence, initializeAuth } from 'firebase/auth'
 
 // Public web configuration; authorization is enforced by Firebase Auth and Firestore Rules.
 export const app = initializeApp({
@@ -22,11 +22,9 @@ if (import.meta.env.PROD || debugToken) {
 }
 
 export const auth = initializeAuth(app, {
-  persistence: browserSessionPersistence,
-  popupRedirectResolver: browserPopupRedirectResolver,
+  persistence: [browserLocalPersistence, browserSessionPersistence],
 })
 
-export async function prepareSignIn() {
-  // Warm attestation before the tap so Safari's popup gesture does not expire waiting for it.
-  if (appCheck) await getToken(appCheck)
+export async function authHeaders(): Promise<Record<string, string>> {
+  return appCheck ? { 'X-Firebase-AppCheck': (await getToken(appCheck)).token } : {}
 }

@@ -6,7 +6,7 @@ import ts from 'typescript'
 import { OWNER_UID } from '../src/lib/account.ts'
 
 const flush = () => new Promise(resolve => setImmediate(resolve))
-async function panel({ initialUser = null, restoreError = false, popupError = null, setupError = null } = {}) {
+async function panel({ initialUser = null, restoreError = false, signInError = null, callbackError = null } = {}) {
   const values = [], setters = []
   let cursor = 0, subscribe, stop = 0, signIns = 0, signOuts = 0
   const source = readFileSync(new URL('../src/components/auth-panel.tsx', import.meta.url), 'utf8')
@@ -16,12 +16,14 @@ async function panel({ initialUser = null, restoreError = false, popupError = nu
     react: { ...React, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn } },
     'react/jsx-runtime': { jsx: React.createElement, jsxs: (type, props) => React.createElement(type, props) },
     'firebase/auth': {
-      GithubAuthProvider: class {},
       onAuthStateChanged: (_auth, next, error) => { if (restoreError) error(); else next(initialUser); return () => stop++ },
-      signInWithPopup: async () => { signIns++; if (popupError) throw popupError },
       signOut: async () => { signOuts++ },
     },
-    '@/lib/firebase': { auth: {}, prepareSignIn: async () => { if (setupError) throw setupError } },
+    '@/lib/firebase': { auth: {} },
+    '@/lib/github-sign-in': {
+      startGitHubSignIn: async () => { signIns++; if (signInError) throw signInError },
+      finishGitHubSignIn: async () => { if (callbackError) throw callbackError },
+    },
     '@/lib/account': { OWNER_UID },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/components/page-loading': { PageLoading: () => null },
@@ -34,7 +36,7 @@ async function panel({ initialUser = null, restoreError = false, popupError = nu
   return { initial, view, unmount, calls: () => ({ signIns, signOuts, stop }) }
 }
 
-test('login waits for auth restore and sign-in preparation, stays on one screen and unsubscribes', async () => {
+test('login waits for redirect completion and auth restore, stays on one screen and unsubscribes', async () => {
   const login = await panel()
   assert.equal(login.initial.type.name, 'PageLoading')
   const view = login.view()
@@ -57,10 +59,10 @@ test('only the owner receives the signed-in message; other accounts can sign out
   }
 })
 
-test('restore and popup failures recover to usable controls without exposing provider details', async () => {
-  for (const options of [{ restoreError: true }, { popupError: new Error('private provider data') }]) {
+test('restore, redirect and callback failures recover without exposing provider details', async () => {
+  for (const options of [{ restoreError: true }, { signInError: new Error('private provider data') }, { callbackError: new Error('private callback data') }]) {
     const login = await panel(options)
-    if (!options.restoreError) {
+    if (options.signInError) {
       login.view().props.children[1].props.onClick()
       assert.equal(login.view().props['aria-busy'], true)
       await flush()
@@ -73,17 +75,7 @@ test('restore and popup failures recover to usable controls without exposing pro
   }
 })
 
-test('attestation failure offers setup retry without opening a popup', async () => {
-  const login = await panel({ setupError: new Error('private attestation details') })
-  assert.equal(login.view().props.children[1].props.children, 'Retry sign-in setup')
-  login.view().props.children[1].props.onClick()
-  await flush()
-  assert.equal(login.calls().signIns, 0)
-  assert.equal(login.view().props['aria-busy'], false)
-  assert.equal(login.view().props.children[2].props.children, 'Safe account error')
-})
-
-test('GitHub popup is requested directly in the prepared button click', async () => {
+test('the sign-in button starts same-window GitHub navigation', async () => {
   const login = await panel()
   login.view().props.children[1].props.onClick()
   assert.equal(login.calls().signIns, 1)

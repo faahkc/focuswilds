@@ -12,4 +12,4 @@ Buy supplies, sell spare finds, and decorate with toys, beds, cat houses and bow
 
 Designed for one player's phone, the experience uses a portrait layout, showing a portrait-mode notice on landscape or square screens. An in-game keyboard is planned for future editing screens.
 
-The current version contains only the login screen. Focus, garden walks, cat care and the shop will arrive one screen at a time.
+Sign in and stay signed in on your personal device. The current version contains only the login screen. Focus, garden walks, cat care and the shop will arrive one screen at a time.

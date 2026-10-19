@@ -2,6 +2,9 @@ export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'en') {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : null
   if (language !== 'th') {
     switch (code) {
+      case 'auth/invalid-redirect': return 'This sign-in request expired or could not be verified. Please sign in again.'
+      case 'auth/access-denied': return 'This account does not have access to Focuswilds.'
+      case 'auth/sign-in-cancelled': return 'GitHub sign-in was cancelled. Please try again.'
       case 'auth/popup-closed-by-user':
       case 'auth/cancelled-popup-request': return 'GitHub sign-in was cancelled. Please try again.'
       case 'auth/popup-blocked': return 'Allow popups for this site, then try signing in again.'
@@ -13,6 +16,9 @@ export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'en') {
     }
   }
   switch (code) {
+    case 'auth/invalid-redirect': return 'คำขอเข้าสู่ระบบหมดอายุหรือตรวจสอบไม่ได้ โปรดเข้าสู่ระบบใหม่'
+    case 'auth/access-denied': return 'บัญชีนี้ไม่มีสิทธิ์ใช้งาน Focuswilds'
+    case 'auth/sign-in-cancelled': return 'ยกเลิกการเข้าสู่ระบบด้วย GitHub แล้ว โปรดลองอีกครั้ง'
     case 'auth/popup-closed-by-user':
     case 'auth/cancelled-popup-request':
       return 'ยกเลิกการเข้าสู่ระบบด้วย GitHub แล้ว โปรดลองอีกครั้ง'

@@ -6,7 +6,7 @@ Approved requirements, not a checklist of shipped features. README and this plan
 
 The player collects and cares for cats of different breeds. Use "player", not trainer; cats are individual residents, not evolving monsters or expendable workers. Focus earns money, player experience and items that can be spent on the cats and their shared living space. The mobile PWA, owner-only access and Aseprite requirements remain in force.
 
-The current milestone is login only: a warm portrait page, GitHub authentication and owner-only account status. There is no signed-in game page and no client database access. All gameplay below remains planned. Retired gameplay, assets and schema documentation are removed from the current tree; technical status and production cleanup boundaries are in DEVELOPMENT.md.
+The current milestone is login only: a warm portrait page, GitHub authentication and owner-only account status. GitHub sign-in uses a same-window authorization return on GitHub Pages and persistent account restoration, with owner-only access. The OAuth callback setting and real-device return/persistence must be verified separately. There is no signed-in game page and no client database access. All gameplay below remains planned. Retired gameplay, assets and schema documentation are removed from the current tree; technical status and production cleanup boundaries are in DEVELOPMENT.md.
 
 ### Core loop and focus rewards
 

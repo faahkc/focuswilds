@@ -12,6 +12,7 @@
 }
 :where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::before { inset: 0; z-index: -2; background: var(--frame-border); }
 :where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"])::after { inset: var(--frame-inset) var(--frame-inset) calc(var(--frame-inset) + var(--frame-depth)); z-index: -1; background: var(--frame-surface); }
-.pixel-frame:focus-within, .pixel-frame:focus-visible, .pixel-button[aria-pressed="true"]:focus-visible { --frame-inset: 4px; outline: none; }
+.pixel-frame:focus-within, .pixel-frame:focus-visible, .pixel-button[aria-pressed="true"]:focus-visible { outline: none; }
+.pixel-input-frame:focus-within, .pixel-select-trigger:focus-visible, .pixel-button[aria-pressed="true"]:focus-visible { --frame-surface: #e1d9ca; }
 .pixel-frame[data-invalid="true"], .pixel-frame[aria-invalid="true"] { --frame-border: #93462d; }
 .pixel-frame[data-disabled="true"], .pixel-frame:disabled { opacity: .6; }

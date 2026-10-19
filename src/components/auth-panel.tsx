@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { GithubAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { auth, prepareSignIn } from '@/lib/firebase'
 import { OWNER_UID } from '@/lib/account'
 import { authErrorMessage } from '@/lib/auth-error'
 import { PageLoading } from '@/components/page-loading'
@@ -10,14 +10,28 @@ export function AuthPanel() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<unknown>(null)
+  const [ready, setReady] = useState(false)
 
-  useEffect(() => onAuthStateChanged(auth, next => {
-    setUser(next)
-    setLoading(false)
-  }, () => {
-    setLoading(false)
-    setError({ code: 'auth/restore-failed' })
-  }), [])
+  useEffect(() => {
+    let active = true
+    const stop = onAuthStateChanged(auth, async next => {
+      if (!active) return
+      setUser(next)
+      try {
+        if (!next) await prepareSignIn()
+        if (active) setReady(true)
+      } catch (setupError) {
+        if (active) setError(setupError)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }, () => {
+      if (!active) return
+      setLoading(false)
+      setError({ code: 'auth/restore-failed' })
+    })
+    return () => { active = false; stop() }
+  }, [])
 
   async function updateAccount() {
     if (busy) return
@@ -25,6 +39,7 @@ export function AuthPanel() {
     setError(null)
     try {
       if (user) await signOut(auth)
+      else if (!ready) { await prepareSignIn(); setReady(true) }
       else await signInWithPopup(auth, new GithubAuthProvider())
     } catch (accountError) {
       setError(accountError)
@@ -38,7 +53,7 @@ export function AuthPanel() {
     {user && (user.uid === OWNER_UID
       ? <p role="status">You are signed in.<br/>Your cat home is coming soon.</p>
       : <p role="alert">This account does not have access to Focuswilds.</p>)}
-    <button disabled={busy} onClick={() => void updateAccount()}>{busy ? 'Please wait...' : user ? 'Sign out' : 'Sign in with GitHub'}</button>
+    <button disabled={busy} onClick={() => void updateAccount()}>{busy ? 'Please wait...' : user ? 'Sign out' : ready ? 'Sign in with GitHub' : 'Retry sign-in setup'}</button>
     {error !== null && <p role="alert">{authErrorMessage(error)}</p>}
   </section>
 }

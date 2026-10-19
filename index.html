@@ -17,7 +17,8 @@
       html, body { margin: 0; background: #edf0df; }
       .app-screen { position: fixed; left: 0; top: 0; width: var(--screen-width); height: var(--screen-height); container: screen / size; overflow: auto; overscroll-behavior: none; touch-action: pan-y; transform-origin: top left; scrollbar-width: none; }
       .app-screen::-webkit-scrollbar { display: none; }
-      @media (aspect-ratio > 1/1) { :root { --screen-width: 100svh; --screen-height: 100svw; } .app-screen { transform: translateX(100svw) rotate(90deg); } }
+      .orientation-notice { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; background: #edf0df; color: #354b39; font: 20px/1.5 'GNU Unifont',monospace; text-align: center; }
+      @media (min-aspect-ratio: 1/1) { #root { display: none; } .orientation-notice { display: flex; } }
       .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #edf0df; color: #354b39; font: 16px 'GNU Unifont',monospace; text-align: center; }
       .startup-recovery[hidden] { display: none; }
       .page-loading-spinner { width: 18px; height: 18px; border: 2px solid #b8c5a0; border-top-color: #3e6846; animation: loading-spin 1s linear infinite; }
@@ -26,6 +27,7 @@
     </style>
   </head>
   <body>
+    <div class="orientation-notice" role="status">Please use portrait mode.<br/>Turn your device upright or make this window taller than it is wide.</div>
     <div id="root"><div class="app-screen"><main class="page-loading" role="status"><span class="page-loading-spinner" aria-hidden="true"></span>Preparing...</main><div class="startup-recovery" hidden><p>Unable to load Focuswilds. Reload to try again.</p><button onclick="location.reload()">Reload</button></div><noscript><div class="startup-recovery">Enable JavaScript to open Focuswilds.</div></noscript></div></div>
     <script type="module" src="/src/main.tsx" onerror="document.querySelector('.startup-recovery').hidden=false"></script>
   </body>

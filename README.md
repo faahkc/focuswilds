@@ -10,6 +10,6 @@ At home, care and play build affection. Content cats may offer helpful bonuses; 
 
 Buy supplies, sell spare finds, and decorate with toys, beds, cat houses and bowls. As your home grows, there is space to welcome more cats. Warm pixel art brings the house and garden to life.
 
-Designed for one player's phone, the experience uses a portrait layout, turning sideways when the screen is landscape. An in-game keyboard is planned for future editing screens.
+Designed for one player's phone, the experience uses a portrait layout, showing a portrait-mode notice on landscape or square screens. An in-game keyboard is planned for future editing screens.
 
 The current version contains only the login screen. Focus, garden walks, cat care and the shop will arrive one screen at a time.

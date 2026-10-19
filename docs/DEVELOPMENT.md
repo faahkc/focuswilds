@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-Login only, with a warm pixel cat mark, GNU Unifont, a shared portrait frame and owner-only GitHub account status. Landscape viewports rotate the interface into portrait; square viewports stay upright. The page remains the same after sign-in. There are no game routes, timer, shop, garden scene, custom keyboard or database calls yet. Future gameplay is described in IMPLEMENTATION_PLAN.md.
+Login only, with a warm pixel cat mark, GNU Unifont, a shared portrait frame and owner-only GitHub account status. Landscape and square viewports hide the mounted application and show a portrait-mode notice, including before startup. No automatic rotation. The page remains the same after sign-in. There are no game routes, timer, shop, garden scene, custom keyboard or database calls yet. Future gameplay is described in IMPLEMENTATION_PLAN.md.
 
 ## Local development
 
@@ -10,11 +10,11 @@ Use Node 24 and npm. Run `npm ci`, `npm run prepare`, `npm run dev`, `npm test`,
 
 ## Authentication and Firebase
 
-The existing Firebase project is `focuswilds`. Public web configuration and App Check setup remain in src/lib/firebase.ts; do not commit OAuth secrets, admin credentials or debug tokens. Auth is session-scoped. Keep the existing GitHub provider, authorized domains and App Check security configuration. The owner UID is defined in src/lib/account.ts. Accounts other than the owner show an access-denied message and cannot reach game content.
+The existing Firebase project is `focuswilds`. Public web configuration and App Check setup remain in src/lib/firebase.ts; do not commit OAuth secrets, admin credentials or debug tokens. Auth is session-scoped. Keep the existing GitHub provider, authorized domains and App Check security configuration. The owner UID is defined in src/lib/account.ts. Accounts other than the owner show an access-denied message and cannot reach game content. This is an application access check, not an Auth-server signup allowlist: GitHub Authentication can still create a non-owner account, but grants no application or database access. Firestore rules do not control Authentication sign-in.
 
 This login-only client performs zero Firestore reads/writes. firestore.rules denies all document reads/writes until a concrete cat-game schema is implemented. Local rules edits are not deployed rules. Retain Firebase Authentication users and user/profile documents. The owner authorized clearing old session/game documents, not deleting profiles or the whole project/database. Inspect actual production document paths before deletion; do not guess profile locations from the retired schema. No Firebase CLI or Emulator is needed for development.
 
-The owner chose to perform production data cleanup and rules publication in the Console. These operations are pending, not performed by the agent. Never report remote deletion based solely on local file changes. No real data is touched by npm tests.
+The owner chose to perform production data cleanup and rules publication in the Console. The owner reported both operations complete on 2026-10-19; they were not performed or independently verified by the agent. Never report remote deletion based solely on local file changes. No real data is touched by npm tests.
 
 ### Owner Console steps for the clean start
 
@@ -45,3 +45,8 @@ The main-branch filter removed 31 exact retired image/font paths and two old ico
 ## Verification
 
 Verification on 2026-10-18: 13 offline tests, lint and production build passed. Browser checks at 390x844, 844x390, 320x568, 1024x1024 and 1440x900 showed a portrait logical frame, a reachable sign-in button and no horizontal document overflow. Mocked owner and non-owner accounts stayed on the one login screen; popup failure left a usable retry button. All external requests were blocked during these checks. The inspected phone capture uses the new pixel cat icon. The application JS is about 325 kB minified / 101 kB gzip, with no old scene chunk or 500 kB warning. Real GitHub authentication, production Firebase cleanup/rules, installed-device zoom/orientation behavior and real-phone performance must be reported separately. No game features are implemented by this cleanup.
+
+
+2026-10-19 update: warm App Check attestation before showing the GitHub sign-in button to avoid spending Safari user activation waiting on the first token. Preparation failures expose a separate setup retry; no popup is attempted until a subsequent fresh tap. Keep App Check enabled. Do not substitute cross-origin signInWithRedirect on GitHub Pages: Safari third-party storage restrictions require a supported hosting/auth-domain arrangement (see https://firebase.google.com/docs/auth/web/redirect-best-practices). A fully blocked popup still needs browser permission; real Safari acceptance of this fix remains pending. No additional database reads/writes. The owner reported real deployed owner sign-in, installation and zoom checks successful before this fix; device/browser versions were not supplied.
+
+Verification for the 2026-10-19 update: 16 offline tests, lint and production build passed. Browser checks at 390x844, 844x390 and 600x600 confirmed portrait content, landscape/square notice, no rotation transform and the same mounted application after returning to portrait. Safari popup behavior still requires a real-device retest.

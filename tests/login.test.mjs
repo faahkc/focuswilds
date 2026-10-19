@@ -6,7 +6,7 @@ import ts from 'typescript'
 import { OWNER_UID } from '../src/lib/account.ts'
 
 const flush = () => new Promise(resolve => setImmediate(resolve))
-function panel({ initialUser = null, restoreError = false, popupError = null } = {}) {
+async function panel({ initialUser = null, restoreError = false, popupError = null, setupError = null } = {}) {
   const values = [], setters = []
   let cursor = 0, subscribe, stop = 0, signIns = 0, signOuts = 0
   const source = readFileSync(new URL('../src/components/auth-panel.tsx', import.meta.url), 'utf8')
@@ -21,7 +21,7 @@ function panel({ initialUser = null, restoreError = false, popupError = null } =
       signInWithPopup: async () => { signIns++; if (popupError) throw popupError },
       signOut: async () => { signOuts++ },
     },
-    '@/lib/firebase': { auth: {} },
+    '@/lib/firebase': { auth: {}, prepareSignIn: async () => { if (setupError) throw setupError } },
     '@/lib/account': { OWNER_UID },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/components/page-loading': { PageLoading: () => null },
@@ -30,11 +30,12 @@ function panel({ initialUser = null, restoreError = false, popupError = null } =
   const view = () => { cursor = 0; return module.exports.AuthPanel() }
   const initial = view()
   const unmount = subscribe()
+  await flush()
   return { initial, view, unmount, calls: () => ({ signIns, signOuts, stop }) }
 }
 
-test('login waits for auth restore, stays on one screen and unsubscribes', () => {
-  const login = panel()
+test('login waits for auth restore and sign-in preparation, stays on one screen and unsubscribes', async () => {
+  const login = await panel()
   assert.equal(login.initial.type.name, 'PageLoading')
   const view = login.view()
   assert.equal(view.props['aria-label'], 'Account')
@@ -45,7 +46,7 @@ test('login waits for auth restore, stays on one screen and unsubscribes', () =>
 
 test('only the owner receives the signed-in message; other accounts can sign out', async () => {
   for (const uid of [OWNER_UID, 'another-account']) {
-    const login = panel({ initialUser: { uid } })
+    const login = await panel({ initialUser: { uid } })
     const view = login.view()
     assert.equal(view.props.children[0].props.role, uid === OWNER_UID ? 'status' : 'alert')
     assert.equal(view.props.children[1].props.children, 'Sign out')
@@ -58,7 +59,7 @@ test('only the owner receives the signed-in message; other accounts can sign out
 
 test('restore and popup failures recover to usable controls without exposing provider details', async () => {
   for (const options of [{ restoreError: true }, { popupError: new Error('private provider data') }]) {
-    const login = panel(options)
+    const login = await panel(options)
     if (!options.restoreError) {
       login.view().props.children[1].props.onClick()
       assert.equal(login.view().props['aria-busy'], true)
@@ -70,6 +71,23 @@ test('restore and popup failures recover to usable controls without exposing pro
     assert.equal(view.props.children[2].props.role, 'alert')
     assert.equal(view.props.children[2].props.children, 'Safe account error')
   }
+})
+
+test('attestation failure offers setup retry without opening a popup', async () => {
+  const login = await panel({ setupError: new Error('private attestation details') })
+  assert.equal(login.view().props.children[1].props.children, 'Retry sign-in setup')
+  login.view().props.children[1].props.onClick()
+  await flush()
+  assert.equal(login.calls().signIns, 0)
+  assert.equal(login.view().props['aria-busy'], false)
+  assert.equal(login.view().props.children[2].props.children, 'Safe account error')
+})
+
+test('GitHub popup is requested directly in the prepared button click', async () => {
+  const login = await panel()
+  login.view().props.children[1].props.onClick()
+  assert.equal(login.calls().signIns, 1)
+  await flush()
 })
 
 test('login-only rules deny all database access and the shell requests portrait installation', () => {

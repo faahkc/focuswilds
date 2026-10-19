@@ -85,6 +85,8 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 
 App recovery reuses the approved open-eye cat head from the loading atlas as a static crop with no ring or animation. Both React and pre-React recovery show Something went wrong, Please reload to try again, the shared Reload button treatment and bottom version. Keep the fallback independent of the application bundle, hide Loading when failure is shown and do not add automatic retries.
 
+Keep recovery titles and their descriptions grouped with an 8px gap in App Error, Update Error and pre-React recovery. Retain the 20px separation between the other main sections and the shared footer clearance. Apply this through the common recovery stylesheet rather than separate screen overrides.
+
 ## Startup application updates
 
 Before loading account services or showing Login, check the deployed static version once per ordinary document load, with deduplication, a five-second timeout and no polling or focus/visibility checks. Missing, invalid, offline or timed-out metadata lets the current version continue.

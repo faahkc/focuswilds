@@ -25,6 +25,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
       finishGitHubSignIn: async () => { if (callbackError) throw callbackError },
     },
     '@/lib/account': { OWNER_UID },
+    '@/screens/login': { __esModule: true, default: function LoginPage() {} },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },
   }
@@ -37,15 +38,19 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   new Function('require', 'module', 'exports', viewCode)(name => { assert.ok(name in dependencies); return dependencies[name] }, viewModule, viewModule.exports)
   dependencies['@/components/account-view'] = viewModule.exports
   new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies, `Unexpected dependency: ${name}`); return dependencies[name] }, module, module.exports)
+  let screenProps
   const view = () => {
     cursor = 0
     const element = module.exports.AuthPanel()
-    return element.type === viewModule.exports.AccountView ? element.type(element.props) : element
+    if (element.type !== viewModule.exports.AccountView) return element
+    const screen = element.type(element.props)
+    screenProps = screen.props
+    return screen.props.children
   }
   const initial = view()
   const unmount = subscribe()
   await flush()
-  return { initial, view, unmount, calls: () => ({ signIns, signOuts, stop }) }
+  return { initial, view, unmount, screen: () => screenProps, calls: () => ({ signIns, signOuts, stop }) }
 }
 
 test('login waits for redirect completion and auth restore, stays on one screen and unsubscribes', async () => {
@@ -53,7 +58,7 @@ test('login waits for redirect completion and auth restore, stays on one screen 
   assert.equal(login.initial.type.name, 'PageLoading')
   const view = login.view()
   assert.equal(view.props['aria-label'], 'Account')
-  assert.equal(view.props.children[1].props.children, 'Sign in')
+  assert.equal(view.props.children[0].props.children, 'Sign in')
   login.unmount()
   assert.equal(login.calls().stop, 1)
 })
@@ -62,11 +67,12 @@ test('only the owner receives the signed-in message; other accounts can sign out
   for (const uid of [OWNER_UID, 'another-account']) {
     const login = await panel({ initialUser: { uid } })
     const view = login.view()
-    assert.equal(view.props.children[uid === OWNER_UID ? 0 : 2].props.role, uid === OWNER_UID ? 'status' : 'alert')
-    assert.equal(view.props.children[1].props.children, 'Sign out')
-    view.props.children[1].props.onClick()
-    assert.equal(login.view().props.children[1].props.children, 'Signing out…')
-    assert.equal(login.view().props.children[1].props.disabled, true)
+    assert.equal(login.screen().ownerSignedIn, uid === OWNER_UID)
+    if (uid !== OWNER_UID) assert.equal(view.props.children[1].props.role, 'alert')
+    assert.equal(view.props.children[0].props.children, 'Sign out')
+    view.props.children[0].props.onClick()
+    assert.equal(login.view().props.children[0].props.children, 'Signing out…')
+    assert.equal(login.view().props.children[0].props.disabled, true)
     await flush()
     assert.equal(login.calls().signOuts, 1)
     assert.equal(login.calls().signIns, 0)
@@ -77,32 +83,31 @@ test('restore, redirect and callback failures recover without exposing provider 
   for (const options of [{ restoreError: true }, { signInError: new Error('private provider data') }, { callbackError: new Error('private callback data') }]) {
     const login = await panel(options)
     if (options.signInError) {
-      login.view().props.children[1].props.onClick()
+      login.view().props.children[0].props.onClick()
       assert.equal(login.view().props['aria-busy'], true)
       await flush()
     }
     const view = login.view()
     assert.equal(view.props['aria-busy'], false)
-    assert.equal(view.props.children[1].props.disabled, false)
-    assert.equal(view.props.children[2].props.role, 'alert')
-    assert.equal(view.props.children[2].props.children, 'Safe account error')
+    assert.equal(view.props.children[0].props.disabled, false)
+    assert.equal(view.props.children[1].props.role, 'alert')
+    assert.equal(view.props.children[1].props.children, 'Safe account error')
   }
 })
 
 test('access denial and an account error produce only one error below the action', async () => {
   const login = await panel({ initialUser: { uid: 'another-account' }, callbackError: new Error('private') })
   const view = login.view()
-  assert.equal(view.props.children[0], false)
-  assert.equal(view.props.children[1].props.children, 'Sign out')
-  assert.equal(view.props.children[2].props.role, 'alert')
-  assert.equal(view.props.children[2].props.children, 'Safe account error')
+  assert.equal(view.props.children[0].props.children, 'Sign out')
+  assert.equal(view.props.children[1].props.role, 'alert')
+  assert.equal(view.props.children[1].props.children, 'Safe account error')
 })
 
 test('the sign-in button starts same-window GitHub navigation', async () => {
   const login = await panel()
-  login.view().props.children[1].props.onClick()
-  assert.equal(login.view().props.children[1].props.children, 'Signing in…')
-  assert.equal(login.view().props.children[1].props.disabled, true)
+  login.view().props.children[0].props.onClick()
+  assert.equal(login.view().props.children[0].props.children, 'Signing in…')
+  assert.equal(login.view().props.children[0].props.disabled, true)
   assert.equal(login.calls().signIns, 1)
   await flush()
 })

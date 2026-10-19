@@ -1,11 +1,10 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export state metadata, not a Fast Refresh boundary. */
-import LoginPage from './login'
 import { AccountView } from '@/components/account-view'
 
 function AccountPreview({ signedIn = false, owner = false, busy = false, error = null }: {
   signedIn?: boolean; owner?: boolean; busy?: boolean; error?: unknown
 }) {
-  return <LoginPage><AccountView signedIn={signedIn} owner={owner} busy={busy} error={error} onAction={() => {}}/></LoginPage>
+  return <AccountView signedIn={signedIn} owner={owner} busy={busy} error={error} onAction={() => {}}/>
 }
 
 function LoginPreview() { return <AccountPreview/> }

@@ -88,9 +88,9 @@ test('login preview fixtures use shared account UI without account services', ()
     const screen = preview.type(preview.props)
     const panel = screen.props.children[0]
     assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
-    assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied'].includes(name))
-    assert.equal(panel.props.owner, name === 'Owner signed in')
-    assert.equal(panel.props.busy, name === 'Signing in')
+    assert.equal(panel.props.signedIn, ['Owner signed in', 'Access denied', 'Signing out'].includes(name))
+    assert.equal(panel.props.owner, ['Owner signed in', 'Signing out'].includes(name))
+    assert.equal(panel.props.busy, ['Signing in', 'Signing out'].includes(name))
     assert.equal(panel.props.error?.code ?? null, name === 'Account error' ? 'auth/restore-failed' : null)
     assert.doesNotThrow(() => panel.props.onAction())
   }

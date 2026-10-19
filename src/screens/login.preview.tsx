@@ -14,6 +14,7 @@ export default { Default: LoginPreview, cases: {
   'Owner signed in': () => <AccountPreview signedIn owner/>,
   'Access denied': () => <AccountPreview signedIn/>,
   'Signing in': () => <AccountPreview busy/>,
+  'Signing out': () => <AccountPreview signedIn owner busy/>,
   'Account error': () => <AccountPreview error={{ code: 'auth/restore-failed' }}/>,
   'Update available': () => <AccountPreview update/>,
 } }

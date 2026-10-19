@@ -75,7 +75,11 @@ test('only the owner receives the signed-in message; other accounts can sign out
     view.props.children.props.onClick()
     assert.equal(login.view().props.children.props.children, 'Signing out…')
     assert.equal(login.view().props.children.props.disabled, true)
+    assert.equal(login.screen().statusMessage, 'Signing you out…')
+    assert.equal(login.screen().errorMessage, null)
     await flush()
+    login.view()
+    assert.equal(login.screen().statusMessage, null)
     assert.equal(login.calls().signOuts, 1)
     assert.equal(login.calls().signIns, 0)
   }
@@ -93,6 +97,7 @@ test('restore, redirect and callback failures recover without exposing provider 
     assert.equal(view.props['aria-busy'], false)
     assert.equal(view.props.children.props.disabled, false)
     assert.equal(login.screen().errorMessage, 'Safe account error')
+    assert.equal(login.screen().statusMessage, null)
   }
 })
 
@@ -110,7 +115,13 @@ test('the sign-in button starts same-window GitHub navigation', async () => {
   assert.equal(login.view().props.children.props.children, 'Signing in…')
   assert.equal(login.view().props.children.props.disabled, true)
   assert.equal(login.calls().signIns, 1)
+  assert.equal(login.screen().statusMessage, 'Signing you in…')
+  assert.equal(login.screen().errorMessage, null)
+  login.view().props.children.props.onClick()
+  assert.equal(login.calls().signIns, 1)
   await flush()
+  login.view()
+  assert.equal(login.screen().statusMessage, null)
 })
 
 test('login-only rules deny all database access and the shell requests portrait installation', () => {

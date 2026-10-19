@@ -83,6 +83,14 @@ Use a contemporary city and a welcoming small apartment. The city is the game's 
 - Run animations regardless of OS reduced-motion settings; suspend rendering only while hidden or graphics are unavailable. Rendering and viewport changes add zero database operations. Keep timer state independent of scene lifecycle.
 - Measure transfer size, deployed files, decoded memory, frame-time percentiles and dropped frames on actual devices before claiming performance. The former 500 kB baseline is not a hard cap. Review one cat, a care interaction and a room object in portrait before expanding the artwork. Day/night or weather simulation and multiple neighborhood routes are deferred.
 
+## Shared loading states
+
+Use the shared `PageLoading` screen for initial startup, authentication restoration and future whole-screen data preparation. Its optional `message` is real text below the animation; omit it for ordinary startup. The optional accessible `label` defaults to Loading. Callers supply translated text in the active UI language; do not bake text into Aseprite frames. Keep errors and retry controls in the existing recovery screens, never a successful loading state.
+
+Future home loading may say Loading your home; explicit authentication may say Signing in. These are preview examples, not evidence that home loading exists. Small saves and purchases should show busy state in their own button or dialog, preserve the mounted timer and drafts, prevent duplicate submissions and report failures locally. Do not add a global loading store, artificial delay, progress percentages, extra reads or polling. Add each caller when its screen is implemented.
+
+The owner selected a new direction: the logo cat face centered on cream, eyes slowly closing/opening, with no head translation. Prepare and review its Aseprite animation before replacing the deployed nine-frame seated cat. Until that review, retain the existing approved artwork. Bootstrap and React must use the same approved atlas and timings after integration. Verify text-free, English/Thai message and failure states through localhost preview; verify startup before React separately. Real-device motion and installed-app behavior need device checks.
+
 ## Languages and signed-in Settings
 
 - Support English (`en`) and Thai (`th`) across menus, account messages, cats, breeds, care actions, moods, effects, items, shop entries, tasks and tags, and accessibility labels. Keep translated strings separate from logic and use stable IDs for game data.

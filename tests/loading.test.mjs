@@ -15,14 +15,22 @@ test('bootstrap and application share a text-free, accessible cat loading screen
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => {
     assert.equal(name, 'react/jsx-runtime')
-    return { jsx: React.createElement }
+    return { jsx: React.createElement, jsxs: React.createElement }
   }, module, module.exports)
   const view = module.exports.default()
   assert.equal(view.props.role, 'status')
   assert.equal(view.props['aria-label'], 'Loading')
-  assert.equal(view.props.children.props.className, 'loading-cat')
-  assert.equal(view.props.children.props['aria-hidden'], 'true')
-  assert.equal(view.props.children.props.children, undefined)
+  assert.equal(view.props.children[0].props.className, 'loading-cat')
+  assert.equal(view.props.children[0].props['aria-hidden'], 'true')
+  assert.equal(view.props.children[0].props.children, undefined)
+  assert.equal(view.props.children[1], undefined)
+  for (const message of ['Signing in…', 'กำลังโหลด…']) {
+    const status = module.exports.default({ message })
+    assert.equal(status.props['aria-label'], message)
+    assert.equal(status.props['aria-atomic'], 'true')
+    assert.equal(status.props.children[1].props.children, message)
+  }
+  assert.equal(module.exports.default({ label: 'กำลังโหลด' }).props['aria-label'], 'กำลังโหลด')
 })
 
 test('sprite timing preserves the approved nine poses and 3040ms loop', () => {

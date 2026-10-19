@@ -153,3 +153,9 @@ Local development verification (2026-10-19): 22 offline tests, lint and build pa
 The owner approved wider logo shoulders and the matching seated login cat. The logo adds one shoulder pixel per side without changing the face or corner treatment; all six icons are regenerated from the same 16x16 Aseprite master. The login retains the logo face, has a taller seated body, a low tail and contact shadows on the sill. Paws stay anchored throughout the eight-frame loop. The export animation bounds now cover the larger cat; scene dimensions, timing and layout remain unchanged.
 
 Verification: Aseprite exports validated icon symmetry in the reviewed draft, PNG pixels, fixed scene pixels and frame timings. All 32 offline tests, lint and production build passed. The integrated localhost Login preview was checked at 390x844 with external requests blocked. No database operations were added. Installed-device icon refresh and real-device animation performance were not retested.
+
+### Shared loading messages
+
+`src/screens/system/loading.tsx` accepts optional `message` and accessible `label` strings. With no props it keeps text-free startup behavior. A supplied message appears below the shared animation and names the atomic status for assistive technology. Callers own translations; there is no new global state or database access. Future screen-level waits should reuse this screen; local saves should keep busy/error feedback within their existing control or dialog.
+
+Local UI preview now includes default, Signing in, planned home loading and Thai message cases. The existing approved animation remains deployed while the new face-only Aseprite draft awaits owner review. Checks passed: 32 offline tests (including optional messages and translated labels), lint and build; Thai preview at 390x844 had no horizontal overflow. Real devices and production authentication were not retested.

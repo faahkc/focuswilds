@@ -29,10 +29,10 @@ export default function UIPreview() {
   return <>
     <details className="ui-preview-tools">
       <summary>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</summary>
-      <div className="ui-preview-menu">
+      <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
         <label>Search screens<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
-        <nav className="ui-preview-list" aria-label="Preview screens">
+        <nav className="ui-preview-list" aria-label="Preview screens" tabIndex={0}>
           {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
             setSelected(screen)
             setVariant('')

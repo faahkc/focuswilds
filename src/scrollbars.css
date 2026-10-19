@@ -1,0 +1,6 @@
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* Keep native scrollbar behavior inside text editors and select controls. */
+input, textarea, select, [contenteditable]:not([contenteditable="false"]) { scrollbar-width: auto; }
+input::-webkit-scrollbar, textarea::-webkit-scrollbar, select::-webkit-scrollbar, [contenteditable]:not([contenteditable="false"])::-webkit-scrollbar { display: revert; }

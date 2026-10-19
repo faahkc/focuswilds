@@ -33,23 +33,23 @@ test('bootstrap and application share a text-free, accessible cat loading screen
   assert.equal(module.exports.default({ label: 'กำลังโหลด' }).props['aria-label'], 'กำลังโหลด')
 })
 
-test('sprite timing preserves the approved nine poses and 3040ms loop', () => {
+test('sprite timing preserves the approved 23 poses and 3370ms loop', () => {
   const css = readFileSync(new URL('../src/loading.css', import.meta.url), 'utf8')
   const png = readFileSync(new URL('../src/assets/loading-cat.png', import.meta.url))
-  assert.equal(png.readUInt32BE(16), 32 * 9)
-  assert.equal(png.readUInt32BE(20), 40)
-  assert.match(css, /width: 128px; height: 160px/)
-  assert.match(css, /1152px 160px/)
-  assert.match(css, /3040ms step-end infinite/)
+  assert.equal(png.readUInt32BE(16), 32 * 23)
+  assert.equal(png.readUInt32BE(20), 32)
+  assert.match(css, /width: 128px; height: 128px/)
+  assert.match(css, /2944px 128px/)
+  assert.match(css, /3370ms step-end infinite/)
   assert.doesNotMatch(css, /prefers-reduced-motion/)
   const frames = [...css.matchAll(/([\d.]+)% \{ background-position: (-?\d+)(?:px)? 0; \}/g)]
-  assert.equal(frames.length, 10)
-  const durations = [450, 350, 350, 350, 140, 500, 300, 100, 500]
-  for (let i = 0; i < 9; i++) {
+  assert.equal(frames.length, 24)
+  const durations = [210, 211, 210, 211, 211, 147, 63, 77, 134, 211, 210, 211, 134, 76, 24, 140, 47, 53, 158, 210, 211, 71, 140]
+  for (let i = 0; i < 23; i++) {
     assert.equal(Number(frames[i][2]), (0 - i) * 128)
-    assert.ok(Math.abs((Number(frames[i + 1][1]) - Number(frames[i][1])) * 30.4 - durations[i]) < 0.001)
+    assert.ok(Math.abs((Number(frames[i + 1][1]) - Number(frames[i][1])) * 33.7 - durations[i]) < 0.001)
   }
-  assert.equal(Number(frames[9][2]), 0)
+  assert.equal(Number(frames[23][2]), 0)
 })
 
 test('cat animation pauses while hidden and resumes even before React loads', () => {

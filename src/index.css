@@ -8,7 +8,7 @@ input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-sele
 button, input, textarea, select { font: inherit; font-size: max(16px, 1em); }
 .login-page { position: relative; min-height: 100%; width: min(100%, 440px); margin: auto; padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; text-align: center; padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 40px)); }
 h1, h2, p { margin: 0; font-weight: normal; }
-h1 { font-size: 48px; line-height: 1.1; letter-spacing: .02em; }
+h1 { font-weight: 700; font-size: 48px; line-height: 1.1; letter-spacing: .02em; }
 h2 { font-size: 22px; margin-bottom: 12px; }
 .login-scene { width: 100%; max-width: 336px; aspect-ratio: 8 / 7; flex-shrink: 0; }
 .login-page:has(.login-account p) .login-scene { max-width: min(336px, calc((100cqh - 420px) * 8 / 7)); }

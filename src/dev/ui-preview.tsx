@@ -52,6 +52,11 @@ export default function UIPreview() {
           tools.current?.removeAttribute('open')
           tools.current?.querySelector('summary')?.focus()
         }}/>}
+        {loaded && !failed && <Button onClick={() => {
+          setRetry(value => value + 1)
+          tools.current?.removeAttribute('open')
+          tools.current?.querySelector('summary')?.focus()
+        }}>Replay preview</Button>}
         <p>Preview only. Account actions are simulated.</p>
         <a className="pixel-button" href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>

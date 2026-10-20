@@ -1,4 +1,5 @@
 .ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; font-size: 16px; }
+.app-screen:has(.ui-preview-tools) > .toast-viewport { z-index: 201; }
 .ui-preview-tools details { max-height: calc(100svh - max(8px, env(safe-area-inset-top)) - 8px); overflow: auto; overscroll-behavior: contain; }
 .ui-preview-tools summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--control-height); padding: var(--control-padding); font-size: 20px; line-height: var(--control-line-height); cursor: pointer; list-style: none; }
 .ui-preview-tools summary::-webkit-details-marker { display: none; }

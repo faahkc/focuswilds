@@ -1,5 +1,5 @@
 export default function PageLoading({ message, label = 'Loading…' }: { message?: string; label?: string } = {}) {
-  return <div className="page-loading" role="status" aria-label={message || label} aria-atomic="true">
+  return <div className="page-loading content-column" role="status" aria-label={message || label} aria-atomic="true">
     <span className="loading-cat" aria-hidden="true"/>
     <span>{message || label}</span>
   </div>

@@ -1,0 +1,2 @@
+:root { --content-width: 440px; --content-gutter: 24px; --content-left: max(var(--content-gutter), env(safe-area-inset-left)); --content-right: max(var(--content-gutter), env(safe-area-inset-right)); }
+.app-screen .content-column { box-sizing: border-box; width: min(100%, var(--content-width)); margin-inline: auto; padding-left: var(--content-left); padding-right: var(--content-right); }

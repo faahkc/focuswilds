@@ -100,9 +100,12 @@ test('login preview fixtures use shared account UI without account services', ()
   }
 })
 
-test('production build excludes UI preview code and styles', async () => {
+test('production build excludes preview code and preserves bootstrap recovery', async () => {
   const result = await build({ logLevel: 'silent', build: { write: false } })
   const files = (Array.isArray(result) ? result : [result]).flatMap(bundle => bundle.output)
+  const html = String(files.find(file => file.fileName === 'index.html').source)
+  assert.match(html, /id=["']?startup-error/)
+  assert.match(html, /addEventListener\(\s*['"]error['"]/)
   const manifest = JSON.parse(files.find(file => file.fileName === 'manifest.webmanifest').source)
   assert.equal(manifest.id, '/focuswilds/')
   for (const icon of manifest.icons) assert.match(icon.src, /\.png\?v=[a-f0-9]{12}$/)

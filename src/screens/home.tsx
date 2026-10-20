@@ -28,7 +28,7 @@ export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
 
   if (state === 'loading') return <PageLoading message="Loading your home…"/>
   if (state === 'error') return <AppRecovery/>
-  return <main className="home-page">
+  return <main className="home-page content-column">
     <header className="home-header"><h1>Your home</h1><Button onClick={() => menu.current?.showModal()}>Menu</Button></header>
     <div className="home-stats" aria-label="Player progress"><span>Lv. 1</span><span>0 coins</span></div>
     <div className="home-room pixel-frame" role="img" aria-label="Your black cat resting on a rug in a warm apartment, with a city view through the window.">

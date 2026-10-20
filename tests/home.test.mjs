@@ -47,7 +47,7 @@ test('Home hides all page controls until both atlases decode and deduplicates St
   room.images[1].resolve(); await flush()
   const ready = room.view()
   assert.equal(ready.type, 'main')
-  assert.equal(ready.props.className, 'home-page')
+  assert.equal(ready.props.className, 'home-page content-column')
   const content = JSON.stringify(ready)
   assert.match(content, /1 cat at home/)
   assert.match(content, /Lv\. 1/)

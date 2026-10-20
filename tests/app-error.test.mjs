@@ -32,14 +32,25 @@ test('React recovery uses a static cat, shared controls/version and a working re
 test('pre-React failure hides loading and exposes the same recovery content', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   assert.match(html, /href="\/src\/recovery.css"/)
-  assert.match(html, /class="startup-recovery" role="alert" hidden><span class="recovery-cat" aria-hidden="true"><\/span><h1>Something went wrong<\/h1><p>Please reload to try again\.<\/p>/)
+  assert.match(html, /class="startup-recovery content-column" role="alert" hidden><span class="recovery-cat" aria-hidden="true"><\/span><h1>Something went wrong<\/h1><p>Please reload to try again\.<\/p>/)
   assert.match(html, /class="app-version">v%APP_VERSION%<\/footer>/)
   const loading = { hidden: false }, recovery = { hidden: true }
   const document = { querySelector: selector => selector === '.page-loading' ? loading : recovery }
-  const handler = html.match(/src="\/src\/main.tsx" onerror="([^"]+)"/)[1]
-  runInNewContext(handler, { document })
+  const handler = html.match(/<script id="startup-error">([\s\S]*?)<\/script>/)[1]
+  let listener
+  const window = { addEventListener: (name, callback, capture) => {
+    assert.equal(name, 'error')
+    assert.equal(capture, true)
+    listener = callback
+  } }
+  runInNewContext(handler, { document, window })
+  listener({ target: { tagName: 'IMG' } })
+  listener({ target: { tagName: 'SCRIPT', type: 'text/javascript' } })
+  assert.equal(loading.hidden, false)
+  listener({ target: { tagName: 'SCRIPT', type: 'module' } })
   assert.equal(loading.hidden, true)
   assert.equal(recovery.hidden, false)
+  assert.doesNotThrow(() => runInNewContext(handler, { document: { querySelector: () => null }, window: { addEventListener: (_, callback) => callback({ target: { tagName: 'SCRIPT', type: 'module' } }) } }))
   const css = readFileSync(new URL('../src/loading.css', import.meta.url), 'utf8')
   const rule = css.match(/^\.recovery-cat \{[^}]+\}/m)[0]
   assert.doesNotMatch(rule, /animation:/)

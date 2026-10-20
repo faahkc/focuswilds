@@ -8,7 +8,7 @@ import ts from 'typescript'
 test('bootstrap and application share a labelled, accessible cat loading screen', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   assert.match(html, /href="\/src\/loading.css"/)
-  assert.match(html, /<main class="page-loading" role="status" aria-label="Loading…"><span class="loading-cat" aria-hidden="true"><\/span><span class="loading-message">Loading…<\/span><\/main>/)
+  assert.match(html, /<main class="page-loading content-column" role="status" aria-label="Loading…"><span class="loading-cat" aria-hidden="true"><\/span><span class="loading-message">Loading…<\/span><\/main>/)
   assert.doesNotMatch(html, /page-loading-spinner|Preparing|loading-spin/)
   const source = readFileSync(new URL('../src/screens/system/loading.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText

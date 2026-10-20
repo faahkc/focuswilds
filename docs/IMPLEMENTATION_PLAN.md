@@ -226,7 +226,13 @@ Use the shared ToastHost in ScreenLayout and showToast for appropriate short non
 
 Use inline/dialog feedback for important validation and recovery, and keep pending data recoverable; do not substitute a disappearing toast for a necessary decision or retry action. Preview Login/Home English and Thai cases without initializing account services. Keep toast above the visible preview toolbar, and use Replay preview to restart the selected state while closing the menu and restoring summary focus. The diagnostic cap is now 60 writes per owner-wide 60-second window; functions added later need separately chosen personal-use limits and normal burst headroom.
 
-Keep preview controls aligned as a group: search, screen-list actions, State, Replay preview and Exit preview share column edges, with 8px between adjacent controls. Compare rendered gaps, including State trigger to Replay and screen-list button pairs. Recovery actions share a maximum 320px column, including standalone Reload before/after React; multiline labels retain natural height.
+Keep preview controls aligned as a group: search, screen-list actions, State, Replay preview and Exit preview share column edges, with 8px between adjacent controls. Compare rendered gaps, including State trigger to Replay and screen-list button pairs. Login and recovery actions fill the same inner column as Home, including standalone Reload before/after React; multiline labels retain natural height.
+
+### Shared content column and primary actions
+
+All full-screen presentation roots and ToastHost reuse content-column from head-loaded src/content-layout.css. The shared outer width is at most 440px, centered with at least 24px safe-area-aware left/right padding. Primary Login, Home and recovery actions fill the inner width: 272px at a 320px viewport, 342px at 390px and 392px once the outer column reaches 440px. Remove independent 292px/320px button caps. Loading messages and recovery copy stay inside the same column; artwork retains its approved size limits. Keep 60px single-line actions and natural multiline growth, compact Menu/icon targets and three-column Home navigation. Dialog frames follow the inner column, while their buttons fill the dialog's padded content. Preview controls align with the column on wider portrait screens as well as phones.
+
+Reuse shared width/inset tokens on future screens rather than creating new caps. Preserve page-specific vertical spacing and footer/safe-area behavior. Head-loaded bootstrap loading/recovery uses the same class and stylesheet. Register module-resource errors in a classic script listener that survives production HTML transformation; block the built entry script to verify recovery appears, with a full-width working Reload action. Do not initialize account services in UI preview or bootstrap sizing checks.
 
 ## Delivery order and verification
 

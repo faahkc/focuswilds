@@ -76,6 +76,8 @@ This latest owner-approved direction supersedes earlier landscape-first and page
 
 ## Approved visual direction
 
+Before presenting an artwork draft, review the complete composition at native resolution and in its intended UI at 320x568 and 390x844. Check structural line weight, proportions, perspective, contact shadows, palette/mascot continuity, overlaps and edge clearance together; fix visible issues within the approved direction before asking for review. Owner review is for approving the result, not finding routine defects one at a time.
+
 For every Aseprite artwork or animation change, prepare a draft and show a preview for owner review. Do not integrate, replace live assets or publish the draft until the owner explicitly approves it. Keep unapproved sources and exports outside deployed assets. Approval of this visual direction does not approve individual assets.
 
 The owner approved the rounded black-cat head with a compact rotating pixel ring, two pixels thick in charcoal gray #454750. The head stays stationary and blinks; there are no shoulders or body. Use the same centered 128x128 mark on cream before React startup and during application loading. The 32x32 Aseprite source has two layers and 23 synchronized frames over 3.37 seconds, combining eight eye poses with 16 ring steps. Keep ordinary startup text-free with an accessible Loading label; named operations, including a detected startup update, can supply the real text message defined below. Pause only while the document is hidden. This replaces the seated-cat loading illustration. The editable source is `art/loading/loading-cat.aseprite`; runtime uses a local PNG atlas and discrete CSS timing, not a GIF/video loop.

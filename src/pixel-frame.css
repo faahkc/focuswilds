@@ -1,6 +1,6 @@
 :root { --control-height: 60px; --control-line-height: 32px; --control-padding: 12px 16px 16px; }
 .pixel-frame, .pixel-button, .pixel-select-options [role="option"], .pixel-search-clear {
-  --pixel-cut: 2px;
+  --pixel-cut: 4px;
   --pixel-outline: polygon(var(--pixel-cut) 0, calc(100% - var(--pixel-cut)) 0, calc(100% - var(--pixel-cut)) var(--pixel-cut), 100% var(--pixel-cut), 100% calc(100% - var(--pixel-cut)), calc(100% - var(--pixel-cut)) calc(100% - var(--pixel-cut)), calc(100% - var(--pixel-cut)) 100%, var(--pixel-cut) 100%, var(--pixel-cut) calc(100% - var(--pixel-cut)), 0 calc(100% - var(--pixel-cut)), 0 var(--pixel-cut), var(--pixel-cut) var(--pixel-cut));
 }
 :where(.pixel-frame, .pixel-button[aria-pressed="true"], .pixel-select-options [role="option"][data-active="true"]) {

@@ -4,7 +4,8 @@
 .ui-preview-tools summary::-webkit-details-marker { display: none; }
 .ui-preview-tools summary > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .ui-preview-tools details[open] summary .pixel-select-arrow { transform: rotate(180deg); }
-.ui-preview-tools summary:focus-visible { outline: 2px solid var(--text); outline-offset: -6px; }
+.ui-preview-tools summary:focus-visible { position: relative; isolation: isolate; outline: none; }
+.ui-preview-tools summary:focus-visible::before { content: ''; position: absolute; inset: 2px 4px; z-index: -1; pointer-events: none; background: #e1d9ca; clip-path: var(--pixel-outline); }
 .ui-preview-menu { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }
 .ui-preview-menu > * { flex-shrink: 0; }
 .ui-preview-menu label { display: grid; gap: 4px; }
@@ -15,4 +16,4 @@
 .ui-preview-list .pixel-button { position: relative; padding-left: 44px; padding-right: 44px; }
 .ui-preview-list .pixel-choice-mark { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
 .ui-preview-tools button[aria-pressed="true"], .ui-preview-tools button[aria-pressed="true"]:focus-visible { background: transparent; color: var(--text); box-shadow: none; }
-.ui-preview-tools a { color: inherit; }
+.ui-preview-tools a.pixel-button { display: block; text-align: center; text-decoration: none; }

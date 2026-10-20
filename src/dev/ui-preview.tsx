@@ -52,7 +52,7 @@ export default function UIPreview() {
           tools.current?.querySelector('summary')?.focus()
         }}/>}
         <p>Preview only. Account actions are simulated.</p>
-        <a href={import.meta.env.BASE_URL}>Exit preview</a>
+        <a className="pixel-button" href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>
     </details></div>
     {!selected ? <p>No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p>Unable to load preview.</p><Button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</Button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}

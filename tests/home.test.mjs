@@ -50,7 +50,23 @@ test('Home hides all page controls until both atlases decode and deduplicates St
   assert.equal(ready.props.className, 'home-page')
   const content = JSON.stringify(ready)
   assert.match(content, /1 cat at home/)
-  assert.doesNotMatch(content, /Mochi|120 coins|Feeling good|Start focus/)
+  assert.match(content, /Player Lv\. 1/)
+  assert.match(content, /0 coins/)
+  assert.match(content, /Your black cat/)
+  assert.doesNotMatch(content, /Mochi|120 coins|Feeling good/)
+  const buttons = []
+  function visit(element) {
+    if (!React.isValidElement(element)) return
+    if (element.type.name === 'Button') buttons.push(element)
+    React.Children.forEach(element.props.children, visit)
+  }
+  visit(ready)
+  for (const label of ['Start focus', 'Cats', 'City', 'Shop']) {
+    const button = buttons.find(element => element.props.children === label)
+    assert.equal(button?.props.disabled, true)
+    assert.equal(button.props['aria-description'], 'Coming soon')
+    assert.equal(button.props.onClick, undefined)
+  }
 })
 
 test('a failed room decode shows existing recovery, and unmount prevents late state writes', async () => {

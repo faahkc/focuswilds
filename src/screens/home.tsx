@@ -30,10 +30,17 @@ export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
   if (state === 'error') return <AppRecovery/>
   return <main className="home-page">
     <header className="home-header"><h1>Your home</h1><Button onClick={() => menu.current?.showModal()}>Menu</Button></header>
+    <div className="home-stats" aria-label="Player progress"><span>Player Lv. 1</span><span>0 coins</span></div>
     <div className="home-room pixel-frame" role="img" aria-label="Your black cat resting on a rug in a warm apartment, with a city view through the window.">
       <div className="home-room-window"><div className="home-room-art"/></div>
     </div>
-    <section className="home-cat pixel-frame" aria-label="Cats at home"><p>1 cat at home</p></section>
+    <section className="home-cat pixel-frame" aria-label="Cats at home"><p>Your black cat</p><p className="home-cat-count">1 cat at home</p></section>
+    <Button className="home-unavailable" disabled aria-description="Coming soon">Start focus</Button>
+    <nav className="home-nav" aria-label="Game menus">
+      <Button className="home-unavailable" disabled aria-description="Coming soon">Cats</Button>
+      <Button className="home-unavailable" disabled aria-description="Coming soon">City</Button>
+      <Button className="home-unavailable" disabled aria-description="Coming soon">Shop</Button>
+    </nav>
     <dialog ref={menu} className="home-menu pixel-frame" aria-labelledby="home-menu-title">
       <h2 id="home-menu-title">Menu</h2>
       <Button onClick={onSignOut}>Sign out</Button>

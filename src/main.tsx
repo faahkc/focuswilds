@@ -47,7 +47,7 @@ async function start() {
     render(<Preview/>)
   } else {
     const target = updateTarget(window.location.href)
-    render(<PageLoading message={target ? 'Loading the latest version…' : undefined}/>)
+    render(<PageLoading message={target ? 'Loading the latest version…' : new URLSearchParams(window.location.search).has('focuswilds-auth') ? 'Signing in…' : undefined}/>)
     if (target) {
       if (newerVersion(target, version)) updateFailed(target)
       else { clearUpdateTarget(); await openApp() }

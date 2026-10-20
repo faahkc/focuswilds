@@ -1,0 +1,38 @@
+local output=assert(app.params['output'],'Supply --script-param output=<review folder>; this exporter does not deploy artwork')
+for _,compact in ipairs({false,true}) do
+ local name=compact and 'home-room-compact' or 'home-room'
+ local source=app.open('art/home/'..name..'.aseprite')
+ local height=compact and 80 or 144
+ local x,y=compact and 53 or 46,compact and 29 or 80
+ local px,py=compact and 105 or 104,compact and 40 or 85
+ assert(source.width==128 and source.height==height and #source.frames==32)
+ local atlas=Image(4096,height,ColorMode.RGB)
+ local baseline,total,changed=nil,0,0
+ for i,frame in ipairs(source.frames) do
+  total=total+math.floor(frame.duration*1000+0.5)
+  local im=Image(128,height,ColorMode.RGB)
+  for _,layer in ipairs(source.layers) do
+   local cel=layer:cel(i)
+   if cel then im:drawImage(cel.image,cel.position) end
+  end
+  if not baseline then baseline=Image(im) end
+  local delta=0
+  for yy=0,height-1 do for xx=0,127 do
+   local cat=xx>=x and xx<x+38 and yy>=y and yy<y+43
+   local leaf=xx>=px-1 and xx<=px+20 and yy>=py and yy<py+16
+   local ink=im:getPixel(xx,yy)
+   assert(app.pixelColor.rgbaA(ink)==255,'Transparent room pixel')
+   if not cat and not leaf then assert(ink==baseline:getPixel(xx,yy),'Static room moved') end
+   if xx>=x+6 and xx<=x+23 and yy>=y+39 and yy<=y+42 then assert(ink==baseline:getPixel(xx,yy),'Paws moved') end
+   if ink~=baseline:getPixel(xx,yy) then delta=delta+1 end
+  end end
+  if delta>0 then changed=changed+1 end
+  atlas:drawImage(im,Point((i-1)*128,0))
+ end
+ assert(total==10770 and changed==27,'Approved animation timing or changing frames changed')
+ local path=output..'/'..name..'-atlas.png'
+ atlas:saveAs(path)
+ local saved=Image{fromFile=path}
+ for yy=0,height-1 do for xx=0,4095 do assert(saved:getPixel(xx,yy)==atlas:getPixel(xx,yy),'Export pixels changed') end end
+ print(name..': verified 32 frames / 10770ms; room and paws anchored; atlas round-trip passed')
+end

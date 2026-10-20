@@ -6,23 +6,24 @@ import ts from 'typescript'
 import { OWNER_UID } from '../src/lib/account.ts'
 
 const flush = () => new Promise(resolve => setImmediate(resolve))
-async function panel({ initialUser = null, restoreError = false, signInError = null, callbackError = null } = {}) {
-  const values = [], setters = []
+async function panel({ initialUser = null, restoreError = false, signInError = null, callbackError = null, returning = false, finishWait, holdRestore = false, signOutError = null } = {}) {
+  const values = [], setters = [], events = new Map()
+  let observer
   let cursor = 0, subscribe, stop = 0, signIns = 0, signOuts = 0
   const source = readFileSync(new URL('../src/components/auth-panel.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   const dependencies = {
-    react: { ...React, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn } },
+    react: { ...React, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn }, useRef: initial => { const i = cursor++; if (!(i in values)) values[i] = { current: initial }; return values[i] } },
     'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: (type, props) => React.createElement(type, props) },
     'firebase/auth': {
-      onAuthStateChanged: (_auth, next, error) => { if (restoreError) error(); else next(initialUser); return () => stop++ },
-      signOut: async () => { signOuts++ },
+      onAuthStateChanged: (_auth, next, error) => { observer = next; if (restoreError) error(); else if (!holdRestore) next(initialUser); return () => stop++ },
+      signOut: async () => { signOuts++; if (signOutError) throw signOutError },
     },
     '@/lib/firebase': { auth: {} },
     '@/lib/github-sign-in': {
       startGitHubSignIn: async () => { signIns++; if (signInError) throw signInError },
-      finishGitHubSignIn: async () => { if (callbackError) throw callbackError },
+      finishGitHubSignIn: async () => { await finishWait; if (callbackError) throw callbackError },
     },
     '@/lib/account': { OWNER_UID },
     '@/screens/login': { __esModule: true, default: function LoginPage() {} },
@@ -37,7 +38,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   const viewCode = ts.transpileModule(readFileSync(new URL('../src/components/account-view.tsx', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   new Function('require', 'module', 'exports', viewCode)(name => { assert.ok(name in dependencies); return dependencies[name] }, viewModule, viewModule.exports)
   dependencies['@/components/account-view'] = viewModule.exports
-  new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies, `Unexpected dependency: ${name}`); return dependencies[name] }, module, module.exports)
+  new Function('require', 'module', 'exports', 'location', 'window', code)(name => { assert.ok(name in dependencies, `Unexpected dependency: ${name}`); return dependencies[name] }, module, module.exports, { search: returning ? '?focuswilds-auth=1' : '' }, { addEventListener: (name, fn) => events.set(name, fn), removeEventListener: name => events.delete(name) })
   let screenProps
   const view = () => {
     cursor = 0
@@ -45,13 +46,14 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
     const element = result.type === React.Fragment ? result.props.children[0] : result
     if (element.type !== viewModule.exports.AccountView) return element
     const screen = element.type(element.props)
+    if (screen.type === dependencies['@/screens/system/loading'].default) return screen
     screenProps = screen.props
     return screen.props.children
   }
   const initial = view()
   const unmount = subscribe()
   await flush()
-  return { initial, view, unmount, screen: () => screenProps, calls: () => ({ signIns, signOuts, stop }) }
+  return { initial, view, unmount, screen: () => screenProps, emit: next => observer(next), resume: () => events.get('pageshow')({ persisted: true }), failSignIn: error => { signInError = error }, calls: () => ({ signIns, signOuts, stop }) }
 }
 
 test('login waits for redirect completion and auth restore, stays on one screen and unsubscribes', async () => {
@@ -89,7 +91,7 @@ test('restore, redirect and callback failures recover without exposing provider 
     const login = await panel(options)
     if (options.signInError) {
       login.view().props.children.props.onClick()
-      assert.equal(login.view().props['aria-busy'], true)
+      assert.equal(login.view().props.children.props.children, 'Signing in…')
       await flush()
     }
     const view = login.view()
@@ -108,19 +110,59 @@ test('access denial and an account error pass one error to the intro and retain 
   assert.equal(React.Children.count(view.props.children), 1)
 })
 
-test('the sign-in button starts same-window GitHub navigation', async () => {
+test('sign-in keeps the busy button through navigation and blocks stale repeated clicks', async () => {
   const login = await panel()
-  login.view().props.children.props.onClick()
-  assert.equal(login.view().props.children.props.children, 'Signing in…')
+  const click = login.view().props.children.props.onClick
+  click(); click(); click()
+  assert.equal(login.calls().signIns, 1)
+  assert.equal(login.view().props.children.props.children, 'Signing in\u2026')
   assert.equal(login.view().props.children.props.disabled, true)
-  assert.equal(login.calls().signIns, 1)
-  assert.equal(login.screen().statusMessage, 'Signing you in…')
-  assert.equal(login.screen().errorMessage, null)
-  login.view().props.children.props.onClick()
-  assert.equal(login.calls().signIns, 1)
   await flush()
-  login.view()
-  assert.equal(login.screen().statusMessage, null)
+  assert.equal(login.view().props.children.props.children, 'Signing in\u2026')
+  assert.equal(login.view().props.children.props.disabled, true)
+  click()
+  assert.equal(login.calls().signIns, 1)
+  login.resume()
+  assert.equal(login.view().props.children.props.children, 'Sign in')
+})
+
+test('OAuth return keeps Signing in loading until completion and the first restored account', async () => {
+  let complete
+  const finishWait = new Promise(resolve => { complete = resolve })
+  const login = await panel({ returning: true, finishWait, holdRestore: true })
+  assert.equal(login.initial.props.message, 'Signing in…')
+  assert.equal(login.view().type.name, 'PageLoading')
+  complete(); await flush()
+  assert.equal(login.view().type.name, 'PageLoading')
+  login.emit({ uid: OWNER_UID })
+  assert.equal(login.view().props.children.props.children, 'Sign out')
+  assert.equal(login.screen().ownerSignedIn, true)
+})
+
+test('a failed sign-in can retry once without duplicate requests or stale error copy', async () => {
+  const login = await panel({ signInError: new Error('private') })
+  login.view().props.children.props.onClick()
+  await flush()
+  const retry = login.view().props.children.props.onClick
+  assert.equal(login.screen().errorMessage, 'Safe account error')
+  login.failSignIn(null)
+  retry(); retry()
+  assert.equal(login.calls().signIns, 2)
+  assert.equal(login.view().props.children.props.children, 'Signing in…')
+  await flush()
+  assert.equal(login.view().props.children.props.disabled, true)
+})
+
+test('sign-out releases its guard after failure and accepts a retry', async () => {
+  const login = await panel({ initialUser: { uid: OWNER_UID }, signOutError: new Error('private') })
+  const click = login.view().props.children.props.onClick
+  click(); click()
+  assert.equal(login.calls().signOuts, 1)
+  await flush()
+  const retry = login.view().props.children.props.onClick
+  assert.equal(login.screen().errorMessage, 'Safe account error')
+  retry(); retry()
+  assert.equal(login.calls().signOuts, 2)
 })
 
 test('login-only rules deny all database access and the shell requests portrait installation', () => {

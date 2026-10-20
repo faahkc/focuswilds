@@ -16,7 +16,7 @@ The owner selected the room-first portrait composition. Arrange the Home screen 
 
 The local layout review is art/drafts/home-layout-v1/review.html, with overview.png and 320px captures. These ignored artifacts are layout references, not deployed screens. The cat logo stands in for the future room illustration. Sample cat names, money, levels, counts and mood are mock data, not approved initial state or economy values. Retain the shared typography, frames and control dimensions; reserve footer/safe-area clearance when implementing the real screen.
 
-Next, prepare a portrait apartment-scene draft in Aseprite for owner review, using the approved black-cat identity and warm city/apartment direction. Layout approval does not approve new artwork or animation. Do not replace the temporary signed-in page or integrate room art until its required review and the first screen's interaction/state contract are complete. The runtime remains login-only; this decision adds no gameplay, database calls or keyboard implementation.
+The owner approved the warm apartment scene and 32-frame, 10.77-second idle animation: the existing mascot breathes, blinks and moves its tail while leaves sway occasionally; paws and the room stay anchored. Editable portrait (128x144) and compact (128x80) masters are tracked under art/home/. The explicit-output exporter validates motion bounds, foot anchors and PNG round trips without deploying unused art. This approval does not implement Home or approve sample gameplay values. Define the first screen's interaction/state contract before replacing the signed-in placeholder. Runtime remains login-only, with no additional database calls or keyboard implementation.
 
 ### Core loop and focus rewards
 
@@ -129,6 +129,8 @@ Use one message area between the illustration and account action. The following 
 | Owner signed in | You are signed in. / Your cat home is coming soon. | Sign out |
 | Access denied or account failure | One safe error replacing the normal intro or owner confirmation | Sign in or Sign out, matching the actual account state |
 
+Reuse the existing Login / Signing in and Login / Signing out presentation for outgoing actions; do not redesign those states or change their copy. Keep the sign-in state pending after navigation is requested, until the page leaves. Errors and bfcache return restore the existing action. On OAuth return, reuse Loading / Signing in before React, during startup checks and through redirect completion plus the first auth restoration callback; never show a signed-out Login between them. Update loading keeps priority when a release update is required.
+
 While busy, hide stale errors. Otherwise errors take precedence over owner confirmation. Do not repeat an error below the button, show the ordinary tagline during an account operation, or label an action Try again unless it actually retries that operation. Signed-in owner confirmation remains a temporary login-milestone state, not a completed home screen.
 
 ## Typography, spacing and scrolling
@@ -161,7 +163,7 @@ Before accepting shared UI changes, inspect every affected screen and every prev
 
 Use the shared `PageLoading` screen for initial startup, authentication restoration and future whole-screen data preparation. Its optional `message` is real text below the animation; omit it for ordinary startup. The optional accessible `label` defaults to Loading. Callers supply translated text in the active UI language; do not bake text into Aseprite frames. Keep errors and retry controls in the existing recovery screens, never a successful loading state.
 
-Future home loading may say Loading your home; explicit authentication may say Signing in. These are preview examples, not evidence that home loading exists. Small saves and purchases should show busy state in their own button or dialog, preserve the mounted timer and drafts, prevent duplicate submissions and report failures locally. Do not add a global loading store, artificial delay, progress percentages, extra reads or polling. Add each caller when its screen is implemented.
+Future home loading may say Loading your home; this remains a preview example, not implemented Home loading. OAuth return already uses the shared Signing in loading message. Small saves and purchases should show busy state in their own button or dialog, preserve the mounted timer and drafts, prevent duplicate submissions and report failures locally. Do not add a global loading store, artificial delay, progress percentages, extra reads or polling. Add each caller when its screen is implemented.
 
 The approved head-and-ring artwork is integrated into both bootstrap and React through the shared atlas and stylesheet. Further visual changes require a reviewed Aseprite draft. Verify text-free, English/Thai message and failure states through localhost preview; verify startup before React separately. Real-device motion and installed-app behavior need device checks.
 

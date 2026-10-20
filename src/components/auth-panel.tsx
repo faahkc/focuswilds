@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
@@ -7,6 +7,8 @@ import { AccountView } from '@/components/account-view'
 import PageLoading from '@/screens/system/loading'
 
 export function AuthPanel() {
+  const inFlight = useRef(false)
+  const [returning] = useState(() => new URLSearchParams(location.search).has('focuswilds-auth'))
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -15,6 +17,10 @@ export function AuthPanel() {
   useEffect(() => {
     let active = true
     let stop = () => {}
+    const resume = (event: PageTransitionEvent) => {
+      if (event.persisted) { inFlight.current = false; setBusy(false) }
+    }
+    window.addEventListener('pageshow', resume)
     void finishGitHubSignIn().catch(accountError => {
       if (active) setError(accountError)
     }).then(() => {
@@ -28,11 +34,12 @@ export function AuthPanel() {
         setError({ code: 'auth/restore-failed' })
       })
     })
-    return () => { active = false; stop() }
+    return () => { active = false; stop(); window.removeEventListener('pageshow', resume) }
   }, [])
 
   async function updateAccount() {
-    if (busy) return
+    if (inFlight.current) return
+    inFlight.current = true
     setBusy(true)
     setError(null)
     try {
@@ -40,11 +47,14 @@ export function AuthPanel() {
       else await startGitHubSignIn()
     } catch (accountError) {
       setError(accountError)
-    } finally {
+      inFlight.current = false
       setBusy(false)
+    } finally {
+      // Sign-in stays busy until navigation; a bfcache return restores the action.
+      if (user) { inFlight.current = false; setBusy(false) }
     }
   }
 
-  if (loading) return <PageLoading/>
+  if (loading) return <PageLoading message={returning ? 'Signing in…' : undefined}/>
   return <AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/>
 }

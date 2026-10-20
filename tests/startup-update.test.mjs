@@ -139,15 +139,25 @@ test('incomplete, missing and malformed releases never navigate automatically', 
   }
 })
 
-test('pre-React update navigation uses the shared loading message without exposing URL values', () => {
+test('startup keeps the sign-in return labelled while checking updates', async () => {
+  let resolve
+  const boot = await startup({ href: `${base}?focuswilds-auth=1&code=private`, fetch: () => new Promise(done => { resolve = done }) })
+  assert.equal(boot.current().props.message, 'Signing in\u2026')
+  assert.equal(boot.appLoads(), 0)
+  resolve({ ok: true, json: async () => ({ version: '0.1.109' }) })
+  await flush()
+  assert.equal(boot.current().type.name, 'App')
+})
+
+test('pre-React operation loading preserves update priority and never exposes callback values', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   const script = html.match(/<script id="update-loading">([\s\S]*?)<\/script>/)[1]
-  for (const [search, expected] of [['', false], ['?focuswilds-update=bad', false], ['?focuswilds-update=0.1.110', true]]) {
+  for (const [search, expected] of [['', null], ['?focuswilds-update=bad', null], ['?focuswilds-update=0.1.110', 'Loading the latest version…'], ['?focuswilds-auth=1&code=private', 'Signing in…'], ['?focuswilds-update=0.1.110&focuswilds-auth=1', 'Loading the latest version…']]) {
     const appended = []
-    const loading = { setAttribute: (name, text) => { assert.equal(name, 'aria-label'); assert.equal(text, 'Loading the latest version…') }, append: value => appended.push(value) }
+    const loading = { setAttribute: (name, text) => { assert.equal(name, 'aria-label'); assert.equal(text, expected) }, append: value => appended.push(value) }
     runInNewContext(script, { URLSearchParams, location: { search }, document: { querySelector: () => loading, createElement: () => ({}) } })
     assert.equal(appended.length, expected ? 1 : 0)
-    if (expected) assert.equal(appended[0].textContent, 'Loading the latest version…')
+    if (expected) assert.equal(appended[0].textContent, expected)
   }
 })
 

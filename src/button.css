@@ -1,5 +1,5 @@
 @import './pixel-frame.css';
-.pixel-button { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; --pixel-cut: 4px; --button-depth: 4px; min-height: 56px; padding: 12px 20px 16px; border: 0; border-radius: 0; background: var(--text); color: var(--page-bg); font: 700 20px/1.5 'GNU Unifont', monospace; cursor: pointer; box-shadow: inset 0 calc(-1 * var(--button-depth)) 0 #202329; clip-path: var(--pixel-outline); }
+.pixel-button { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; --pixel-cut: 4px; --button-depth: 4px; min-height: var(--control-height); padding: var(--control-padding); border: 0; border-radius: 0; background: var(--text); color: var(--page-bg); font: 700 20px/var(--control-line-height) 'GNU Unifont', monospace; cursor: pointer; box-shadow: inset 0 calc(-1 * var(--button-depth)) 0 #202329; clip-path: var(--pixel-outline); }
 @media (hover: hover) { .pixel-button:hover:not(:disabled) { background: #44454d; } }
 .pixel-button:disabled { cursor: wait; opacity: .7; }
 .pixel-button:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--page-bg), inset 0 calc(-1 * var(--button-depth)) 0 #202329; }

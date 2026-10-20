@@ -1,6 +1,11 @@
-.ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; padding: 10px; font-size: 16px; }
-.ui-preview-tools summary { cursor: pointer; }
-.ui-preview-menu { display: flex; flex-direction: column; gap: 8px; max-height: calc(100svh - env(safe-area-inset-top) - 80px); overflow: auto; padding-top: 8px; }
+.ui-preview-tools { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 200; font-size: 16px; }
+.ui-preview-tools details { max-height: calc(100svh - max(8px, env(safe-area-inset-top)) - 8px); overflow: auto; overscroll-behavior: contain; }
+.ui-preview-tools summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--control-height); padding: var(--control-padding); font-size: 20px; line-height: var(--control-line-height); cursor: pointer; list-style: none; }
+.ui-preview-tools summary::-webkit-details-marker { display: none; }
+.ui-preview-tools summary > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.ui-preview-tools details[open] summary .pixel-select-arrow { transform: rotate(180deg); }
+.ui-preview-tools summary:focus-visible { outline: 2px solid var(--text); outline-offset: -6px; }
+.ui-preview-menu { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }
 .ui-preview-menu > * { flex-shrink: 0; }
 .ui-preview-menu label { display: grid; gap: 4px; }
 .ui-preview-menu > label, .ui-preview-menu > .pixel-select { margin: 4px; }

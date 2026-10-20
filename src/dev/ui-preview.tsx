@@ -30,8 +30,8 @@ export default function UIPreview() {
   const groups = [...new Set(visible.map(screen => screen.group))]
   const Screen = loaded && (loaded.cases[variant] ?? loaded.Default)
   return <>
-    <details className="pixel-frame ui-preview-tools" ref={tools}>
-      <summary>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</summary>
+    <div className="pixel-frame ui-preview-tools"><details ref={tools}>
+      <summary><span>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</span><span className="pixel-select-arrow" aria-hidden="true"/></summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
         <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
@@ -54,7 +54,7 @@ export default function UIPreview() {
         <p>Preview only. Account actions are simulated.</p>
         <a href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>
-    </details>
+    </details></div>
     {!selected ? <p>No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p>Unable to load preview.</p><Button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</Button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}
   </>
 }

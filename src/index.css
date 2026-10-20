@@ -2,12 +2,12 @@
 
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-body { color: var(--text); background: var(--page-bg); font: 18px/1.5 'GNU Unifont', monospace; }
+body { color: var(--text); background: var(--page-bg); font: 700 18px/1.5 'GNU Unifont', monospace; }
 .login-page h1, .login-intro, .login-scene { -webkit-user-select: none; user-select: none; }
 input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
 button, input, textarea, select { font: inherit; font-size: max(16px, 1em); }
 .login-page { position: relative; min-height: 100%; width: min(100%, 440px); margin: auto; padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 40px)); }
-h1, h2, p { margin: 0; font-weight: normal; }
+h1, h2, p { margin: 0; font-weight: inherit; }
 h1 { font-weight: 700; font-size: 48px; line-height: 1.1; text-wrap: balance; }
 h2 { font-size: 22px; margin-bottom: 12px; }
 .login-scene { width: 100%; max-width: 336px; aspect-ratio: 8 / 7; flex-shrink: 0; }

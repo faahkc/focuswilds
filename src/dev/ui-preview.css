@@ -8,6 +8,7 @@
 .ui-preview-tools summary:focus-visible::before { content: ''; position: absolute; inset: 2px 4px; z-index: -1; pointer-events: none; background: #e1d9ca; clip-path: var(--pixel-outline); }
 .ui-preview-menu { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }
 .ui-preview-menu > * { flex-shrink: 0; }
+.ui-preview-menu > p { font-weight: 400; }
 .ui-preview-menu label { display: grid; gap: 4px; }
 .ui-preview-menu > label, .ui-preview-menu > .pixel-select { margin: 4px; }
 .ui-preview-list { min-height: 0; max-height: 40svh; overflow: auto; overscroll-behavior: contain; }

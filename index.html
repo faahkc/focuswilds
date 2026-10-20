@@ -24,9 +24,9 @@
       :root { --page-bg: #f2ebdc; --text: #2e3037; --muted: #67616a; --accent: #e0cb83; --screen-width: 100svw; --screen-height: 100svh; }
       html, body { margin: 0; background: #f2ebdc; }
       .app-screen { position: fixed; left: 0; top: 0; width: var(--screen-width); height: var(--screen-height); container: screen / size; overflow: auto; overscroll-behavior: none; touch-action: pan-y; transform-origin: top left; }
-      .orientation-notice { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; background: #f2ebdc; color: var(--text); font: 20px/1.5 'GNU Unifont',monospace; text-align: center; }
+      .orientation-notice { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; background: #f2ebdc; color: var(--text); font: 700 20px/1.5 'GNU Unifont',monospace; text-align: center; }
       @media (min-aspect-ratio: 1/1) { #root { display: none; } .orientation-notice { display: flex; } }
-      .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #f2ebdc; color: var(--text); font: 16px 'GNU Unifont',monospace; text-align: center; }
+      .page-loading, .startup-recovery { position: absolute; inset: 0; z-index: 100; margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #f2ebdc; color: var(--text); font: 700 16px 'GNU Unifont',monospace; text-align: center; }
       .startup-recovery[hidden], .page-loading[hidden] { display: none; }
     </style>
     <script id="loading-visibility">

@@ -1,5 +1,13 @@
 # Development
 
+## General text weight (2026-10-20)
+
+General body text, descriptions, account statuses/errors, labels, editable controls and menu options now use 700 GNU Unifont. Paragraphs inherit the body weight; recovery/loading and pre-React shorthands explicitly retain 700 instead of resetting it to normal. Existing heading/button weights, sizes, line heights and inherited 1px tracking are preserved. AppVersion remains 400 at 12px; preview counts and the small preview disclaimer also stay 400. Selected/unselected options keep the same weight. The bundled font still declares its real 400 face; 700 is browser synthetic bold, matching the owner-approved comparison, with no new font asset.
+
+Verification: 54 offline tests, lint and build passed. Inspected all 13 current preview screen/states after fonts loaded at 320x568 and 390x844, including owner/busy/account error/update and Thai loading text. Computed general weights were 700 and version weights 400; no document horizontal overflow or button/footer overlap was found. Inspected placeholders, entered complete/mp/gpqy and Thai marks in normal/invalid/disabled fields, plus labels and menus; all editable/menu text was 700. A rendered canvas mp probe at 18px and 20px with inherited 1px tracking retained two empty ink columns between the glyphs at alpha >128 for both 400 and 700. This supplements the actual captures rather than replacing visual inspection. Blocked the entry module and inspected pre-React recovery and startup-update loading at both portrait sizes, plus the landscape notice. Startup CSS is 9.76 kB / 3.67 kB gzip, up from 9.74 kB / 3.67 kB; no assets, dependencies or database calls were added. Physical Safari/Android rendering and screen readers were not tested.
+
+Repeat these font-loaded captures and weight checks for new presentation screens or font changes. Include complete/mp, Latin descenders and Thai marks in both placeholder and entered text; compare selected versus unselected menu weights and reach the last item by keyboard/scroll. Check pre-React equivalents when shared styles change. Do not tighten letter spacing or reduce sizes to repair bold text; preserve the shared metrics and investigate glyph/layout issues directly.
+
 ## Dropdown interior clearance fix (2026-10-20)
 
 The popup's equal 6px outer padding left only 2px of cream below the selected option versus 4px above it, because the shared frame includes an extra 2px lower edge. Select now uses 6px top/side padding and 6px plus --frame-depth bottom padding. This preserves the approved frame and gives equal 4px visible inner clearance, including the single Default option on Update Error. No option height, selected fill, icon or trigger style changed.

@@ -123,6 +123,8 @@ While busy, hide stale errors. Otherwise errors take precedence over owner confi
 
 ## Typography, spacing and scrolling
 
+Use 700 GNU Unifont for general text, descriptions, statuses, errors, labels, inputs and menu options across React screens and pre-React loading/recovery/orientation notices. Preserve existing heading/button weight, font sizes, line heights and 1px tracking. Keep AppVersion and explicitly small secondary metadata at 400. Selected and unselected options use the same weight. The bundled font contains a 400 face; browser-synthesized 700 matches the approved comparison, not a separate bold font asset. Verify complete/mp, Latin descenders and Thai marks after fonts load before applying this weight to new screens.
+
 Selected dropdown options keep a solid charcoal fill, cream text and check mark even when active/focused, without a cream/white inset ring. Keyboard movement to an unselected option retains the charcoal frame indicator; movement alone never commits a value.
 
 Dropdown popup padding compensates for the frame's lower edge: 6px at top/sides and 6px plus frame depth at bottom. With the current 2px inset and 2px lower edge, the first/last options have equal 4px cream clearance inside the frame. Verify a single selected option as well as multi-option/scrolling menus; preserve the complete outer border.

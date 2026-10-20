@@ -1,5 +1,5 @@
-.pixel-icon { display: inline-block; flex-shrink: 0; width: 16px; height: 16px; background: currentColor; mask-image: url("./assets/ui-icons.png"); mask-repeat: no-repeat; mask-size: 64px 16px; image-rendering: pixelated; }
+.pixel-icon { display: inline-block; flex-shrink: 0; width: 32px; height: 32px; background: currentColor; mask-image: url("./assets/ui-icons.png"); mask-repeat: no-repeat; mask-size: 128px 32px; image-rendering: pixelated; }
 .pixel-icon-check { mask-position: 0 0; }
-.pixel-icon-close { mask-position: -16px 0; }
-.pixel-icon-down { mask-position: -32px 0; }
-.pixel-icon-up { mask-position: -48px 0; }
+.pixel-icon-close { mask-position: -32px 0; }
+.pixel-icon-down { mask-position: -64px 0; }
+.pixel-icon-up { mask-position: -96px 0; }

@@ -3,7 +3,7 @@
 .ui-preview-tools summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--control-height); padding: var(--control-padding); font-size: 20px; line-height: var(--control-line-height); cursor: pointer; list-style: none; }
 .ui-preview-tools summary::-webkit-details-marker { display: none; }
 .ui-preview-tools summary > span:first-child { min-width: 0; overflow-wrap: anywhere; }
-.ui-preview-tools details[open] summary .pixel-select-arrow { transform: rotate(180deg); }
+.ui-preview-tools details[open] summary .preview-disclosure-arrow { mask-position: -48px 0; }
 .ui-preview-tools summary:focus-visible { position: relative; isolation: isolate; outline: none; }
 .ui-preview-tools summary:focus-visible::before { content: ''; position: absolute; inset: 2px 4px; z-index: -1; pointer-events: none; background: #e1d9ca; clip-path: var(--pixel-outline); }
 .ui-preview-menu { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }

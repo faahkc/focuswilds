@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useId, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { PixelIcon } from './pixel-icon'
 import '../form-controls.css'
 
 type SelectProps = {
@@ -105,14 +106,14 @@ export function Select({ label, value, options, onChange, disabled = false, inva
   }
 
   const popup = expanded && <div className="pixel-frame pixel-select-popup" style={position} onPointerDown={event => { if (event.target === event.currentTarget) event.preventDefault() }}><div ref={list} id={`${id}-list`} className="pixel-select-options" role="listbox" aria-labelledby={`${id}-label`} tabIndex={-1} aria-activedescendant={options[active] ? `${id}-option-${active}` : undefined} onKeyDown={event => { event.stopPropagation(); keyDown(event) }} onBlur={blur}>
-    {options.map((option, index) => <button key={option.value} id={`${id}-option-${index}`} type="button" role="option" tabIndex={-1} aria-selected={option.value === value} data-active={index === active} onClick={() => choose(index)} onFocus={() => setActive(index)}><span>{option.label}</span><span className="pixel-choice-mark" aria-hidden="true">{option.value === value ? '✓' : ''}</span></button>)}
+    {options.map((option, index) => <button key={option.value} id={`${id}-option-${index}`} type="button" role="option" tabIndex={-1} aria-selected={option.value === value} data-active={index === active} onClick={() => choose(index)} onFocus={() => setActive(index)}><span>{option.label}</span><span className="pixel-choice-mark" aria-hidden="true">{option.value === value && <PixelIcon name="check"/>}</span></button>)}
   </div></div>
 
   return <div className="pixel-select" ref={root} onKeyDown={keyDown} onBlur={blur}>
     <span id={`${id}-label`}>{label}</span>
     <button ref={trigger} type="button" className="pixel-frame pixel-select-trigger" role="combobox" aria-labelledby={`${id}-label ${id}-value`} aria-controls={`${id}-list`} aria-haspopup="listbox" aria-expanded={expanded} aria-invalid={invalid || undefined} aria-describedby={describedBy} disabled={disabled || !options.length} onClick={() => {
       setActive(Math.max(0, selected)); setOpen(!expanded)
-    }}><span id={`${id}-value`}>{options[selected]?.label ?? 'Select…'}</span><span className="pixel-select-arrow" aria-hidden="true"/></button>
+    }}><span id={`${id}-value`}>{options[selected]?.label ?? 'Select…'}</span><PixelIcon name={expanded ? 'up' : 'down'}/></button>
     {portalTarget && popup ? createPortal(popup, portalTarget) : popup}
   </div>
 }

@@ -4,6 +4,7 @@ import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Select } from '@/components/select'
+import { PixelIcon } from '@/components/pixel-icon'
 import { createCatalog, type ScreenModule, type PreviewModule } from './preview-catalog'
 import './ui-preview.css'
 
@@ -31,7 +32,7 @@ export default function UIPreview() {
   const Screen = loaded && (loaded.cases[variant] ?? loaded.Default)
   return <>
     <div className="pixel-frame ui-preview-tools"><details ref={tools}>
-      <summary><span>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</span><span className="pixel-select-arrow" aria-hidden="true"/></summary>
+      <summary><span>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</span><PixelIcon name="down" className="preview-disclosure-arrow"/></summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
         <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Name or group"/></label>
         <p>{visible.length} / {catalog.length} screens</p>
@@ -43,7 +44,7 @@ export default function UIPreview() {
             setFailed(false)
             setRetry(value => value + 1)
             event.currentTarget.closest('details')?.removeAttribute('open')
-          }}><span>{screen.name}</span><span className="pixel-choice-mark" aria-hidden="true">{selected?.id === screen.id ? '✓' : ''}</span></Button>)}</section>)}
+          }}><span>{screen.name}</span><span className="pixel-choice-mark" aria-hidden="true">{selected?.id === screen.id && <PixelIcon name="check"/>}</span></Button>)}</section>)}
           {!visible.length && <p role="status">No matching screens.</p>}
         </nav>
         {loaded && <Select label="State" value={variant} options={[{ value: '', label: 'Default' }, ...Object.keys(loaded.cases).map(name => ({ value: name, label: name }))]} onChange={value => {

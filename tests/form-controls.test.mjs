@@ -12,6 +12,8 @@ function load(name, hooks = {}) {
     if (name === 'react') return hooks
     if (name === 'react-dom') return { createPortal: element => element }
     if (name === '../form-controls.css') return {}
+    if (name === '../pixel-icon.css') return {}
+    if (name === './pixel-icon') return load('pixel-icon')
     assert.equal(name, 'react/jsx-runtime')
     return { jsx: React.createElement, jsxs: React.createElement }
   }, module, module.exports)
@@ -38,9 +40,10 @@ test('controlled search has an accessible themed clear action and keeps focus wi
   const view = Input(props)
   const clear = view.props.children[1]
   assert.equal(clear.props['aria-label'], 'ล้างการค้นหา')
-  assert.equal(clear.props.children.props.className, 'pixel-search-clear-mark')
-  assert.equal(clear.props.children.props['aria-hidden'], 'true')
-  assert.equal(clear.props.children.props.children, undefined, 'the clear icon does not depend on a text glyph baseline')
+  assert.equal(clear.props.children.props.name, 'close')
+  const mark = clear.props.children.type(clear.props.children.props)
+  assert.equal(mark.props['aria-hidden'], 'true')
+  assert.equal(mark.props.children, undefined, 'the clear icon does not depend on a text glyph baseline')
   let focusOptions
   clear.props.onClick({ currentTarget: { previousElementSibling: { focus: options => { focusOptions = options } } } })
   assert.equal(clears, 1)

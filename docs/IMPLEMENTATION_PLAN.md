@@ -131,11 +131,11 @@ Use one message area between the illustration and account action. The following 
 | Signing in | Signing you in… / Please wait a moment. | Signing in…; disabled |
 | Signing out | Signing you out… / Please wait a moment. | Signing out…; disabled |
 | Owner signed in | Home after its code and artwork are ready | Menu with Sign out |
-| Access denied or account failure | One safe error replacing the normal intro or owner confirmation | Sign in or Sign out, matching the actual account state |
+| Access denied or account failure | One safe error replacing the normal intro | Sign in or Sign out, matching the actual account state |
 
 Reuse the existing Login / Signing in and Login / Signing out presentation for outgoing actions; do not redesign those states or change their copy. Keep the sign-in state pending after navigation is requested, until the page leaves. Errors and bfcache return restore the existing action. On OAuth return, reuse Loading / Signing in before React, during startup checks and through redirect completion plus the first auth restoration callback; never show a signed-out Login between them. Update loading keeps priority when a release update is required.
 
-While busy, hide stale errors. Otherwise errors take precedence over owner confirmation. Do not repeat an error below the button, show the ordinary tagline during an account operation, or label an action Try again unless it actually retries that operation. The signed-in owner confirmation remains a legacy presentation fixture; runtime now opens initial Home. Sign-out and account failures continue to use the existing Login states.
+While busy, hide stale errors. Do not repeat an error below the button, show the ordinary tagline during an account operation, or label an action Try again unless it actually retries that operation. The retired Login / Owner signed in presentation and preview are removed; owners open initial Home after shared loading. Sign-out and account failures continue to use the existing Login states. Do not add a minimum sign-out duration: a fast completion may finish before the busy state is painted.
 
 ## Typography, spacing and scrolling
 

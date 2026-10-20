@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import React from 'react'
 import ts from 'typescript'
 
-test('login intro shows errors before owner confirmation and the default tagline', () => {
+test('login intro preserves the default tagline, safe errors and account operation messages', () => {
   const source = readFileSync(new URL('../src/screens/login.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const dependencies = {
@@ -14,27 +14,25 @@ test('login intro shows errors before owner confirmation and the default tagline
   }
   const module = { exports: {} }
   new Function('require', 'module', 'exports', code)(name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports)
-  for (const ownerSignedIn of [false, true]) {
-    const view = module.exports.default({ ownerSignedIn })
-    const intro = view.props.children[2]
-    assert.equal(intro.props.children[0], ownerSignedIn ? 'You are signed in.' : 'A little focus.')
-    assert.equal(intro.props.children[2], ownerSignedIn ? 'Your cat home is coming soon.' : 'A home for cats.')
-    assert.equal(intro.props.role, ownerSignedIn ? 'status' : undefined)
-    const action = React.createElement('button', null, 'Account action')
-    const failed = module.exports.default({ ownerSignedIn, errorMessage: 'Safe account error', children: action })
-    assert.equal(failed.props.children[2].props.role, 'alert')
-    assert.equal(failed.props.children[2].props.children, 'Safe account error')
-    assert.equal(failed.props.children[3], action)
-    assert.doesNotMatch(JSON.stringify(failed), /A little focus|You are signed in/)
-    for (const statusMessage of ['Signing you in…', 'Signing you out…']) {
-      const pending = module.exports.default({ ownerSignedIn, statusMessage, children: action })
-      const message = pending.props.children[2]
-      assert.equal(message.props.role, 'status')
-      assert.equal(message.props.children[0], statusMessage)
-      assert.equal(message.props.children[2], 'Please wait a moment.')
-      assert.equal(pending.props.children[3], action)
-      assert.doesNotMatch(JSON.stringify(pending), /A little focus|You are signed in/)
-    }
+  const view = module.exports.default({})
+  const intro = view.props.children[2]
+  assert.equal(intro.props.children[0], 'A little focus.')
+  assert.equal(intro.props.children[2], 'A home for cats.')
+  assert.equal(intro.props.role, undefined)
+  const action = React.createElement('button', null, 'Account action')
+  const failed = module.exports.default({ errorMessage: 'Safe account error', children: action })
+  assert.equal(failed.props.children[2].props.role, 'alert')
+  assert.equal(failed.props.children[2].props.children, 'Safe account error')
+  assert.equal(failed.props.children[3], action)
+  assert.doesNotMatch(JSON.stringify(failed), /A little focus|You are signed in/)
+  for (const statusMessage of ['Signing you in…', 'Signing you out…']) {
+    const pending = module.exports.default({ statusMessage, children: action })
+    const message = pending.props.children[2]
+    assert.equal(message.props.role, 'status')
+    assert.equal(message.props.children[0], statusMessage)
+    assert.equal(message.props.children[2], 'Please wait a moment.')
+    assert.equal(pending.props.children[3], action)
+    assert.doesNotMatch(JSON.stringify(pending), /A little focus|You are signed in/)
   }
 })
 

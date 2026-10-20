@@ -339,3 +339,10 @@ Checks: 61 offline tests, lint and production build passed for the Home label/ve
 Default PageLoading and pre-React bootstrap now show Loading… beneath the approved animation. Named operation messages replace that one line; bootstrap updates/sign-in replace the existing text node rather than appending another message. Translated fallback labels are visible as well as accessible. Artwork, timing, spacing and recovery actions are unchanged. This supersedes the former text-free default, with no data operations or artificial loading delay.
 
 Validation: 61 offline tests, lint and build passed. Inspected 16 font-loaded captures at 320x568 and 390x844: React default, update, sign-in, Home and Thai messages, plus pre-React default, sign-in and update. Each had one visible message matching its accessible label and no horizontal overflow; update priority and callback privacy remain tested. No real account/database calls or physical-device checks were made.
+
+
+## Retire the signed-in Login placeholder (2026-10-20)
+
+Removed the obsolete Login / Owner signed in presentation, prop and preview case. Authenticated owners already open Home after shared loading. Login / Signing out remains the existing disabled action state; fast sign-out can complete before a browser paint, and no artificial delay is added. Access-denial checks and account transition guards are unchanged.
+
+Validation: 61 offline tests, lint and production build passed. Inspected all five remaining Login states (Default, Access denied, Signing in, Signing out and Account error) after fonts loaded at 320x568 and 390x844. Messages, disabled busy buttons and version footer fit without horizontal overflow or overlap; the retired state is absent from the preview selector. No real account/database calls or physical-device checks were made.

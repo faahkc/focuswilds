@@ -10,7 +10,7 @@ export function AccountView({ signedIn, owner, busy, error, onAction }: {
   onAction: () => void
 }) {
   const problem = error !== null ? authErrorMessage(error) : signedIn && !owner ? 'This account does not have access to Focuswilds.' : null
-  return <LoginPage ownerSignedIn={signedIn && owner} errorMessage={busy ? null : problem} statusMessage={busy ? signedIn ? 'Signing you out…' : 'Signing you in…' : null}><section className="login-account" aria-label="Account" aria-busy={busy}>
+  return <LoginPage errorMessage={busy ? null : problem} statusMessage={busy ? signedIn ? 'Signing you out…' : 'Signing you in…' : null}><section className="login-account" aria-label="Account" aria-busy={busy}>
     <Button disabled={busy} aria-busy={busy} onClick={onAction}>{busy ? signedIn ? 'Signing out…' : 'Signing in…' : signedIn ? 'Sign out' : 'Sign in'}</Button>
   </section></LoginPage>
 }

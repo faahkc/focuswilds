@@ -10,7 +10,6 @@ function AccountPreview({ signedIn = false, owner = false, busy = false, error =
 function LoginPreview() { return <AccountPreview/> }
 
 export default { Default: LoginPreview, cases: {
-  'Owner signed in': () => <AccountPreview signedIn owner/>,
   'Access denied': () => <AccountPreview signedIn/>,
   'Signing in': () => <AccountPreview busy/>,
   'Signing out': () => <AccountPreview signedIn owner busy/>,

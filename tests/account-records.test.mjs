@@ -7,6 +7,11 @@ import { OWNER_UID } from '../src/lib/account.ts'
 function store({ fail = false, stalledToken = false, conflict = false, existingProfile = false } = {}) {
   const documents = new Map(), requests = [], timers = new Map(), local = new Map()
   let revision = 0, writes = 0, tokenCalls = 0, conflicted = false
+  let now = Date.parse('2026-10-20T00:00:00Z'), clientOffset = 0
+  class ClientDate extends Date {
+    constructor(value) { super(value === undefined ? now + clientOffset : value) }
+    static now() { return now + clientOffset }
+  }
   const profile = `projects/test/databases/(default)/documents/users/${OWNER_UID}`
   if (existingProfile) documents.set(profile, { fields: { language: { stringValue: 'th' }, legacy: { stringValue: 'preserve' } }, updateTime: 'existing' })
   const dependencies = {
@@ -31,29 +36,39 @@ function store({ fail = false, stalledToken = false, conflict = false, existingP
     const { writes: batch } = JSON.parse(options.body)
     assert.equal(batch.length, 1)
     const write = batch[0], old = documents.get(write.update.name)
-    if (conflict && !conflicted && write.update.name.endsWith('/logs/account')) {
-      conflicted = true
-      // Simulate a successful write whose acknowledgement was lost; retry must not append it twice.
-      documents.set(write.update.name, { fields: structuredClone(write.update.fields), updateTime: String(++revision) })
-      return reply({ error: { status: 'FAILED_PRECONDITION' } }, 400)
-    }
     if ((write.currentDocument.exists === false && old) || (write.currentDocument.updateTime && write.currentDocument.updateTime !== old?.updateTime)) return reply({ error: { status: 'FAILED_PRECONDITION' } }, 400)
     const fields = structuredClone(write.update.fields)
     for (const transform of write.updateTransforms) {
       assert.equal(transform.setToServerValue, 'REQUEST_TIME')
-      fields[transform.fieldPath] = { timestampValue: new Date().toISOString() }
+      fields[transform.fieldPath] = { timestampValue: new Date(now).toISOString() }
+    }
+    if (write.update.name.endsWith('/logs/account')) {
+      const count = Number(fields.windowCount.integerValue)
+      const start = Date.parse(fields.windowStartedAt.timestampValue)
+      const oldStart = old?.fields.windowStartedAt?.timestampValue
+      const resetAllowed = !oldStart || now >= Date.parse(oldStart) + 60000
+      const valid = Number.isInteger(count) && count >= 1 && count <= 10 && (resetAllowed
+        ? count === 1 && start === now
+        : start === Date.parse(oldStart) && count === Number(old.fields.windowCount.integerValue) + 1)
+      if (!valid) return reply({ error: { status: 'PERMISSION_DENIED' } }, 403)
+      if (conflict && !conflicted) {
+        conflicted = true
+        // Simulate a successful write whose acknowledgement was lost; retry must not append it twice.
+        documents.set(write.update.name, { fields, updateTime: String(++revision) }); writes++
+        return reply({ error: { status: 'FAILED_PRECONDITION' } }, 400)
+      }
     }
     documents.set(write.update.name, { fields, updateTime: String(++revision) }); writes++
     return reply({})
   }
-  new Function('require', 'module', 'exports', 'fetch', 'matchMedia', 'navigator', 'location', 'sessionStorage', 'setTimeout', 'clearTimeout', code)(
+  new Function('require', 'module', 'exports', 'fetch', 'matchMedia', 'navigator', 'location', 'sessionStorage', 'setTimeout', 'clearTimeout', 'Date', code)(
     name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports,
     fetch, () => ({ matches: true }), {}, { hostname: 'localhost' },
     { getItem: key => local.get(key) ?? null, setItem: (key, value) => local.set(key, value) },
-    fn => { const id = Symbol(); timers.set(id, fn); return id }, id => timers.delete(id),
+    fn => { const id = Symbol(); timers.set(id, fn); return id }, id => timers.delete(id), ClientDate,
   )
   const user = { uid: OWNER_UID, getIdToken: async () => { tokenCalls++; return stalledToken ? new Promise(() => {}) : 'private-token' } }
-  return { api: module.exports, user, documents, requests, local, profile, events: () => documents.get(`${profile}/logs/account`)?.fields.events.arrayValue.values.map(value => value.mapValue.fields) ?? [], stats: () => ({ writes, tokenCalls, timers: timers.size }), expire: () => { for (const fn of timers.values()) fn() } }
+  return { advance: ms => { now += ms }, skew: ms => { clientOffset = ms }, api: module.exports, user, documents, requests, local, profile, events: () => documents.get(`${profile}/logs/account`)?.fields.events.arrayValue.values.map(value => value.mapValue.fields) ?? [], stats: () => ({ writes, tokenCalls, timers: timers.size }), expire: () => { for (const fn of timers.values()) fn() } }
 }
 
 test('owner profile initialization is deduplicated, creates once and never overwrites saved fields', async () => {
@@ -78,7 +93,10 @@ test('owner profile initialization is deduplicated, creates once and never overw
 
 test('history retains the latest 100 events, uses server receipt times and serializes no credentials', async () => {
   const s = store()
-  for (let i = 0; i < 103; i++) assert.equal(await s.api.recordAccountEvent(s.user, i % 2 ? 'sign_in' : 'sign_out_requested'), true)
+  for (let i = 0; i < 103; i++) {
+    assert.equal(await s.api.recordAccountEvent(s.user, i % 2 ? 'sign_in' : 'sign_out_requested'), true)
+    s.advance(6000)
+  }
   assert.equal(s.events().length, 100)
   assert.equal(s.stats().writes, 103)
   assert.equal(s.events()[0].type.stringValue, 'sign_in')
@@ -144,6 +162,70 @@ test('rules contract scopes access to the owner and validates bounded append-onl
   assert.match(rules, /data.updatedAt == request.time/)
   assert.match(rules, /logId == 'account'/)
   assert.match(rules, /resource.data.events.removeAll/)
+  assert.match(rules, /data.windowCount is int.*data.windowCount <= 10/)
+  assert.match(rules, /request.time >= previous.windowStartedAt \+ duration.value\(60, 's'\)/)
+  assert.match(rules, /next.windowCount == previous.windowCount \+ 1/)
+  assert.match(rules, /request.resource.data.windowStartedAt == request.time/)
   assert.match(rules, /allow read, write: if false/)
   assert.doesNotMatch(rules, /allow (list|delete):|allow write: if owner|allow update: if owner\(uid\);/)
+})
+
+
+test('account diagnostics accept ten events, drop excess without a write and reopen exactly at 60 seconds', async () => {
+  const s = store()
+  for (let i = 0; i < 10; i++) assert.equal(await s.api.recordAccountEvent(s.user, 'sign_in'), true)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '10')
+  assert.equal(await s.api.recordAccountEvent(s.user, 'account_error'), false)
+  assert.equal(s.stats().writes, 10)
+  s.advance(59999)
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), false)
+  s.advance(1)
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), true)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '1')
+  assert.equal(s.events().length, 11)
+})
+
+test('concurrent event calls share the persisted limit instead of receiving a per-tab allowance', async () => {
+  const s = store()
+  for (let i = 0; i < 8; i++) await s.api.recordAccountEvent(s.user, 'sign_in')
+  const results = await Promise.all(Array.from({ length: 5 }, () => s.api.recordAccountEvent(s.user, 'sign_out_requested')))
+  assert.equal(results.filter(Boolean).length, 2)
+  assert.equal(s.events().length, 10)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '10')
+})
+
+test('normal low-frequency use opens a fresh window without accumulating a lifetime action count', async () => {
+  const s = store()
+  for (let i = 0; i < 15; i++) {
+    assert.equal(await s.api.recordAccountEvent(s.user, 'sign_in'), true)
+    assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '1')
+    s.advance(60000)
+  }
+  assert.equal(s.events().length, 15)
+})
+
+test('an existing history upgrades its missing rate metadata without resetting events or the profile', async () => {
+  const s = store({ existingProfile: true })
+  await s.api.recordAccountEvent(s.user, 'sign_in')
+  const current = s.documents.get(`${s.profile}/logs/account`)
+  delete current.fields.windowCount
+  delete current.fields.windowStartedAt
+  const originalEvent = structuredClone(s.events()[0])
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), true)
+  assert.deepEqual(s.events()[0], originalEvent)
+  assert.equal(s.events().length, 2)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '1')
+  assert.equal(s.documents.get(s.profile).fields.language.stringValue, 'th')
+})
+
+test('a fast client clock cannot force an early window reset accepted by the in-memory server', async () => {
+  const s = store()
+  await s.api.recordAccountEvent(s.user, 'sign_in')
+  s.skew(3600000)
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), false)
+  assert.equal(s.events().length, 1)
+  assert.equal(s.requests.length, 4)
+  assert.equal(s.stats().writes, 1)
+  s.skew(0)
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), true)
 })

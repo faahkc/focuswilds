@@ -21,11 +21,28 @@ service cloud.firestore {
     }
     function validHistory() {
       let data = request.resource.data;
-      return data.keys().hasAll(['events', 'updatedAt'])
-        && data.keys().hasOnly(['events', 'updatedAt'])
+      return data.keys().hasAll(['events', 'updatedAt', 'windowStartedAt', 'windowCount'])
+        && data.keys().hasOnly(['events', 'updatedAt', 'windowStartedAt', 'windowCount'])
         && data.updatedAt == request.time
+        && data.windowStartedAt is timestamp
+        && data.windowCount is int && data.windowCount >= 1 && data.windowCount <= 10
         && data.events is list && data.events.size() >= 1 && data.events.size() <= 100
         && validEvent(data.events[data.events.size() - 1]);
+    }
+    function newWindow() {
+      return request.resource.data.windowStartedAt == request.time
+        && request.resource.data.windowCount == 1;
+    }
+    function validRateUpdate() {
+      let previous = resource.data;
+      let next = request.resource.data;
+      // Existing history without rate metadata upgrades once, retaining its events.
+      return !previous.keys().hasAny(['windowStartedAt', 'windowCount'])
+        ? newWindow()
+        : (request.time >= previous.windowStartedAt + duration.value(60, 's')
+          ? newWindow()
+          : next.windowStartedAt == previous.windowStartedAt
+            && next.windowCount == previous.windowCount + 1);
     }
     match /users/{uid} {
       allow get: if owner(uid);
@@ -38,9 +55,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
       match /logs/{logId} {
         allow get: if owner(uid) && logId == 'account';
-        allow create: if owner(uid) && logId == 'account' && validHistory()
+        allow create: if owner(uid) && logId == 'account' && validHistory() && newWindow()
           && request.resource.data.events.size() == 1;
-        allow update: if owner(uid) && logId == 'account' && validHistory()
+        allow update: if owner(uid) && logId == 'account' && validHistory() && validRateUpdate()
           && request.resource.data.events == (resource.data.events.size() < 100
             ? resource.data.events
             : resource.data.events.removeAll([resource.data.events[0]]))

@@ -9,7 +9,7 @@ const userPath = `${root}/users/${OWNER_UID}`
 const historyPath = `${userPath}/logs/account`
 const safeCodes = ['auth/invalid-redirect', 'auth/access-denied', 'auth/sign-in-cancelled', 'auth/network-request-failed', 'auth/too-many-requests', 'auth/restore-failed', 'auth/unknown']
 type EventType = 'sign_in' | 'sign_out_requested' | 'account_error'
-type Value = { stringValue?: string; timestampValue?: string; mapValue?: { fields: Record<string, Value> }; arrayValue?: { values?: Value[] } }
+type Value = { stringValue?: string; integerValue?: string; timestampValue?: string; mapValue?: { fields: Record<string, Value> }; arrayValue?: { values?: Value[] } }
 type Document = { fields: Record<string, Value>; updateTime: string }
 
 async function conflict(response: Response) {
@@ -19,12 +19,12 @@ async function conflict(response: Response) {
 }
 
 // One bounded history document avoids an unbounded collection or paid TTL cleanup.
-async function withAccount(user: User | null, work: (request: (path: string, body?: object) => Promise<Response>) => Promise<void>) {
+async function withAccount(user: User | null, work: (request: (path: string, body?: object) => Promise<Response>) => Promise<void | boolean>) {
   if (user?.uid !== OWNER_UID) return false
   const controller = new AbortController()
   let timeout: ReturnType<typeof setTimeout> | undefined
   try {
-    await Promise.race([
+    const result = await Promise.race([
       (async () => {
         const [token, attestation] = await Promise.all([user.getIdToken(), authHeaders()])
         const request = (path: string, body?: object) => {
@@ -36,13 +36,13 @@ async function withAccount(user: User | null, work: (request: (path: string, bod
             signal: controller.signal, cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer',
           })
         }
-        await work(request)
+        return work(request)
       })(),
       new Promise<never>((_, reject) => {
         timeout = setTimeout(() => { controller.abort(); reject(new Error('Account storage timeout')) }, 1500)
       }),
     ])
-    return true
+    return result !== false
   } catch {
     // Diagnostics must never prevent account access or sign-out.
     return false
@@ -88,10 +88,23 @@ export function recordAccountEvent(user: User | null, type: EventType, code = 'n
       const events = current?.fields.events?.arrayValue?.values ?? []
       if (!Array.isArray(events) || events.length > 100) throw new Error('Invalid account history')
       if (events.some(value => value.mapValue?.fields.id?.stringValue === event.mapValue?.fields.id?.stringValue)) return
+      const windowStart = current?.fields.windowStartedAt?.timestampValue
+      const count = Number(current?.fields.windowCount?.integerValue ?? '0')
+      if ((windowStart && (!Number.isFinite(Date.parse(windowStart)) || !Number.isInteger(count) || count < 1 || count > 10)) || (!windowStart && count !== 0)) throw new Error('Invalid account rate window')
+      // Client time is only a hint; rules enforce the window using server time.
+      const resetWindow = !windowStart || Date.now() >= Date.parse(windowStart) + 60000
+      if (!resetWindow && count >= 10) return false
       const result = await request(`${endpoint}:commit`, { writes: [{
-        update: { name: historyPath, fields: { events: { arrayValue: { values: [...events.slice(-99), event] } } } },
+        update: { name: historyPath, fields: {
+          events: { arrayValue: { values: [...events.slice(-99), event] } },
+          windowCount: { integerValue: String(resetWindow ? 1 : count + 1) },
+          ...(!resetWindow ? { windowStartedAt: { timestampValue: windowStart } } : {}),
+        } },
         currentDocument: current ? { updateTime: current.updateTime } : { exists: false },
-        updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }],
+        updateTransforms: [
+          { fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' },
+          ...(resetWindow ? [{ fieldPath: 'windowStartedAt', setToServerValue: 'REQUEST_TIME' }] : []),
+        ],
       }] })
       if (result.ok) return
       if (!await conflict(result)) throw new Error('History unavailable')

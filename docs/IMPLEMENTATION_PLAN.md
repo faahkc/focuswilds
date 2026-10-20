@@ -10,6 +10,14 @@ The owner-approved setting is now a city and the player's small apartment. "Wild
 
 The current milestone is login only: a warm portrait page, GitHub authentication and owner-only account status. GitHub sign-in uses a same-window authorization return on GitHub Pages and persistent account restoration, with owner-only access. The OAuth callback setting and real-device return/persistence must be verified separately. There is no signed-in game page and no client database access. All gameplay below remains planned. Retired gameplay, assets and schema documentation are removed from the current tree; technical status and production cleanup boundaries are in DEVELOPMENT.md.
 
+### Approved Home layout A (planned)
+
+The owner selected the room-first portrait composition. Arrange the Home screen in this order: title and Menu action, a compact player-level/money row, the apartment scene as the largest flexible region, a concise cat-status area, the primary Start focus action, then the secondary Cats/City/Shop menu row. Keep the primary action clear and reachable on small phones. Future game menus open inside the mounted portrait shell; review their icon artwork separately.
+
+The local layout review is art/drafts/home-layout-v1/review.html, with overview.png and 320px captures. These ignored artifacts are layout references, not deployed screens. The cat logo stands in for the future room illustration. Sample cat names, money, levels, counts and mood are mock data, not approved initial state or economy values. Retain the shared typography, frames and control dimensions; reserve footer/safe-area clearance when implementing the real screen.
+
+Next, prepare a portrait apartment-scene draft in Aseprite for owner review, using the approved black-cat identity and warm city/apartment direction. Layout approval does not approve new artwork or animation. Do not replace the temporary signed-in page or integrate room art until its required review and the first screen's interaction/state contract are complete. The runtime remains login-only; this decision adds no gameplay, database calls or keyboard implementation.
+
 ### Core loop and focus rewards
 
 1. Choose a task or focus title, select count-up or countdown, and focus. Actual focused time also advances an imagined city walk; no separate walking timer, real-world walking or GPS is required. Retain pause/resume, partial-session recording and recovery; add a separate rest phase. Bound reward-eligible elapsed time and define rest calculation/caps before shipping the new count-up mode. Rest, unattended background rendering and merely reopening the app do not generate focus rewards.

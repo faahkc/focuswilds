@@ -1,5 +1,9 @@
 # Development
 
+## Home layout decision (2026-10-20; design only)
+
+The owner approved layout A from the local three-option review: a dominant room scene with compact player/cat information and Start focus above secondary navigation. The chosen reference is art/drafts/home-layout-v1/review.html?layout=a; the overview and individual 320px captures remain ignored alongside it. Earlier browser checks confirmed the layout fits 320x568 and 390x844 without horizontal overflow; the room uses a placeholder with the existing approved cat logo. This is layout evidence only, not validation of final room artwork, functional controls, adoption or persistence. No application code, runtime assets or database state changed in this decision. Next artwork remains subject to the separate Aseprite draft review. Automated checks were not repeated for this documentation-only update; physical-device acceptance of Home remains outstanding.
+
 ## General text weight (2026-10-20)
 
 General body text, descriptions, account statuses/errors, labels, editable controls and menu options now use 700 GNU Unifont. Paragraphs inherit the body weight; recovery/loading and pre-React shorthands explicitly retain 700 instead of resetting it to normal. Existing heading/button weights, sizes, line heights and inherited 1px tracking are preserved. AppVersion remains 400 at 12px; preview counts and the small preview disclaimer also stay 400. Selected/unselected options keep the same weight. The bundled font still declares its real 400 face; 700 is browser synthetic bold, matching the owner-approved comparison, with no new font asset.

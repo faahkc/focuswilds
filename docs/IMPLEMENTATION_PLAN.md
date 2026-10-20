@@ -4,6 +4,8 @@ Approved requirements, not a checklist of shipped features. README and this plan
 
 ## Continuation baseline (2026-10-21)
 
+When a proposed change conflicts with an existing requirement without an explicit owner decision resolving it, present the conflict, recommend an option and explain its consequences, then wait for the owner to decide before changing that behavior or replacing the rule. Continue independent authorized work. Record the decision and remove superseded alternatives afterward; do not reopen conflicts already explicitly resolved.
+
 The current shared UI baseline is implemented: content columns and primary-action widths, role-based typography and spacing, pixel frames and controls, and visible-pixel alignment for all four UI icons. Apply the existing shared tokens/components to new screens and audit all affected states when changing them; do not recreate independent screen-specific standards. See the latest checkpoint in DEVELOPMENT.md for verified behavior and remaining acceptance work.
 
 Home Menu currently retains its existing Sign out / Close presentation. A secondary cream Close button was suggested during review but has not been approved or implemented; do not apply that suggestion as an agreed requirement. Resume from the owner's next request rather than expanding gameplay or redesigning assets automatically.

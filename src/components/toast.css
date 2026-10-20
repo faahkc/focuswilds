@@ -1,5 +1,5 @@
-.toast-viewport { position: absolute; inset: 0 0 auto; z-index: 100; overflow: hidden; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) 16px 4px; }
-.toast-card { width: min(100%, 408px); margin-inline: auto; padding: 12px 16px 16px; color: var(--text); font: inherit; font-size: 18px; line-height: 27px; text-align: left; overflow-wrap: anywhere; animation: toast-slide 5360ms linear both; animation-play-state: var(--loading-animation-state, running); }
+.toast-viewport { position: absolute; inset: 0 0 auto; width: min(100%, 440px); margin-inline: auto; z-index: 100; overflow: hidden; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 4px max(24px, env(safe-area-inset-left)); }
+.toast-card { width: 100%; margin-inline: auto; padding: 12px 16px 16px; color: var(--text); font: inherit; font-size: 18px; line-height: 27px; text-align: left; overflow-wrap: anywhere; animation: toast-slide 5360ms linear both; animation-play-state: var(--loading-animation-state, running); }
 .toast-title { color: #93462d; }
 .toast-card p { margin: 0; }
 @keyframes toast-slide {

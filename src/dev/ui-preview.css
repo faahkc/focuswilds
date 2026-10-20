@@ -11,8 +11,9 @@
 .ui-preview-menu > * { flex-shrink: 0; }
 .ui-preview-menu > p { font-weight: 400; }
 .ui-preview-menu label { display: grid; gap: 4px; }
-.ui-preview-menu > label, .ui-preview-menu > .pixel-select { margin: 4px; }
-.ui-preview-list { min-height: 0; max-height: 40svh; overflow: auto; overscroll-behavior: contain; }
+.ui-preview-menu > label, .ui-preview-menu > .pixel-select { margin-inline: 4px; }
+.ui-preview-menu > .pixel-button { margin-inline: 4px; }
+.ui-preview-list { min-height: 0; max-height: 40svh; margin-block: -4px; overflow: auto; overscroll-behavior: contain; }
 .ui-preview-list section { display: grid; gap: 8px; padding: 4px; }
 .ui-preview-list h2 { font-size: 18px; margin: 4px 0; }
 .ui-preview-list .pixel-button { position: relative; padding-left: 44px; padding-right: 44px; }

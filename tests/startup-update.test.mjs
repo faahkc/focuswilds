@@ -153,11 +153,10 @@ test('pre-React operation loading preserves update priority and never exposes ca
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   const script = html.match(/<script id="update-loading">([\s\S]*?)<\/script>/)[1]
   for (const [search, expected] of [['', null], ['?focuswilds-update=bad', null], ['?focuswilds-update=0.1.110', 'Loading the latest version…'], ['?focuswilds-auth=1&code=private', 'Signing in…'], ['?focuswilds-update=0.1.110&focuswilds-auth=1', 'Loading the latest version…']]) {
-    const appended = []
-    const loading = { setAttribute: (name, text) => { assert.equal(name, 'aria-label'); assert.equal(text, expected) }, append: value => appended.push(value) }
-    runInNewContext(script, { URLSearchParams, location: { search }, document: { querySelector: () => loading, createElement: () => ({}) } })
-    assert.equal(appended.length, expected ? 1 : 0)
-    if (expected) assert.equal(appended[0].textContent, expected)
+    const message = { textContent: 'Loading…' }
+    const loading = { setAttribute: (name, text) => { assert.equal(name, 'aria-label'); assert.equal(text, expected) }, querySelector: () => message }
+    runInNewContext(script, { URLSearchParams, location: { search }, document: { querySelector: () => loading } })
+    assert.equal(message.textContent, expected ?? 'Loading…')
   }
 })
 

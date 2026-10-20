@@ -5,10 +5,10 @@ import { runInNewContext } from 'node:vm'
 import React from 'react'
 import ts from 'typescript'
 
-test('bootstrap and application share a text-free, accessible cat loading screen', () => {
+test('bootstrap and application share a labelled, accessible cat loading screen', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   assert.match(html, /href="\/src\/loading.css"/)
-  assert.match(html, /<main class="page-loading" role="status" aria-label="Loading"><span class="loading-cat" aria-hidden="true"><\/span><\/main>/)
+  assert.match(html, /<main class="page-loading" role="status" aria-label="Loading…"><span class="loading-cat" aria-hidden="true"><\/span><span class="loading-message">Loading…<\/span><\/main>/)
   assert.doesNotMatch(html, /page-loading-spinner|Preparing|loading-spin/)
   const source = readFileSync(new URL('../src/screens/system/loading.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
@@ -19,11 +19,11 @@ test('bootstrap and application share a text-free, accessible cat loading screen
   }, module, module.exports)
   const view = module.exports.default()
   assert.equal(view.props.role, 'status')
-  assert.equal(view.props['aria-label'], 'Loading')
+  assert.equal(view.props['aria-label'], 'Loading…')
   assert.equal(view.props.children[0].props.className, 'loading-cat')
   assert.equal(view.props.children[0].props['aria-hidden'], 'true')
   assert.equal(view.props.children[0].props.children, undefined)
-  assert.equal(view.props.children[1], undefined)
+  assert.equal(view.props.children[1].props.children, 'Loading…')
   for (const message of ['Signing in…', 'กำลังโหลด…']) {
     const status = module.exports.default({ message })
     assert.equal(status.props['aria-label'], message)

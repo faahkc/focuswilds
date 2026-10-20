@@ -44,7 +44,7 @@ Icon verification: the promoted master matches all four approved draft frames pi
 
 Login only, with the approved animated apartment-window illustration, GNU Unifont, a shared portrait frame and owner-only GitHub account status. Landscape and square viewports hide the mounted application and show a portrait-mode notice, including before startup. No automatic rotation. The page remains the same after sign-in. There are no game routes, timer, shop, playable city/apartment scenes, custom keyboard or database calls yet; the window illustration is login decoration only. The approved setting is now city exploration and cat care in a small apartment, as described in IMPLEMENTATION_PLAN.md. Ordinary signed-out Login uses A little focus. / A home for cats.; busy, owner and error states replace that same message area above the account action. Browser/install icons retain the approved black-cat logo.
 
-Current shared UI requirements are recorded in AGENTS.md and the Account message states, Typography, spacing and scrolling, and Startup application updates sections of IMPLEMENTATION_PLAN.md. The implemented defaults are bold 20px shared buttons, inherited 1px font spacing, copyable errors/version text with pale-gold selection, hidden scrollbars outside native editors/selects, and a version footer sourced from package.json. Do not restore the earlier 24px buttons, below-button errors or inline update panel. An ordinary startup remains text-free; a detected release update uses the existing animated cat plus its actual loading message before showing account screens.
+Current shared UI requirements are recorded in AGENTS.md and the Account message states, Typography, spacing and scrolling, and Startup application updates sections of IMPLEMENTATION_PLAN.md. The implemented defaults are bold 20px shared buttons, inherited 1px font spacing, copyable errors/version text with pale-gold selection, hidden scrollbars outside native editors/selects, and a version footer sourced from package.json. Do not restore the earlier 24px buttons, below-button errors or inline update panel. An ordinary startup now shows Loading…; a detected release update uses the existing animated cat plus its actual loading message before showing account screens.
 
 Latest implementation checks: 54 offline tests, lint and build passed. Shared field checks covered preview selection at 320x568 and 390x844, keyboard focus/selection/cancellation, long English/Thai options and wheel/simulated-touch scrolling. Earlier browser checks covered the 13 current preview states for font/wrapping changes, complete/mp glyph bounds and startup update success/failure/loop protection. These checks are not physical-device acceptance. Physical Safari/Android rendering, installed-app update navigation and icon refresh remain separate checks. Historical verification paragraphs below retain the scope and counts from their original checkpoints.
 
@@ -198,7 +198,7 @@ Verification: Aseprite exports validated icon symmetry in the reviewed draft, PN
 
 ### Shared loading messages
 
-`src/screens/system/loading.tsx` accepts optional `message` and accessible `label` strings. With no props it keeps text-free startup behavior. A supplied message appears below the shared animation and names the atomic status for assistive technology. Callers own translations; there is no new global state or database access. Future screen-level waits should reuse this screen; local saves should keep busy/error feedback within their existing control or dialog.
+`src/screens/system/loading.tsx` accepts optional `message` and accessible `label` strings. With no props it now shows Loading… for both visible and accessible status. A supplied message appears below the shared animation and names the atomic status for assistive technology. Callers own translations; there is no new global state or database access. Future screen-level waits should reuse this screen; local saves should keep busy/error feedback within their existing control or dialog.
 
 Local UI preview now includes default, Signing in, planned home loading and Thai message cases. The approved head-and-ring animation is now shared with the bootstrap shell. Checks passed: 32 offline tests (including optional messages and translated labels), lint and build; Thai preview at 390x844 had no horizontal overflow. Real devices and production authentication were not retested.
 
@@ -216,7 +216,7 @@ Validation: 33 offline tests, lint and build passed. Tests cover native prop for
 
 Every screen that displays an application version uses `src/components/app-version.tsx`, which reads package.json and renders v followed by the version. Login and App error use this component; all Login states share it. Pre-React recovery uses the same footer class and a build-time version from package.json. The redundant footer slogan is removed. Future screens displaying a version should reuse this component in a positioned screen container and reserve bottom space instead of writing their own copy.
 
-The footer uses muted 12px GNU Unifont, bottom-center alignment and a safe-area-aware inset. Login reserves space on both ordinary and short viewports so status text and actions do not overlap it. Loading remains text-free by default and gains no version label.
+The footer uses muted 12px GNU Unifont, bottom-center alignment and a safe-area-aware inset. Login reserves space on both ordinary and short viewports so status text and actions do not overlap it. Loading now shows Loading… by default and retains no version label.
 
 Verification: 34 offline tests, lint and build passed. Browser checks covered default, owner, denied and error Login states at 390x844, 375x667 and 320x568; the version stayed at the same bottom position for each viewport, remained visible and never overlapped account controls or messages. Real-device safe areas were not retested.
 
@@ -332,3 +332,10 @@ Home now labels initial progress Lv. 1, omitting the generic Player label withou
 Inspected Home and open Menu after fonts loaded at 320x568 and 390x844. Version was invisible with Menu closed and appeared below Close without overlap when open (16px gap). Neither app shell overflowed; Escape returned focus to Menu. Artwork and shared Login/recovery styling were unchanged. Physical-device safe areas remain unchecked.
 
 Checks: 61 offline tests, lint and production build passed for the Home label/version change.
+
+
+## Default loading message (2026-10-20)
+
+Default PageLoading and pre-React bootstrap now show Loading… beneath the approved animation. Named operation messages replace that one line; bootstrap updates/sign-in replace the existing text node rather than appending another message. Translated fallback labels are visible as well as accessible. Artwork, timing, spacing and recovery actions are unchanged. This supersedes the former text-free default, with no data operations or artificial loading delay.
+
+Validation: 61 offline tests, lint and build passed. Inspected 16 font-loaded captures at 320x568 and 390x844: React default, update, sign-in, Home and Thai messages, plus pre-React default, sign-in and update. Each had one visible message matching its accessible label and no horizontal overflow; update priority and callback privacy remain tested. No real account/database calls or physical-device checks were made.

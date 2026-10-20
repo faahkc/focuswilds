@@ -323,3 +323,12 @@ Restored the approved section order and flexible scene instead of the reduced ve
 The full layout fits both 320x568 and 390x844 after fonts load. The room is 272x159 on the smaller viewport (compact art) and 342x400 on the larger (portrait art). Both preserve mascot aspect ratio. Action rows retain 60px controls; the final row ends 14px above the version footer in both sizes. No horizontal or vertical app-shell overflow was measured. Screenshots were inspected for the room, text wrapping and footer clearance. Artwork and animation pixels/timing are unchanged. Physical-device safe areas remain unverified.
 
 Validation for the restored layout: 61 offline tests, lint and build passed. Regression assertions require all four unimplemented actions to be disabled, described as Coming soon and lack handlers. The account menu was visually checked at both target sizes; Escape still restores Menu focus. Home JS is now 2.26 kB / 0.86 kB gzip and Home CSS 3.53 kB / 1.35 kB gzip; no assets, services or database operations were added.
+
+
+## Home level label and version placement (2026-10-20)
+
+Home now labels initial progress Lv. 1, omitting the generic Player label without exposing an account name or email. The same AppVersion component now appears inside Menu below its actions, in normal document flow. Home no longer reserves the old version-footer clearance; bottom padding remains at least 24px and includes the device safe area plus 16px. Login and recovery version placement is unchanged. No artwork, shared version source or database behavior changed.
+
+Inspected Home and open Menu after fonts loaded at 320x568 and 390x844. Version was invisible with Menu closed and appeared below Close without overlap when open (16px gap). Neither app shell overflowed; Escape returned focus to Menu. Artwork and shared Login/recovery styling were unchanged. Physical-device safe areas remain unchecked.
+
+Checks: 61 offline tests, lint and production build passed for the Home label/version change.

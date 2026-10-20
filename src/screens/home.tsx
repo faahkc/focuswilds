@@ -30,7 +30,7 @@ export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
   if (state === 'error') return <AppRecovery/>
   return <main className="home-page">
     <header className="home-header"><h1>Your home</h1><Button onClick={() => menu.current?.showModal()}>Menu</Button></header>
-    <div className="home-stats" aria-label="Player progress"><span>Player Lv. 1</span><span>0 coins</span></div>
+    <div className="home-stats" aria-label="Player progress"><span>Lv. 1</span><span>0 coins</span></div>
     <div className="home-room pixel-frame" role="img" aria-label="Your black cat resting on a rug in a warm apartment, with a city view through the window.">
       <div className="home-room-window"><div className="home-room-art"/></div>
     </div>
@@ -45,7 +45,7 @@ export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
       <h2 id="home-menu-title">Menu</h2>
       <Button onClick={onSignOut}>Sign out</Button>
       <Button onClick={() => menu.current?.close()}>Close</Button>
+      <AppVersion/>
     </dialog>
-    <AppVersion/>
   </main>
 }

@@ -50,10 +50,10 @@ test('Home hides all page controls until both atlases decode and deduplicates St
   assert.equal(ready.props.className, 'home-page')
   const content = JSON.stringify(ready)
   assert.match(content, /1 cat at home/)
-  assert.match(content, /Player Lv\. 1/)
+  assert.match(content, /Lv\. 1/)
   assert.match(content, /0 coins/)
   assert.match(content, /Your black cat/)
-  assert.doesNotMatch(content, /Mochi|120 coins|Feeling good/)
+  assert.doesNotMatch(content, /Player Lv|Mochi|120 coins|Feeling good/)
   const buttons = []
   function visit(element) {
     if (!React.isValidElement(element)) return

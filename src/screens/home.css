@@ -1,4 +1,4 @@
-.home-page { position: relative; width: min(100%, 440px); height: 100%; min-height: 540px; margin: auto; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(48px, calc(env(safe-area-inset-bottom) + 40px)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 16px; }
+.home-page { position: relative; width: min(100%, 440px); height: 100%; min-height: 540px; margin: auto; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, calc(env(safe-area-inset-bottom) + 16px)) max(24px, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 16px; }
 .home-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .home-header h1 { font-size: 28px; text-align: left; }
 .home-header button { padding-inline: 12px; }
@@ -17,5 +17,6 @@
 .home-menu:not([open]) { display: none; }
 .home-menu[open] { display: grid; gap: 16px; }
 .home-menu h2 { margin: 0; font-size: 24px; }
+.home-menu .app-version { position: static; }
 .home-menu::backdrop { background: rgb(46 48 55 / 45%); }
 @container screen (max-height: 650px) { .home-page { gap: 12px; padding-top: max(20px, env(safe-area-inset-top)); } .home-header h1 { font-size: 24px; } .home-cat { padding: 8px 16px 12px; font-size: 18px; line-height: 27px; } }

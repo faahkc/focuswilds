@@ -125,6 +125,8 @@ While busy, hide stale errors. Otherwise errors take precedence over owner confi
 
 Selected dropdown options keep a solid charcoal fill, cream text and check mark even when active/focused, without a cream/white inset ring. Keyboard movement to an unselected option retains the charcoal frame indicator; movement alone never commits a value.
 
+Dropdown popup padding compensates for the frame's lower edge: 6px at top/sides and 6px plus frame depth at bottom. With the current 2px inset and 2px lower edge, the first/last options have equal 4px cream clearance inside the frame. Verify a single selected option as well as multi-option/scrolling menus; preserve the complete outer border.
+
 Single-line text inputs, action buttons, select triggers/options and disclosure headers share a 60px total height, 32px line height, 20px font and 12px 16px 16px padding through the head-loaded control tokens in pixel-frame.css. Preserve approved button weight and action/field colors while aligning their dimensions. Multiline labels expand in 32px line steps; never force long text into a clipped 60px box. Compact icon actions retain 44px touch targets. Reserve room for clear/check/arrow indicators. Preview disclosure contents scroll inside a stationary outer frame and use the same pixel arrow as Select; the expanded panel is content-sized and bounded by the viewport, not fixed to one row.
 
 The shared search-clear control uses the approved Aseprite close icon: a symmetric 12x12 visible X within a 16x16 cell and 44x44 touch target. Center the actual mark, not only a text glyph's line box; keep its accessible label and existing clear/focus behavior.

@@ -1,5 +1,11 @@
 # Development
 
+## Dropdown interior clearance fix (2026-10-20)
+
+The popup's equal 6px outer padding left only 2px of cream below the selected option versus 4px above it, because the shared frame includes an extra 2px lower edge. Select now uses 6px top/side padding and 6px plus --frame-depth bottom padding. This preserves the approved frame and gives equal 4px visible inner clearance, including the single Default option on Update Error. No option height, selected fill, icon or trigger style changed.
+
+Repeatable browser regression check: after fonts load at 320x568 and 390x844, select Update Error in localhost preview and open State. Measure the first option's top minus popup top minus --frame-inset; measure popup bottom minus --frame-inset minus --frame-depth minus last option bottom. Both must be 4px for the single option. Repeat with Login's six-option list at its top and after End scrolls to the last option; compare trigger bounds before/after opening and verify Escape cancels, Enter commits and reopening retains the selected item. The single-option and list-surface clearances measured exactly 4px at both sizes. At the scrolled last option, integer scroll rounding produced 4.40625px/4px clearance at 390px/320px (allow up to 1px rounding for scrolled item bounds). Visual checks passed; the last option was reachable by keyboard and displayed correctly after selection/reopening. All 54 offline tests, lint and build passed. Current dropdown usage is preview-only, so deployed startup CSS remains 9.74 kB / 3.67 kB gzip; there are no new assets, dependencies or database operations. Physical devices were not tested.
+
 ## Shared pixel controls and icon review (2026-10-20)
 
 Frames now share visible 4px corner steps across fields, options, panels and action buttons while preserving 2px borders, existing lower edges and 60px single-line heights. Action keyboard focus uses a 2px cream stepped inset ring; selected controls retain the existing surface-based focus. Disclosure focus shades an inset decorative layer so it cannot paint over the stationary outer frame. Exit preview is a styled action link and preserves native link semantics. Text, font, spacing and account behavior are unchanged.

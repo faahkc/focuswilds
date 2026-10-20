@@ -1,5 +1,6 @@
 .pixel-icon { display: inline-block; flex-shrink: 0; width: 32px; height: 32px; background: currentColor; mask-image: url("./assets/ui-icons.png"); mask-repeat: no-repeat; mask-size: 128px 32px; image-rendering: pixelated; }
-.pixel-icon-check { mask-position: 0 0; }
+/* Center visible pixels, not the transparent margins in the approved atlas. */
+.pixel-icon-check { mask-position: 0 2px; }
 .pixel-icon-close { mask-position: -32px 0; }
-.pixel-icon-down { mask-position: -64px 0; }
-.pixel-icon-up { mask-position: -96px 0; }
+.pixel-icon-down { mask-position: -64px 2px; }
+.pixel-icon-up { mask-position: -96px 2px; }

@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
 import { OWNER_UID } from '@/lib/account'
 import { AccountView } from '@/components/account-view'
 import PageLoading from '@/screens/system/loading'
+
+const HomePage = lazy(() => import('@/screens/home'))
 
 export function AuthPanel() {
   const inFlight = useRef(false)
@@ -56,5 +58,6 @@ export function AuthPanel() {
   }
 
   if (loading) return <PageLoading message={returning ? 'Signing in…' : undefined}/>
+  if (user?.uid === OWNER_UID && !busy && error === null) return <Suspense fallback={<PageLoading message="Loading your home…"/>}><HomePage onSignOut={() => void updateAccount()}/></Suspense>
   return <AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/>
 }

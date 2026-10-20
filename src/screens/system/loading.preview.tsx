@@ -4,6 +4,6 @@ import PageLoading from './loading'
 export default { Default: PageLoading, cases: {
   'Updating app': () => <PageLoading message="Loading the latest version…"/>,
   'Signing in': () => <PageLoading message="Signing in…"/>,
-  'Loading home (planned)': () => <PageLoading message="Loading your home…"/>,
+  'Loading home': () => <PageLoading message="Loading your home…"/>,
   'Thai message': () => <PageLoading message="กำลังโหลด…"/>,
 } }

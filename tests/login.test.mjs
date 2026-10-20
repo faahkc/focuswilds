@@ -14,7 +14,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   const dependencies = {
-    react: { ...React, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn }, useRef: initial => { const i = cursor++; if (!(i in values)) values[i] = { current: initial }; return values[i] } },
+    react: { ...React, lazy: () => function HomePage() {}, useState: initial => { const i = cursor++; if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial; setters[i] = value => { values[i] = value }; return [values[i], setters[i]] }, useEffect: fn => { subscribe = fn }, useRef: initial => { const i = cursor++; if (!(i in values)) values[i] = { current: initial }; return values[i] } },
     'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: (type, props) => React.createElement(type, props) },
     'firebase/auth': {
       onAuthStateChanged: (_auth, next, error) => { observer = next; if (restoreError) error(); else if (!holdRestore) next(initialUser); return () => stop++ },
@@ -43,7 +43,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   const view = () => {
     cursor = 0
     const result = module.exports.AuthPanel()
-    const element = result.type === React.Fragment ? result.props.children[0] : result
+    const element = result.type === React.Fragment ? result.props.children[0] : result.type === React.Suspense ? result.props.children : result
     if (element.type !== viewModule.exports.AccountView) return element
     const screen = element.type(element.props)
     if (screen.type === dependencies['@/screens/system/loading'].default) return screen
@@ -66,21 +66,26 @@ test('login waits for redirect completion and auth restore, stays on one screen 
   assert.equal(login.calls().stop, 1)
 })
 
-test('only the owner receives the signed-in message; other accounts can sign out', async () => {
+test('only the owner reaches Home; account actions reuse the existing signing-out state', async () => {
   for (const uid of [OWNER_UID, 'another-account']) {
     const login = await panel({ initialUser: { uid } })
     const view = login.view()
-    assert.equal(login.screen().ownerSignedIn, uid === OWNER_UID)
-    assert.equal(login.screen().errorMessage, uid === OWNER_UID ? null : 'This account does not have access to Focuswilds.')
-    assert.equal(view.props.children.props.children, 'Sign out')
-    view.props.children.props.onClick()
+    if (uid === OWNER_UID) {
+      assert.equal(view.type.name, 'HomePage')
+      view.props.onSignOut()
+    } else {
+      assert.equal(login.screen().errorMessage, 'This account does not have access to Focuswilds.')
+      assert.equal(view.props.children.props.children, 'Sign out')
+      view.props.children.props.onClick()
+    }
     assert.equal(login.view().props.children.props.children, 'Signing out…')
     assert.equal(login.view().props.children.props.disabled, true)
     assert.equal(login.screen().statusMessage, 'Signing you out…')
     assert.equal(login.screen().errorMessage, null)
     await flush()
-    login.view()
-    assert.equal(login.screen().statusMessage, null)
+    const completed = login.view()
+    if (uid === OWNER_UID) assert.equal(completed.type.name, 'HomePage')
+    else assert.equal(login.screen().statusMessage, null)
     assert.equal(login.calls().signOuts, 1)
     assert.equal(login.calls().signIns, 0)
   }
@@ -135,8 +140,7 @@ test('OAuth return keeps Signing in loading until completion and the first resto
   complete(); await flush()
   assert.equal(login.view().type.name, 'PageLoading')
   login.emit({ uid: OWNER_UID })
-  assert.equal(login.view().props.children.props.children, 'Sign out')
-  assert.equal(login.screen().ownerSignedIn, true)
+  assert.equal(login.view().type.name, 'HomePage')
 })
 
 test('a failed sign-in can retry once without duplicate requests or stale error copy', async () => {
@@ -155,7 +159,7 @@ test('a failed sign-in can retry once without duplicate requests or stale error 
 
 test('sign-out releases its guard after failure and accepts a retry', async () => {
   const login = await panel({ initialUser: { uid: OWNER_UID }, signOutError: new Error('private') })
-  const click = login.view().props.children.props.onClick
+  const click = login.view().props.onSignOut
   click(); click()
   assert.equal(login.calls().signOuts, 1)
   await flush()
@@ -165,7 +169,7 @@ test('sign-out releases its guard after failure and accepts a retry', async () =
   assert.equal(login.calls().signOuts, 2)
 })
 
-test('login-only rules deny all database access and the shell requests portrait installation', () => {
+test('initial presentation still denies database access and requests portrait installation', () => {
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8')
   assert.match(rules, /allow read, write: if false;/)
   assert.equal((rules.match(/allow /g) ?? []).length, 1)

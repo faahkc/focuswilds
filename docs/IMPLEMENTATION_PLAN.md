@@ -2,6 +2,12 @@
 
 Approved requirements, not a checklist of shipped features. README and this plan remain English. The application supports English and Thai, defaults to English, and is restricted to the owner account.
 
+## Continuation baseline (2026-10-21)
+
+The current shared UI baseline is implemented: content columns and primary-action widths, role-based typography and spacing, pixel frames and controls, and visible-pixel alignment for all four UI icons. Apply the existing shared tokens/components to new screens and audit all affected states when changing them; do not recreate independent screen-specific standards. See the latest checkpoint in DEVELOPMENT.md for verified behavior and remaining acceptance work.
+
+Home Menu currently retains its existing Sign out / Close presentation. A secondary cream Close button was suggested during review but has not been approved or implemented; do not apply that suggestion as an agreed requirement. Resume from the owner's next request rather than expanding gameplay or redesigning assets automatically.
+
 ## Approved cat-care game direction (2026-10-19; planned)
 
 The player collects and cares for cats of different breeds. Use "player", not trainer; cats are individual residents, not evolving monsters or expendable workers. Focus earns money, player experience and items that can be spent on the cats and their shared living space. The mobile PWA, owner-only access and Aseprite requirements remain in force.

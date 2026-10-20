@@ -76,7 +76,7 @@ This latest owner-approved direction supersedes earlier landscape-first and page
 
 ## Approved visual direction
 
-Before presenting an artwork draft, review the complete composition at native resolution and in its intended UI at 320x568 and 390x844. Check structural line weight, proportions, perspective, contact shadows, palette/mascot continuity, overlaps and edge clearance together; fix visible issues within the approved direction before asking for review. Owner review is for approving the result, not finding routine defects one at a time.
+Before presenting an artwork draft, review the complete composition at native resolution and in its intended UI at 320x568 and 390x844. Check structural line weight, proportions, perspective, contact shadows, palette/mascot continuity, overlaps and edge clearance together; fix visible issues within the approved direction before asking for review. Owner review is for approving the result, not finding routine defects one at a time. When downscaling repeated pixel details such as building windows, rebuild them on each target grid instead of accepting uneven resampled shapes; verify equal dimensions and spacing within each building.
 
 For every Aseprite artwork or animation change, prepare a draft and show a preview for owner review. Do not integrate, replace live assets or publish the draft until the owner explicitly approves it. Keep unapproved sources and exports outside deployed assets. Approval of this visual direction does not approve individual assets.
 

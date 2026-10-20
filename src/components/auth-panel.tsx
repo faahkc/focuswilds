@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { startGitHubSignIn, finishGitHubSignIn } from '@/lib/github-sign-in'
 import { OWNER_UID } from '@/lib/account'
+import { prepareOwnerAccount, recordAccountEvent, recordAccountError } from '@/lib/account-records'
 import { AccountView } from '@/components/account-view'
 import PageLoading from '@/screens/system/loading'
 
@@ -18,26 +19,38 @@ export function AuthPanel() {
 
   useEffect(() => {
     let active = true
+    let callbackSucceeded = false
+    let recordedSignIn = false
     let stop = () => {}
     const resume = (event: PageTransitionEvent) => {
       if (event.persisted) { inFlight.current = false; setBusy(false) }
     }
     window.addEventListener('pageshow', resume)
-    void finishGitHubSignIn().catch(accountError => {
+    void finishGitHubSignIn().then(() => { callbackSucceeded = true }).catch(accountError => {
+      void recordAccountError(null, accountError)
       if (active) setError(accountError)
     }).then(() => {
       if (!active) return
       stop = onAuthStateChanged(auth, next => {
+        if (!active) return
+        if (next?.uid === OWNER_UID) {
+          void prepareOwnerAccount(next)
+          if (returning && callbackSucceeded && !recordedSignIn) {
+            recordedSignIn = true
+            void recordAccountEvent(next, 'sign_in')
+          }
+        }
         setUser(next)
         setLoading(false)
       }, () => {
         if (!active) return
+        void recordAccountError(null, { code: 'auth/restore-failed' })
         setLoading(false)
         setError({ code: 'auth/restore-failed' })
       })
     })
     return () => { active = false; stop(); window.removeEventListener('pageshow', resume) }
-  }, [])
+  }, [returning])
 
   async function updateAccount() {
     if (inFlight.current) return
@@ -45,9 +58,13 @@ export function AuthPanel() {
     setBusy(true)
     setError(null)
     try {
-      if (user) await signOut(auth)
+      if (user) {
+        await recordAccountEvent(user, 'sign_out_requested')
+        await signOut(auth)
+      }
       else await startGitHubSignIn()
     } catch (accountError) {
+      void recordAccountError(user, accountError)
       setError(accountError)
       inFlight.current = false
       setBusy(false)

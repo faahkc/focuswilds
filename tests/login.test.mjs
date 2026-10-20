@@ -6,9 +6,10 @@ import ts from 'typescript'
 import { OWNER_UID } from '../src/lib/account.ts'
 
 const flush = () => new Promise(resolve => setImmediate(resolve))
-async function panel({ initialUser = null, restoreError = false, signInError = null, callbackError = null, returning = false, finishWait, holdRestore = false, signOutError = null } = {}) {
+async function panel({ initialUser = null, restoreError = false, signInError = null, callbackError = null, returning = false, finishWait, holdRestore = false, signOutError = null, logWait } = {}) {
   const values = [], setters = [], events = new Map()
   let observer
+  const accountEvents = [], accountErrors = [], profiles = []
   let cursor = 0, subscribe, stop = 0, signIns = 0, signOuts = 0
   const source = readFileSync(new URL('../src/components/auth-panel.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
@@ -26,6 +27,11 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
       finishGitHubSignIn: async () => { await finishWait; if (callbackError) throw callbackError },
     },
     '@/lib/account': { OWNER_UID },
+    '@/lib/account-records': {
+      prepareOwnerAccount: async user => { profiles.push(user.uid) },
+      recordAccountEvent: async (user, type) => { accountEvents.push({ uid: user?.uid, type }); return await logWait },
+      recordAccountError: async (user, error) => { accountErrors.push({ uid: user?.uid, error }) },
+    },
     '@/screens/login': { __esModule: true, default: function LoginPage() {} },
     '@/lib/auth-error': { authErrorMessage: () => 'Safe account error' },
     '@/screens/system/loading': { __esModule: true, default: function PageLoading() { return null } },
@@ -53,7 +59,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
   const initial = view()
   const unmount = subscribe()
   await flush()
-  return { initial, view, unmount, screen: () => screenProps, emit: next => observer(next), resume: () => events.get('pageshow')({ persisted: true }), failSignIn: error => { signInError = error }, calls: () => ({ signIns, signOuts, stop }) }
+  return { initial, view, unmount, screen: () => screenProps, emit: next => observer(next), resume: () => events.get('pageshow')({ persisted: true }), failSignIn: error => { signInError = error }, calls: () => ({ signIns, signOuts, stop, accountEvents, accountErrors, profiles }) }
 }
 
 test('login waits for redirect completion and auth restore, stays on one screen and unsubscribes', async () => {
@@ -161,20 +167,58 @@ test('sign-out releases its guard after failure and accepts a retry', async () =
   const login = await panel({ initialUser: { uid: OWNER_UID }, signOutError: new Error('private') })
   const click = login.view().props.onSignOut
   click(); click()
-  assert.equal(login.calls().signOuts, 1)
+  assert.equal(login.calls().accountEvents.length, 1)
   await flush()
+  assert.equal(login.calls().signOuts, 1)
   const retry = login.view().props.children.props.onClick
   assert.equal(login.screen().errorMessage, 'Safe account error')
   retry(); retry()
+  await flush()
   assert.equal(login.calls().signOuts, 2)
 })
 
-test('initial presentation still denies database access and requests portrait installation', () => {
+test('database rules retain a deny-all fallback and request portrait installation', () => {
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8')
   assert.match(rules, /allow read, write: if false;/)
-  assert.equal((rules.match(/allow /g) ?? []).length, 1)
   const manifest = JSON.parse(readFileSync(new URL('../public/manifest.webmanifest', import.meta.url), 'utf8'))
   assert.equal(manifest.orientation, 'portrait')
   assert.equal(manifest.display, 'standalone')
   for (const icon of manifest.icons) assert.ok(readFileSync(new URL(`../public/${icon.src}`, import.meta.url)).length > 0)
+})
+
+
+test('account logging distinguishes OAuth success from restoration and ignores denied accounts', async () => {
+  const restored = await panel({ initialUser: { uid: OWNER_UID } })
+  assert.equal(restored.calls().accountEvents.length, 0)
+  assert.equal(restored.calls().profiles.length, 1)
+  const returned = await panel({ returning: true, initialUser: { uid: OWNER_UID } })
+  returned.emit({ uid: OWNER_UID })
+  assert.deepEqual(returned.calls().accountEvents, [{ uid: OWNER_UID, type: 'sign_in' }])
+  const failed = await panel({ returning: true, initialUser: { uid: OWNER_UID }, callbackError: { code: 'auth/invalid-redirect' } })
+  assert.equal(failed.calls().accountEvents.length, 0)
+  assert.equal(failed.calls().accountErrors.length, 1)
+  const denied = await panel({ returning: true, initialUser: { uid: 'another-account' } })
+  assert.equal(denied.calls().profiles.length, 0)
+  assert.equal(denied.calls().accountEvents.length, 0)
+})
+
+test('sign-out remains busy and guards rapid clicks while its bounded logging finishes', async () => {
+  let release
+  const logWait = new Promise(resolve => { release = resolve })
+  const login = await panel({ initialUser: { uid: OWNER_UID }, logWait })
+  const click = login.view().props.onSignOut
+  click(); click(); click()
+  assert.equal(login.calls().accountEvents.length, 1)
+  assert.equal(login.calls().signOuts, 0)
+  assert.equal(login.view().props.children.props.disabled, true)
+  release(); await flush()
+  assert.equal(login.calls().signOuts, 1)
+})
+
+test('a failed diagnostic write never prevents sign-out or creates an account error', async () => {
+  const login = await panel({ initialUser: { uid: OWNER_UID }, logWait: Promise.resolve(false) })
+  login.view().props.onSignOut()
+  await flush()
+  assert.equal(login.calls().signOuts, 1)
+  assert.equal(login.calls().accountErrors.length, 0)
 })

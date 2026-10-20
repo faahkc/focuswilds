@@ -1,7 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Login-only milestone: no application database access until the new schema is implemented.
+    function owner(uid) {
+      return request.auth != null
+        && request.auth.uid == '7FnLLAGqAFYO269Jl1j2I8lEQbx2'
+        && uid == request.auth.uid;
+    }
+    function validEvent(event) {
+      return event is map
+        && event.keys().hasAll(['id', 'type', 'occurredAt', 'version', 'mode', 'environment', 'code'])
+        && event.keys().hasOnly(['id', 'type', 'occurredAt', 'version', 'mode', 'environment', 'code'])
+        && event.id is string && event.id.matches('[0-9a-f-]{36}')
+        && event.type in ['sign_in', 'sign_out_requested', 'account_error']
+        && event.occurredAt is timestamp
+        && event.version is string && event.version.size() <= 32
+        && event.mode in ['pwa', 'browser']
+        && event.environment in ['local', 'deployed']
+        && ((event.type != 'account_error' && event.code == 'none')
+          || (event.type == 'account_error' && event.code in ['auth/invalid-redirect', 'auth/access-denied', 'auth/sign-in-cancelled', 'auth/network-request-failed', 'auth/too-many-requests', 'auth/restore-failed', 'auth/unknown']));
+    }
+    function validHistory() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['events', 'updatedAt'])
+        && data.keys().hasOnly(['events', 'updatedAt'])
+        && data.updatedAt == request.time
+        && data.events is list && data.events.size() >= 1 && data.events.size() <= 100
+        && validEvent(data.events[data.events.size() - 1]);
+    }
+    match /users/{uid} {
+      allow get: if owner(uid);
+      allow create: if owner(uid)
+        && request.resource.data.keys().hasAll(['schemaVersion', 'language', 'timezone', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'language', 'timezone', 'createdAt'])
+        && request.resource.data.schemaVersion is int && request.resource.data.schemaVersion == 1
+        && request.resource.data.language == 'en'
+        && request.resource.data.timezone == 'Asia/Bangkok'
+        && request.resource.data.createdAt == request.time;
+      match /logs/{logId} {
+        allow get: if owner(uid) && logId == 'account';
+        allow create: if owner(uid) && logId == 'account' && validHistory()
+          && request.resource.data.events.size() == 1;
+        allow update: if owner(uid) && logId == 'account' && validHistory()
+          && request.resource.data.events == (resource.data.events.size() < 100
+            ? resource.data.events
+            : resource.data.events.removeAll([resource.data.events[0]]))
+              .concat([request.resource.data.events[request.resource.data.events.size() - 1]]);
+      }
+    }
     match /{document=**} {
       allow read, write: if false;
     }

@@ -75,6 +75,8 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 
 ## Data quota requirements
 
+- Owner-approved account persistence (2026-10-20): the owner cleared legacy Firestore data through Console; preserve Firebase Authentication and the owner UID. Initialize users/{ownerUid} once without overwriting existing profiles. Keep account diagnostics in users/{ownerUid}/logs/account as a bounded latest-100 history, not an unbounded event collection. Record successful explicit OAuth sign-in, sign-out requests before authentication is lost, and sanitized account errors; restoration is not a new sign-in. Unauthenticated failures stay in a latest-20 session-local buffer. Never store tokens, callback URLs, email, raw exception messages or full device identifiers. Diagnostics are best effort, not a trusted security audit trail; cap their entire operation at 1500ms and never block sign-out on failure. Preserve conditional writes, bounded contention retries and duplicate-action guards. Rules allow only the owner at these exact paths; deny other paths, list queries and deletes. Publish and validate rules separately from local tests; see docs/DEVELOPMENT.md.
+
 - Keep Firebase on Spark without Billing. Routine tests use an in-memory store, never production services; no Emulator or Firebase CLI dependency. Keep the network-blocking preload on `npm test` enabled.
 - Use summary documents for EXP, discoveries and daily totals. Never rebuild progress by scanning session history during normal use.
 - Load history only on demand with cursor pages of at most 25 sessions. Bound daily-summary queries to 30 documents; paginate all-time days.

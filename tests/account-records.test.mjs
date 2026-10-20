@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs'
 import ts from 'typescript'
 import { OWNER_UID } from '../src/lib/account.ts'
 
-function store({ fail = false, stalledToken = false, conflict = false, existingProfile = false } = {}) {
-  const documents = new Map(), requests = [], timers = new Map(), local = new Map()
+function store({ fail = false, stalledToken = false, conflict = false, existingProfile = false, initialLocal = [] } = {}) {
+  const documents = new Map(), requests = [], timers = new Map(), local = new Map(initialLocal), toasts = []
   let revision = 0, writes = 0, tokenCalls = 0, conflicted = false
   let now = Date.parse('2026-10-20T00:00:00Z'), clientOffset = 0
   class ClientDate extends Date {
@@ -18,6 +18,7 @@ function store({ fail = false, stalledToken = false, conflict = false, existingP
     '../../package.json': { version: '0.1.0' },
     './firebase': { app: { options: { projectId: 'test' } }, authHeaders: async () => ({ 'X-Firebase-AppCheck': 'private-attestation' }) },
     './account': { OWNER_UID },
+    './toast': { showToast: (title, message) => toasts.push({ title, message }) },
   }
   const source = readFileSync(new URL('../src/lib/account-records.ts', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText
@@ -47,7 +48,7 @@ function store({ fail = false, stalledToken = false, conflict = false, existingP
       const start = Date.parse(fields.windowStartedAt.timestampValue)
       const oldStart = old?.fields.windowStartedAt?.timestampValue
       const resetAllowed = !oldStart || now >= Date.parse(oldStart) + 60000
-      const valid = Number.isInteger(count) && count >= 1 && count <= 10 && (resetAllowed
+      const valid = Number.isInteger(count) && count >= 1 && count <= 60 && (resetAllowed
         ? count === 1 && start === now
         : start === Date.parse(oldStart) && count === Number(old.fields.windowCount.integerValue) + 1)
       if (!valid) return reply({ error: { status: 'PERMISSION_DENIED' } }, 403)
@@ -68,7 +69,7 @@ function store({ fail = false, stalledToken = false, conflict = false, existingP
     fn => { const id = Symbol(); timers.set(id, fn); return id }, id => timers.delete(id), ClientDate,
   )
   const user = { uid: OWNER_UID, getIdToken: async () => { tokenCalls++; return stalledToken ? new Promise(() => {}) : 'private-token' } }
-  return { advance: ms => { now += ms }, skew: ms => { clientOffset = ms }, api: module.exports, user, documents, requests, local, profile, events: () => documents.get(`${profile}/logs/account`)?.fields.events.arrayValue.values.map(value => value.mapValue.fields) ?? [], stats: () => ({ writes, tokenCalls, timers: timers.size }), expire: () => { for (const fn of timers.values()) fn() } }
+  return { advance: ms => { now += ms }, skew: ms => { clientOffset = ms }, api: module.exports, toasts, user, documents, requests, local, profile, events: () => documents.get(`${profile}/logs/account`)?.fields.events.arrayValue.values.map(value => value.mapValue.fields) ?? [], stats: () => ({ writes, tokenCalls, timers: timers.size }), expire: () => { for (const fn of timers.values()) fn() } }
 }
 
 test('owner profile initialization is deduplicated, creates once and never overwrites saved fields', async () => {
@@ -162,7 +163,7 @@ test('rules contract scopes access to the owner and validates bounded append-onl
   assert.match(rules, /data.updatedAt == request.time/)
   assert.match(rules, /logId == 'account'/)
   assert.match(rules, /resource.data.events.removeAll/)
-  assert.match(rules, /data.windowCount is int.*data.windowCount <= 10/)
+  assert.match(rules, /data.windowCount is int.*data.windowCount <= 60/)
   assert.match(rules, /request.time >= previous.windowStartedAt \+ duration.value\(60, 's'\)/)
   assert.match(rules, /next.windowCount == previous.windowCount \+ 1/)
   assert.match(rules, /request.resource.data.windowStartedAt == request.time/)
@@ -171,27 +172,27 @@ test('rules contract scopes access to the owner and validates bounded append-onl
 })
 
 
-test('account diagnostics accept ten events, drop excess without a write and reopen exactly at 60 seconds', async () => {
+test('account diagnostics accept sixty events, drop excess without a write and reopen exactly at 60 seconds', async () => {
   const s = store()
-  for (let i = 0; i < 10; i++) assert.equal(await s.api.recordAccountEvent(s.user, 'sign_in'), true)
-  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '10')
+  for (let i = 0; i < 60; i++) assert.equal(await s.api.recordAccountEvent(s.user, 'sign_in'), true)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '60')
   assert.equal(await s.api.recordAccountEvent(s.user, 'account_error'), false)
-  assert.equal(s.stats().writes, 10)
+  assert.equal(s.stats().writes, 60)
   s.advance(59999)
   assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), false)
   s.advance(1)
   assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), true)
   assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '1')
-  assert.equal(s.events().length, 11)
+  assert.equal(s.events().length, 61)
 })
 
 test('concurrent event calls share the persisted limit instead of receiving a per-tab allowance', async () => {
   const s = store()
-  for (let i = 0; i < 8; i++) await s.api.recordAccountEvent(s.user, 'sign_in')
+  for (let i = 0; i < 58; i++) await s.api.recordAccountEvent(s.user, 'sign_in')
   const results = await Promise.all(Array.from({ length: 5 }, () => s.api.recordAccountEvent(s.user, 'sign_out_requested')))
   assert.equal(results.filter(Boolean).length, 2)
-  assert.equal(s.events().length, 10)
-  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '10')
+  assert.equal(s.events().length, 60)
+  assert.equal(s.documents.get(`${s.profile}/logs/account`).fields.windowCount.integerValue, '60')
 })
 
 test('normal low-frequency use opens a fresh window without accumulating a lifetime action count', async () => {
@@ -228,4 +229,37 @@ test('a fast client clock cannot force an early window reset accepted by the in-
   assert.equal(s.stats().writes, 1)
   s.skew(0)
   assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), true)
+})
+
+
+test('limited events notify once per window, count locally and report a snapshot on the next successful event', async () => {
+  const s = store()
+  for (let i = 0; i < 60; i++) await s.api.recordAccountEvent(s.user, 'sign_in')
+  for (let i = 0; i < 3; i++) assert.equal(await s.api.recordAccountEvent(s.user, 'sign_out_requested'), false)
+  assert.equal(s.toasts.length, 1)
+  const stats = JSON.parse(s.local.get('focuswilds.account-rate'))
+  assert.equal(stats.count, 3)
+  assert.equal(stats.reported, 0)
+  s.advance(60000)
+  assert.equal(await s.api.recordAccountEvent(s.user, 'sign_in'), true)
+  const report = s.events().at(-1).limited.mapValue.fields
+  assert.equal(report.count.integerValue, '3')
+  assert.equal(report.windowStartedAt.timestampValue, stats.window)
+  assert.equal(JSON.parse(s.local.get('focuswilds.account-rate')).reported, 3)
+  await s.api.recordAccountEvent(s.user, 'sign_in')
+  assert.equal(s.events().at(-1).limited, undefined)
+  for (let i = 0; i < 59; i++) await s.api.recordAccountEvent(s.user, 'sign_in')
+  assert.equal(s.toasts.length, 2)
+})
+
+
+test('reloading within the same limited window preserves the count and does not repeat its toast', async () => {
+  const first = store()
+  for (let i = 0; i < 60; i++) await first.api.recordAccountEvent(first.user, 'sign_in')
+  await first.api.recordAccountEvent(first.user, 'sign_out_requested')
+  const reopened = store({ initialLocal: [...first.local] })
+  for (const [key, value] of first.documents) reopened.documents.set(key, structuredClone(value))
+  assert.equal(await reopened.api.recordAccountEvent(reopened.user, 'sign_out_requested'), false)
+  assert.equal(reopened.toasts.length, 0)
+  assert.equal(JSON.parse(reopened.local.get('focuswilds.account-rate')).count, 2)
 })

@@ -81,6 +81,7 @@ test('login preview fixtures use shared account UI without account services', ()
   const dependencies = {
     'react/jsx-runtime': { Fragment: React.Fragment, jsx: React.createElement, jsxs: React.createElement },
     '@/components/account-view': { AccountView: () => null },
+    '@/dev/toast-preview': { ToastPreview: () => null },
   }
   const source = readFileSync(new URL('../src/screens/login.preview.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
@@ -89,7 +90,7 @@ test('login preview fixtures use shared account UI without account services', ()
   for (const [name, Component] of Object.entries({ Default: module.exports.default.Default, ...module.exports.default.cases })) {
     const preview = Component()
     const screen = preview.type(preview.props)
-    const panel = screen
+    const panel = screen.type === dependencies['@/dev/toast-preview'].ToastPreview ? screen.props.children : screen
     assert.equal(panel.type, dependencies['@/components/account-view'].AccountView)
     assert.equal(panel.props.signedIn, ['Access denied', 'Signing out'].includes(name))
     assert.equal(panel.props.owner, ['Signing out'].includes(name))

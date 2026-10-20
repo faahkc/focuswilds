@@ -9,13 +9,18 @@ service cloud.firestore {
     function validEvent(event) {
       return event is map
         && event.keys().hasAll(['id', 'type', 'occurredAt', 'version', 'mode', 'environment', 'code'])
-        && event.keys().hasOnly(['id', 'type', 'occurredAt', 'version', 'mode', 'environment', 'code'])
+        && event.keys().hasOnly(['id', 'type', 'occurredAt', 'version', 'mode', 'environment', 'code', 'limited'])
         && event.id is string && event.id.matches('[0-9a-f-]{36}')
         && event.type in ['sign_in', 'sign_out_requested', 'account_error']
         && event.occurredAt is timestamp
         && event.version is string && event.version.size() <= 32
         && event.mode in ['pwa', 'browser']
         && event.environment in ['local', 'deployed']
+        && (!('limited' in event) || (event.limited is map
+          && event.limited.keys().hasAll(['windowStartedAt', 'count'])
+          && event.limited.keys().hasOnly(['windowStartedAt', 'count'])
+          && event.limited.windowStartedAt is timestamp
+          && event.limited.count is int && event.limited.count >= 1 && event.limited.count <= 1000000))
         && ((event.type != 'account_error' && event.code == 'none')
           || (event.type == 'account_error' && event.code in ['auth/invalid-redirect', 'auth/access-denied', 'auth/sign-in-cancelled', 'auth/network-request-failed', 'auth/too-many-requests', 'auth/restore-failed', 'auth/unknown']));
     }
@@ -25,7 +30,7 @@ service cloud.firestore {
         && data.keys().hasOnly(['events', 'updatedAt', 'windowStartedAt', 'windowCount'])
         && data.updatedAt == request.time
         && data.windowStartedAt is timestamp
-        && data.windowCount is int && data.windowCount >= 1 && data.windowCount <= 10
+        && data.windowCount is int && data.windowCount >= 1 && data.windowCount <= 60
         && data.events is list && data.events.size() >= 1 && data.events.size() <= 100
         && validEvent(data.events[data.events.size() - 1]);
     }

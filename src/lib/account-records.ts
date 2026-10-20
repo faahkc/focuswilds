@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth'
 import { version } from '../../package.json'
 import { app, authHeaders } from './firebase'
 import { OWNER_UID } from './account'
+import { showToast } from './toast'
 
 const root = `projects/${app.options.projectId}/databases/(default)/documents`
 const endpoint = `https://firestore.googleapis.com/v1/${root}`
@@ -11,6 +12,24 @@ const safeCodes = ['auth/invalid-redirect', 'auth/access-denied', 'auth/sign-in-
 type EventType = 'sign_in' | 'sign_out_requested' | 'account_error'
 type Value = { stringValue?: string; integerValue?: string; timestampValue?: string; mapValue?: { fields: Record<string, Value> }; arrayValue?: { values?: Value[] } }
 type Document = { fields: Record<string, Value>; updateTime: string }
+
+const rateKey = 'focuswilds.account-rate'
+let limited = { window: '', count: 0, reported: 0 }
+try {
+  const saved = JSON.parse(sessionStorage.getItem(rateKey) ?? 'null')
+  if (saved && typeof saved.window === 'string' && Number.isFinite(Date.parse(saved.window)) && Number.isInteger(saved.count) && saved.count >= 1 && saved.count <= 1000000 && Number.isInteger(saved.reported) && saved.reported >= 0 && saved.reported <= saved.count) limited = { window: saved.window, count: saved.count, reported: saved.reported }
+} catch { /* Diagnostics remain available in memory when storage is blocked. */ }
+
+function saveLimited() {
+  try { sessionStorage.setItem(rateKey, JSON.stringify(limited)) } catch { /* Private browsing may block storage. */ }
+}
+
+function reportLimited(window: string) {
+  const first = limited.window !== window
+  limited = { window, count: first ? 1 : Math.min(limited.count + 1, 1000000), reported: first ? 0 : limited.reported }
+  saveLimited()
+  if (first) showToast('History limit reached', 'You can continue.')
+}
 
 async function conflict(response: Response) {
   if ([409, 412].includes(response.status)) return true
@@ -80,6 +99,10 @@ export function recordAccountEvent(user: User | null, type: EventType, code = 'n
     environment: { stringValue: ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) ? 'local' : 'deployed' },
     code: { stringValue: type === 'account_error' ? safeCodes.includes(code) ? code : 'auth/unknown' : 'none' },
   } } }
+  const summary = limited.count > limited.reported ? { ...limited } : null
+  if (summary) event.mapValue!.fields.limited = { mapValue: { fields: {
+    windowStartedAt: { timestampValue: summary.window }, count: { integerValue: String(summary.count) },
+  } } }
   return withAccount(user, async request => {
     for (let attempt = 0; attempt < 3; attempt++) {
       const response = await request(`${endpoint}/users/${OWNER_UID}/logs/account`)
@@ -90,10 +113,10 @@ export function recordAccountEvent(user: User | null, type: EventType, code = 'n
       if (events.some(value => value.mapValue?.fields.id?.stringValue === event.mapValue?.fields.id?.stringValue)) return
       const windowStart = current?.fields.windowStartedAt?.timestampValue
       const count = Number(current?.fields.windowCount?.integerValue ?? '0')
-      if ((windowStart && (!Number.isFinite(Date.parse(windowStart)) || !Number.isInteger(count) || count < 1 || count > 10)) || (!windowStart && count !== 0)) throw new Error('Invalid account rate window')
+      if ((windowStart && (!Number.isFinite(Date.parse(windowStart)) || !Number.isInteger(count) || count < 1 || count > 60)) || (!windowStart && count !== 0)) throw new Error('Invalid account rate window')
       // Client time is only a hint; rules enforce the window using server time.
       const resetWindow = !windowStart || Date.now() >= Date.parse(windowStart) + 60000
-      if (!resetWindow && count >= 10) return false
+      if (!resetWindow && count >= 60) { reportLimited(windowStart!); return false }
       const result = await request(`${endpoint}:commit`, { writes: [{
         update: { name: historyPath, fields: {
           events: { arrayValue: { values: [...events.slice(-99), event] } },
@@ -110,6 +133,12 @@ export function recordAccountEvent(user: User | null, type: EventType, code = 'n
       if (!await conflict(result)) throw new Error('History unavailable')
     }
     throw new Error('History contention')
+  }).then(ok => {
+    if (ok && summary && limited.window === summary.window) {
+      limited.reported = Math.max(limited.reported, summary.count)
+      saveLimited()
+    }
+    return ok
   })
 }
 

@@ -6,9 +6,11 @@
 .game-editor h2 { font-size: 24px; line-height: 32px; margin: 0 0 var(--space-group); }
 .game-editor-error { color: #93462d; margin-top: var(--space-group); }
 .game-keyboard { flex-shrink: 0; display: grid; gap: var(--space-label); }
-.game-key-row { display: grid; gap: 2px; }
+.game-keyboard:not(.numeric) { margin-left: calc(max(8px, env(safe-area-inset-left)) - var(--content-left)); margin-right: calc(max(8px, env(safe-area-inset-right)) - var(--content-right)); }
+.game-key-row { display: flex; justify-content: center; gap: 2px; }
+.game-key-row .game-key { flex-grow: 0; flex-shrink: 0; }
 .game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
-.game-key-tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-label); }
+.game-key-tools { display: grid; grid-template-columns: 48px 44px minmax(0, 1fr) 44px 44px; gap: var(--space-label); }
 .game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .game-keyboard [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
 .game-editor-actions { flex-shrink: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }

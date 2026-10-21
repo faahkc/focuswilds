@@ -83,3 +83,53 @@ test('shared game fields require deliberate editing and keep disabled/read-only 
   field().onKeyDown({ key: 'Enter', preventDefault() {} })
   assert.equal(opens, 1)
 })
+
+test('symbol keyboard covers ASCII punctuation and preserves the draft and selected language', () => {
+  const hooks = []
+  let cursor = 0
+  let committed
+  const input = { selectionStart: 0, selectionEnd: 0, focus() {}, setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end } }
+  const dependencies = {
+    react: {
+      useId: () => 'keyboard-test', useEffect() {},
+      useRef: initial => {
+        const index = cursor++
+        return hooks[index] ??= { current: index === 1 ? input : initial }
+      },
+      useState: initial => {
+        const index = cursor++
+        if (!(index in hooks)) hooks[index] = initial
+        return [hooks[index], value => { hooks[index] = value }]
+      },
+    },
+    'react/jsx-runtime': { Fragment: React.Fragment, jsx: (type, props, key) => React.createElement(type, { ...props, key }), jsxs: (type, props, key) => React.createElement(type, { ...props, key }) },
+    './input': { Input: () => null }, './button': { Button: () => null },
+    '@/lib/text-edit': { editText }, './game-keyboard.css': {},
+  }
+  const source = readFileSync(new URL('../src/components/game-keyboard.tsx', import.meta.url), 'utf8')
+  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
+  const module = { exports: {} }
+  new Function('require', 'module', 'exports', 'requestAnimationFrame', code)(name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports, callback => callback())
+  const render = numeric => {
+    cursor = 0
+    return module.exports.GameKeyboard({ label: 'Task', value: '', numeric, onDone: value => { committed = value }, onCancel() {} })
+  }
+  function elements(node) {
+    return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
+  }
+  const button = name => elements(render(false)).find(node => node.props['aria-label'] === name)
+  button('Switch keyboard language').props.onClick()
+  button('Show symbols').props.onClick()
+  assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Symbol keyboard'))
+  const keys = elements(render(false)).filter(node => node.props.tabIndex === -1).map(node => node.props['aria-label'])
+  for (let code = 33; code <= 126; code++) {
+    const character = String.fromCharCode(code)
+    if (!/[a-z]/i.test(character)) assert.ok(keys.includes(character), character)
+  }
+  button('_').props.onClick()
+  button('Return to letters').props.onClick()
+  assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Thai keyboard'))
+  elements(render(false)).find(node => node.props.children === 'Done').props.onClick()
+  assert.equal(committed, '_')
+  assert.ok(!elements(render(true)).some(node => node.props['aria-label'] === 'Show symbols'))
+})

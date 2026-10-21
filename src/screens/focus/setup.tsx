@@ -18,7 +18,7 @@ export default function FocusSetupPage({ value, onChange, onBack }: {
   return <main className="focus-setup content-column">
     <header><h1 ref={heading} tabIndex={-1}>Focus</h1><Button onClick={onBack}>Back</Button></header>
     <div className="focus-setup-fields">
-      <GameInput label="Task (optional)" value={value.title} placeholder="Name your task" validate={titleError} onChange={title => onChange({ ...value, title })}/>
+      <GameInput label="Task (optional)" value={value.title} placeholder="What’s your focus?" validate={titleError} onChange={title => onChange({ ...value, title })}/>
       <Select label="Timer mode" value={value.mode} options={[{ value: 'down', label: 'Count down' }, { value: 'up', label: 'Count up' }]} onChange={mode => onChange({ ...value, mode: mode as FocusSetup['mode'] })}/>
       <div className="focus-timer-details">
       {value.mode === 'down' ? <section className="game-field" aria-labelledby="duration-label"><span id="duration-label">Duration preset</span><div className="focus-duration-options">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import PageLoading from '@/screens/system/loading'
 import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { Button } from '@/components/button'
-import { Input } from '@/components/input'
+import { GameInput } from '@/components/game-input'
 import { Select } from '@/components/select'
 import { PixelIcon } from '@/components/pixel-icon'
 import { createCatalog, type ScreenModule, type PreviewModule } from './preview-catalog'
@@ -34,7 +34,7 @@ export default function UIPreview() {
     <div className="pixel-frame ui-preview-tools"><details ref={tools}>
       <summary><span>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</span><PixelIcon name="down" className="preview-disclosure-arrow"/></summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
-        <label>Search screens<Input type="search" value={query} onChange={event => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Name or group"/></label>
+        <GameInput label="Search screens" value={query} onChange={setQuery} search placeholder="Name or group"/>
         <p>{visible.length} / {catalog.length} screens</p>
         <nav className="ui-preview-list" aria-label="Preview screens" tabIndex={0}>
           {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {

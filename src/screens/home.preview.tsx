@@ -1,8 +1,8 @@
 /* oxlint-disable react/only-export-components -- Preview fixture exports discovery metadata. */
-import HomePage from './home'
+import OwnerGame from '@/components/owner-game'
 import { ToastPreview } from '@/dev/toast-preview'
 
-function HomePreview() { return <HomePage onSignOut={() => {}}/> }
+function HomePreview() { return <OwnerGame onSignOut={() => {}}/> }
 
 export default { Default: HomePreview, cases: {
   'Toast notification': () => <ToastPreview><HomePreview/></ToastPreview>,

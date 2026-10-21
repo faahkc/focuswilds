@@ -1,0 +1,15 @@
+.game-field { display: grid; gap: var(--space-label); min-width: 0; }
+.game-editor { position: fixed; inset: var(--editor-top, 0px) 0 auto; width: min(100%, var(--content-width)); height: var(--editor-height, 100%); max-width: none; max-height: none; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) var(--content-left) max(24px, env(safe-area-inset-bottom)) var(--content-right); border: 0; background: var(--page-bg); color: var(--text); font: inherit; overflow: hidden; }
+.game-editor[open] { display: flex; flex-direction: column; gap: var(--space-group); }
+.game-editor::backdrop { background: var(--page-bg); }
+.game-editor-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.game-editor h2 { font-size: 24px; line-height: 32px; margin: 0 0 var(--space-group); }
+.game-editor-error { color: #93462d; margin-top: var(--space-group); }
+.game-keyboard { flex-shrink: 0; display: grid; gap: var(--space-label); }
+.game-key-row { display: grid; gap: 2px; }
+.game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
+.game-key-tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-label); }
+.game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.game-keyboard [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
+.game-editor-actions { flex-shrink: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }
+@media (min-aspect-ratio: 1/1) { .game-editor, .game-editor::backdrop { visibility: hidden; } }

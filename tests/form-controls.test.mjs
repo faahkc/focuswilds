@@ -51,6 +51,8 @@ test('controlled search has an accessible themed clear action and keeps focus wi
   assert.equal(Input({ ...props, value: '' }).props.children[1], false)
   assert.equal(Input({ ...props, disabled: true }).props.children[1].props.disabled, true)
   assert.equal(Input({ ...props, readOnly: true }).props.children[1].props.disabled, true)
+  assert.equal(Input({ ...props, readOnly: true, clearDisabled: false }).props.children[1].props.disabled, false)
+  assert.equal(Input({ ...props, disabled: true, clearDisabled: false }).props.children[1].props.disabled, true)
 })
 
 test('Select supports keyboard navigation, selection, cancellation, typeahead and disabled actions', () => {

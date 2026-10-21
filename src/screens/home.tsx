@@ -17,7 +17,7 @@ function loadArtwork() {
   }))
 }
 
-export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
+export default function HomePage({ onSignOut, onStartFocus }: { onSignOut: () => void; onStartFocus?: () => void }) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const menu = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function HomePage({ onSignOut }: { onSignOut: () => void }) {
       <div className="home-room-window"><div className="home-room-art"/></div>
     </div>
     <section className="home-cat pixel-frame" aria-label="Cats at home"><p>Your black cat</p><p className="home-cat-count">1 cat at home</p></section>
-    <Button className="home-unavailable" disabled aria-description="Coming soon">Start focus</Button>
+    <Button className={onStartFocus ? undefined : 'home-unavailable'} disabled={!onStartFocus} aria-description={onStartFocus ? undefined : 'Coming soon'} onClick={onStartFocus}>Start focus</Button>
     <nav className="home-nav" aria-label="Game menus">
       <Button className="home-unavailable" disabled aria-description="Coming soon">Cats</Button>
       <Button className="home-unavailable" disabled aria-description="Coming soon">City</Button>

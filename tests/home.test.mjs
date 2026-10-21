@@ -31,7 +31,7 @@ function home() {
   }
   const module = { exports: {} }
   new Function('require', 'module', 'exports', 'Image', code)(name => { assert.ok(name in dependencies, `Unexpected service: ${name}`); return dependencies[name] }, module, module.exports, Image)
-  const view = () => { cursor = 0; return module.exports.default({ onSignOut() {} }) }
+  const view = (props = {}) => { cursor = 0; return module.exports.default({ onSignOut() {}, ...props }) }
   return { view, images, start: () => effects.at(-1)(), writes: () => writes }
 }
 
@@ -67,6 +67,19 @@ test('Home hides all page controls until both atlases decode and deduplicates St
     assert.equal(button.props['aria-description'], 'Coming soon')
     assert.equal(button.props.onClick, undefined)
   }
+})
+
+test('Home opens setup only when its owner navigation callback is supplied', async () => {
+  const room = home()
+  room.view(); room.start()
+  room.images.forEach(image => image.resolve()); await flush()
+  let opens = 0
+  const ready = room.view({ onStartFocus: () => opens++ })
+  const start = React.Children.toArray(ready.props.children).find(element => element.props?.children === 'Start focus')
+  assert.equal(start.props.disabled, false)
+  assert.equal(start.props['aria-description'], undefined)
+  start.props.onClick()
+  assert.equal(opens, 1)
 })
 
 test('a failed room decode shows existing recovery, and unmount prevents late state writes', async () => {

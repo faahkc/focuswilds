@@ -108,9 +108,8 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
       </div>)}
       <div className={`game-key-tools${numeric ? ' numeric' : letterActions ? ' letters' : ' text'}`}>
         {numeric ? <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button>{deleteKey}</> : <>
-          {thaiLetters && languageKey}
           <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '123'}</Button>
-          {!thaiLetters && languageKey}
+          {languageKey}
           {!letterActions && <>{shiftKey}{deleteKey}</>}
           <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button>{confirmKey}
         </>}

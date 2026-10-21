@@ -146,7 +146,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   assert.equal(cancelled, 1)
   button('Switch keyboard language').props.onClick()
   assert.deepEqual(lastRowLabels(), ['Shift', ...'ผปแอิืทมใฝ', 'Delete previous character'])
-  assert.deepEqual(toolLabels(), ['Switch keyboard language', 'Show symbols', 'Space', 'Confirm text'])
+  assert.deepEqual(toolLabels(), ['Show symbols', 'Switch keyboard language', 'Space', 'Confirm text'])
   assert.equal(characterRows()[1].props.children[1].length, 12)
   assert.ok(elements(characterRows()[2]).some(node => node.props['aria-label'] === 'ฃ'))
   const mark = button('้').props.children

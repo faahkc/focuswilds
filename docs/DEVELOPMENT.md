@@ -787,3 +787,9 @@ Moved ฃ (owner clarified kho khuat, not ซ) from normal row two to after ง 
 Standalone combining-mark labels use integer optical offsets measured from the bundled bold 20px Unifont ink bounds. This affects labels only: no dotted circle, replacement character or change to draft/IME shaping. Recalibrate offsets if the bundled font or keyboard size changes.
 
 88 offline tests, lint and build passed. Added regression assertions for Thai row actions, relocated key, tool order and mark-label preservation. Browser checks at 320x568 and 390x844 covered Thai normal/Shift, no horizontal overflow, mark insertion, grapheme deletion, Enter commit, invalid/disabled confirmation, Back cancellation and shared preview-search editing. Visually inspected Thai, Symbols, English normal/Shift, error and numeric screenshots under ignored .playwright-mcp/thai-layout-*.png. No artwork changes or new dependencies. Real iOS/Android font rendering, IME and touch remain unverified.
+
+### Thai tool order revised (2026-10-22)
+
+Owner requested swapping EN and 123. Both normal and Shift Thai now use 123 / EN / Space / Enter, matching the mode-before-language order of the English layout. Removed the unnecessary Thai-specific conditional placement; updated the existing regression assertion and lasting rules/plan. Earlier EN-first checkpoint is superseded by this decision.
+
+Six focus-setup tests, lint and build passed. Browser checks and visual inspection at 320x568 and 390x844 verified both Thai states and symbols-return/language switching (.playwright-mcp/thai-tools-swap-*.png). Physical-device touch remains unverified; no new artwork or size changes.

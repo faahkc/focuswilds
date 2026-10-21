@@ -1,4 +1,4 @@
-.focus-setup { height: 100%; min-height: 540px; padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px)); display: flex; flex-direction: column; gap: var(--space-section); }
+.focus-setup { height: 100%; min-height: 540px; padding-top: var(--screen-padding-top); padding-bottom: var(--screen-padding-bottom); display: flex; flex-direction: column; gap: var(--space-section); }
 .focus-setup header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-action); flex-shrink: 0; }
 .focus-setup h1 { font-size: 28px; }
 .focus-setup h1:focus { outline: none; }
@@ -12,4 +12,4 @@
 .focus-duration-options [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
 .focus-setup > .pixel-button { flex-shrink: 0; }
 .focus-setup > .pixel-button:disabled { cursor: not-allowed; }
-@container screen (max-height: 650px) { .focus-setup { padding-top: max(20px, env(safe-area-inset-top)); } .focus-setup h1 { font-size: 24px; } }
+@container screen (max-height: 650px) { .focus-setup h1 { font-size: 24px; } }

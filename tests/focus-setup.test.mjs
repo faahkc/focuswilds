@@ -88,6 +88,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   const hooks = []
   let cursor = 0
   let committed
+  let cancelled = 0
   const input = { selectionStart: 0, selectionEnd: 0, focus() {}, setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end } }
   const dependencies = {
     react: {
@@ -113,12 +114,17 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   new Function('require', 'module', 'exports', 'requestAnimationFrame', code)(name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports, callback => callback())
   const render = (numeric, extra = {}) => {
     cursor = 0
-    return module.exports.GameKeyboard({ label: 'Task', value: '', numeric, onDone: value => { committed = value }, onCancel() {}, ...extra })
+    return module.exports.GameKeyboard({ label: 'Task', value: '', numeric, onDone: value => { committed = value }, onCancel() { cancelled++ }, ...extra })
   }
   function elements(node) {
     return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
   }
   const button = name => elements(render(false)).find(node => node.props['aria-label'] === name)
+  assert.ok(elements(render(false)).some(node => node.props.children === 'Back'))
+  assert.ok(!elements(render(false)).some(node => node.props.children === 'Cancel'))
+  assert.equal(button('Delete previous character').props.children.props.name, 'delete')
+  elements(render(false)).find(node => node.props.children === 'Back').props.onClick()
+  assert.equal(cancelled, 1)
   button('Switch keyboard language').props.onClick()
   button('Show symbols').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Symbol keyboard'))

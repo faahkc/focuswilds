@@ -74,13 +74,13 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
     else if (event.key === 'Backspace' || event.key === 'Delete') { event.preventDefault(); type('', event.key === 'Backspace') }
     else if (event.key === 'Enter' && !(event.target as HTMLElement).closest('button')) { event.preventDefault(); done() }
   }}>
-    {numeric && <header className="game-number-header"><h2 id={`${id}-label`}>{label}</h2><Button onClick={cancel}>Back</Button></header>}
+    <header className="game-editor-header"><h2 id={`${id}-label`}>{label}</h2><Button onClick={cancel}>Back</Button></header>
     <div className="game-editor-body" role="region" aria-label={numeric ? 'Number editor' : 'Text editor'} tabIndex={0}>
-      {numeric ? <output ref={number} className="game-number" tabIndex={0} aria-label={label} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined}>{draft || '—'}</output> : <><h2 id={`${id}-label`}>{label}</h2>
+      {numeric ? <output ref={number} className="game-number" tabIndex={0} aria-label={label} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined}>{draft || '—'}</output> :
       <Input ref={input} aria-label={label} value={draft} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {
         if (event.key === 'Backspace' && !event.nativeEvent.isComposing && !event.ctrlKey && !event.altKey && !event.metaKey) { event.preventDefault(); type('', true) }
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); done() }
-      }}/></>}
+      }}/>}
       {(error || helpText) && <p className={error ? 'game-editor-error' : 'game-editor-help'} id={`${id}-message`} role="status">{error || helpText}</p>}
     </div>
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
@@ -90,9 +90,9 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
       <div className={`game-key-tools${numeric ? ' numeric' : ''}`}>
         {numeric && <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button></>}
         {!numeric && <><Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '#+='}</Button><Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button><Button className="game-key" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button><Button className="game-key" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}>Aa</Button></>}
-        <Button className="game-key" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}>{numeric ? <PixelIcon name="delete"/> : 'Del'}</Button>
+        <Button className="game-key" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="delete"/></Button>
       </div>
     </div>}
-    <div className="game-editor-actions">{!numeric && <Button onClick={cancel}>Cancel</Button>}<Button disabled={!!validationError} onClick={done}>{numeric ? 'Set duration' : 'Done'}</Button></div>
+    <div className="game-editor-actions"><Button disabled={!!validationError} onClick={done}>{numeric ? 'Set duration' : 'Done'}</Button></div>
   </dialog>
 }

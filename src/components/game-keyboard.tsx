@@ -11,8 +11,8 @@ const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
 const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
 
-export function GameKeyboard({ label, value, numeric, maxLength, helpText, validate, onDone, onCancel }: {
-  label: string; value: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
+export function GameKeyboard({ label, value, placeholder, numeric, maxLength, helpText, validate, onDone, onCancel }: {
+  label: string; value: string; placeholder?: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
   onDone: (value: string) => void; onCancel: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -83,7 +83,7 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
     <header className="game-editor-header"><h2 id={`${id}-label`}>{label}</h2><Button onClick={cancel}>Back</Button></header>
     <div className="game-editor-body" role="region" aria-label={numeric ? 'Number editor' : 'Text editor'} tabIndex={0}>
       {numeric ? <output ref={number} className="game-number" tabIndex={0} aria-label={label} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined}>{draft || '—'}</output> :
-      <Input ref={input} aria-label={label} value={draft} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {
+      <Input ref={input} aria-label={label} value={draft} placeholder={placeholder} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {
         if (event.key === 'Backspace' && !event.nativeEvent.isComposing && !event.ctrlKey && !event.altKey && !event.metaKey) { event.preventDefault(); type('', true) }
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); done() }
       }}/>}

@@ -773,3 +773,9 @@ Owner approved the v4 arrow and proposed keyboard arrangement. Enter is now the 
 Aseprite export assertions passed: centered alpha bounds, head/shaft reflection about y=8, exact 2x pixels and PNG round trip. The original seven runtime cells are pixel-identical; new Enter matches the approved v4. Master grows 1134 to 1259 bytes (+125); runtime atlas 459 to 498 bytes (+39). Updated lasting rules and plan to replace the superseded Done requirement.
 
 88 offline tests, lint and production build passed. Shared-keyboard regression checks cover Enter placement, invalid text and IME composition. Browser emulation at 320x568 and 390x844 checked actual runtime English/Shift, Thai/Shift, Symbols, invalid/disabled Enter, click/hardware confirmation, Back cancellation, preview-search confirmation, simulated native-keyboard fallback confirmation and numeric three-digit cap/Set duration. Inspected screenshots under ignored .playwright-mcp/enter-integrated-*.png. Short Thai/Symbols/error layouts use existing dialog scrolling rather than reducing padding or keys. Physical iOS/Android touch and actual native IME behavior remain unverified.
+
+### Shared editor placeholder (2026-10-21)
+
+GameInput now forwards its existing placeholder into GameKeyboard's text Input. Empty Task displays What?s your focus? in both Setup and the editor; entered text replaces the hint without changing validation or draft values. Preview search inherits its own Name or group hint rather than Task copy. Numeric mode remains unchanged.
+
+Lint and build passed. Browser checks at 320x568 and 390x844 confirmed the empty hint, empty underlying value, hidden placeholder after typing and successful Enter confirmation. Inspected .playwright-mcp/task-placeholder-320.png and task-placeholder-390.png. No additional tests for this prop-only change; physical-device rendering remains unverified.

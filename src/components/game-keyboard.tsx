@@ -8,7 +8,7 @@ import './game-keyboard.css'
 const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
 const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
-const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
+const thai = ['ๅ/_ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
 
 // Optical offsets for standalone marks in the bundled 20px Unifont; inserted text stays unchanged.

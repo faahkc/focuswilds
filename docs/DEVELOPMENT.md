@@ -793,3 +793,9 @@ Standalone combining-mark labels use integer optical offsets measured from the b
 Owner requested swapping EN and 123. Both normal and Shift Thai now use 123 / EN / Space / Enter, matching the mode-before-language order of the English layout. Removed the unnecessary Thai-specific conditional placement; updated the existing regression assertion and lasting rules/plan. Earlier EN-first checkpoint is superseded by this decision.
 
 Six focus-setup tests, lint and build passed. Browser checks and visual inspection at 320x568 and 390x844 verified both Thai states and symbols-return/language switching (.playwright-mcp/thai-tools-swap-*.png). Physical-device touch remains unverified; no new artwork or size changes.
+
+### Thai underscore key corrected (2026-10-22)
+
+The owner identified the key before ภ as underscore. It was actually mapped to hyphen; changed the normal Thai key to display and insert _. Shift and Symbols mappings remain unchanged. Updated the existing keyboard regression assertions and lasting guidance.
+
+Six focused tests, lint and build passed. Browser checks at 320x568 and 390x844 verified the key immediately precedes ภ and inserts U+005F; visually inspected .playwright-mcp/thai-underscore-320.png and thai-underscore-390.png. No new artwork or layout change. Physical devices remain unverified.

@@ -5,8 +5,8 @@ import { PixelIcon } from './pixel-icon'
 import { editText } from '@/lib/text-edit'
 import './game-keyboard.css'
 
-const english = ['1234567890', 'qwertyuiop', 'asdfghjkl', 'zxcvbnm,./']
-const capitals = ['!@#$%^&*()', 'QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM<>?']
+const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm,./']
+const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM<>?']
 const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
 const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']

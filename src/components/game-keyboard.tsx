@@ -5,8 +5,8 @@ import { PixelIcon } from './pixel-icon'
 import { editText } from '@/lib/text-edit'
 import './game-keyboard.css'
 
-const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm,./']
-const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM<>?']
+const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
 const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
@@ -68,6 +68,8 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
   function done() { if (!validationError && !composing.current) { dialog.current?.close(); onDone(draft) } }
   const rows = numeric ? ['123', '456', '789'] : showSymbols ? symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
   const columns = Math.max(...rows.map(row => [...row].length))
+  const englishLetters = !numeric && !showSymbols && language === 'en'
+  const deleteKey = <Button className="game-key game-key-delete" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="delete"/></Button>
   return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
     if (!numeric || event.nativeEvent.isComposing || event.ctrlKey || event.altKey || event.metaKey) return
     if (/^\d$/.test(event.key)) { event.preventDefault(); type(event.key) }
@@ -86,11 +88,12 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
         {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: `calc((100% - ${(columns - 1) * 2}px) / ${columns})` }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{key}</Button>)}
+        {englishLetters && index === rows.length - 1 && deleteKey}
       </div>)}
-      <div className={`game-key-tools${numeric ? ' numeric' : ''}`}>
+      <div className={`game-key-tools${numeric ? ' numeric' : englishLetters ? ' english' : ''}`}>
         {numeric && <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button></>}
         {!numeric && <><Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '#+='}</Button><Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button><Button className="game-key" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button><Button className="game-key" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}>Aa</Button></>}
-        <Button className="game-key" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="delete"/></Button>
+        {!englishLetters && deleteKey}
       </div>
     </div>}
     <div className="game-editor-actions"><Button disabled={!!validationError} onClick={done}>{numeric ? 'Set duration' : 'Done'}</Button></div>

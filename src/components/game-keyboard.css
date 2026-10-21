@@ -37,3 +37,5 @@
 @media (min-aspect-ratio: 1/1) { .game-editor, .game-editor::backdrop { visibility: hidden; } }
 
 .game-key-mark { display: inline-block; }
+
+.game-keyboard.numeric .game-key { font-size: 24px; }

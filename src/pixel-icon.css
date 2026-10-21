@@ -12,7 +12,9 @@
 .pixel-icon-enter { mask-position: -224px 0; }
 
 /* Keep each keyboard icon's atlas, size and offset together, independent of screen CSS. */
-.pixel-icon.pixel-icon-keyboard-shift, .pixel-icon.pixel-icon-keyboard-delete, .pixel-icon.pixel-icon-keyboard-enter { width: 20px; height: 20px; mask-size: 256px 64px; }
+.pixel-icon.pixel-icon-keyboard-shift, .pixel-icon.pixel-icon-keyboard-delete, .pixel-icon.pixel-icon-keyboard-enter, .pixel-icon.pixel-icon-keyboard-clear { width: 20px; height: 20px; mask-size: 256px 64px; }
 .pixel-icon.pixel-icon-keyboard-shift { mask-position: 0 -32px; }
 .pixel-icon.pixel-icon-keyboard-delete { mask-position: -20px -32px; }
 .pixel-icon.pixel-icon-keyboard-enter { mask-position: -40px -32px; }
+
+.pixel-icon.pixel-icon-keyboard-clear { mask-position: -60px -32px; }

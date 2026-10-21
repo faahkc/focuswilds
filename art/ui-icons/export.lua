@@ -48,9 +48,9 @@ end end
 local keyboard
 do
 local sprite=app.open('art/ui-icons/keyboard-actions.aseprite')
-assert(sprite.width==10 and sprite.height==10 and #sprite.frames==3)
-local names={'Shift','Delete','Enter'}
-local native=Image(30,10,ColorMode.RGB)
+assert(sprite.width==10 and sprite.height==10 and #sprite.frames==4)
+local names={'Shift','Delete','Enter','Clear'}
+local native=Image(40,10,ColorMode.RGB)
 for index,name in ipairs(names) do
  local tag=sprite.tags[index]
  assert(tag.name==name and tag.fromFrame.frameNumber==index and tag.toFrame.frameNumber==index,'Static icon tags changed')
@@ -68,13 +68,14 @@ for index,name in ipairs(names) do
 end
 for y=0,9 do for x=0,9 do assert(native:getPixel(x,y)==native:getPixel(9-x,y),'Shift symmetry') end end
 for y=2,8 do for x=0,4 do assert(native:getPixel(20+x,y)==native:getPixel(20+x,10-y),'Enter head/shaft symmetry') end end
+for y=0,9 do for x=0,9 do assert(native:getPixel(30+x,y)==native:getPixel(39-x,y),'Clear symmetry') end end
 keyboard=native
 end
 local atlas = Image(256,64,ColorMode.RGB)
 for y=0,31 do for x=0,255 do
   atlas:drawPixel(x,y,base:getPixel(math.floor(x/2),math.floor(y/2)))
 end end
-for y=0,19 do for x=0,59 do
+for y=0,19 do for x=0,79 do
  atlas:drawPixel(x,32+y,keyboard:getPixel(math.floor(x/2),math.floor(y/2)))
 end end
 local path='src/assets/ui-icons.png'
@@ -84,7 +85,7 @@ assert(saved.width==256 and saved.height==64)
 for y=0,31 do for x=0,255 do
   assert(saved:getPixel(x,y)==base:getPixel(math.floor(x/2),math.floor(y/2)),'Icon export differs from approved 2x scale')
 end end
-for y=0,19 do for x=0,59 do
+for y=0,19 do for x=0,79 do
  assert(saved:getPixel(x,32+y)==keyboard:getPixel(math.floor(x/2),math.floor(y/2)),'Keyboard export differs from approved pixels')
 end end
-print('PASS: eight 32px and three 20px icons share one atlas with exact 2x master pixels')
+print('PASS: eight 32px and four 20px icons share one atlas with exact 2x master pixels')

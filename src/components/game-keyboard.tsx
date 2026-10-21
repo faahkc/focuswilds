@@ -8,8 +8,15 @@ import './game-keyboard.css'
 const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
 const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
-const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
+const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
+
+// Optical offsets for standalone marks in the bundled 20px Unifont; inserted text stays unchanged.
+const thaiMarkOffsets: Record<string, [number, number]> = {
+  'ั': [4, 5], 'ิ': [6, 5], 'ี': [6, 5], 'ึ': [6, 5], 'ื': [6, 5],
+  'ุ': [3, -9], 'ู': [4, -9], 'ํ': [3, 8], '็': [6, 7],
+  '่': [4, 8], '้': [4, 8], '๊': [5, 8], '๋': [4, 8], '์': [3, 8], 'ฺ': [4, -9],
+}
 
 export function GameKeyboard({ label, value, placeholder, numeric, maxLength, helpText, validate, onDone, onCancel }: {
   label: string; value: string; placeholder?: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
@@ -69,10 +76,14 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
   const rows = numeric ? ['123', '456', '789'] : showSymbols ? symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
   const columns = Math.max(...rows.map(row => [...row].length))
   const englishLetters = !numeric && !showSymbols && language === 'en'
-  // The last English row reserves two 44px actions and eight 2px gaps (104px).
+  const thaiLetters = !numeric && !showSymbols && language === 'th'
+  const letterActions = englishLetters || thaiLetters
+  // Reserve two 44px actions plus character gaps in the last letter row.
   const keyWidth = `calc((100% - ${(columns - 1) * 2}px) / ${columns})`
+  const letterWidth = `min(${keyWidth}, calc((100% - ${88 + (rows.at(-1)!.length + 1) * 2}px) / ${rows.at(-1)!.length}))`
   const shiftKey = <Button className="game-key game-key-shift" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}><PixelIcon name="shift"/></Button>
   const deleteKey = <Button className="game-key game-key-delete" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="delete"/></Button>
+  const languageKey = <Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button>
   const confirmKey = <Button className="game-key game-key-enter" aria-label="Confirm text" disabled={!!validationError} onPointerDown={event => event.preventDefault()} onClick={done}><PixelIcon name="enter"/></Button>
   return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
     if (!numeric || event.nativeEvent.isComposing || event.ctrlKey || event.altKey || event.metaKey) return
@@ -91,15 +102,16 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
     </div>
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
-        {englishLetters && index === rows.length - 1 && shiftKey}
-        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: englishLetters ? `min(${keyWidth}, calc((100% - 104px) / 7))` : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{key}</Button>)}
-        {englishLetters && index === rows.length - 1 && deleteKey}
+        {letterActions && index === rows.length - 1 && shiftKey}
+        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: letterActions ? letterWidth : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{thaiMarkOffsets[key] ? <span className="game-key-mark" style={{ transform: `translate(${thaiMarkOffsets[key][0]}px, ${thaiMarkOffsets[key][1]}px)` }}>{key}</span> : key}</Button>)}
+        {letterActions && index === rows.length - 1 && deleteKey}
       </div>)}
-      <div className={`game-key-tools${numeric ? ' numeric' : englishLetters ? ' english' : ' text'}`}>
+      <div className={`game-key-tools${numeric ? ' numeric' : letterActions ? ' letters' : ' text'}`}>
         {numeric ? <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button>{deleteKey}</> : <>
+          {thaiLetters && languageKey}
           <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '123'}</Button>
-          <Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button>
-          {!englishLetters && <>{shiftKey}{deleteKey}</>}
+          {!thaiLetters && languageKey}
+          {!letterActions && <>{shiftKey}{deleteKey}</>}
           <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button>{confirmKey}
         </>}
       </div>

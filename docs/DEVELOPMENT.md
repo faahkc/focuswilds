@@ -779,3 +779,11 @@ Aseprite export assertions passed: centered alpha bounds, head/shaft reflection 
 GameInput now forwards its existing placeholder into GameKeyboard's text Input. Empty Task displays What?s your focus? in both Setup and the editor; entered text replaces the hint without changing validation or draft values. Preview search inherits its own Name or group hint rather than Task copy. Numeric mode remains unchanged.
 
 Lint and build passed. Browser checks at 320x568 and 390x844 confirmed the empty hint, empty underlying value, hidden placeholder after typing and successful Enter confirmation. Inspected .playwright-mcp/task-placeholder-320.png and task-placeholder-390.png. No additional tests for this prop-only change; physical-device rendering remains unverified.
+
+### Thai keyboard centering and owner-approved layout (2026-10-22)
+
+Moved ฃ (owner clarified kho khuat, not ซ) from normal row two to after ง in row three. Thai's last row now starts with Shift and ends with Delete in both cases; its tools are EN / 123 / Space / Enter. Symbols keeps its prior two-row tools; English and numeric stay unchanged. Shared width calculation reserves the two 44px actions before fitting character keys, preserving uniform letter widths, 60px height and 2px horizontal gaps. Thai keys are about 19.4px wide at 320 and 26.4px at 390; this is denser on narrow phones and needs physical touch calibration. Normal Thai now fits without dialog overflow at both reviewed heights.
+
+Standalone combining-mark labels use integer optical offsets measured from the bundled bold 20px Unifont ink bounds. This affects labels only: no dotted circle, replacement character or change to draft/IME shaping. Recalibrate offsets if the bundled font or keyboard size changes.
+
+88 offline tests, lint and build passed. Added regression assertions for Thai row actions, relocated key, tool order and mark-label preservation. Browser checks at 320x568 and 390x844 covered Thai normal/Shift, no horizontal overflow, mark insertion, grapheme deletion, Enter commit, invalid/disabled confirmation, Back cancellation and shared preview-search editing. Visually inspected Thai, Symbols, English normal/Shift, error and numeric screenshots under ignored .playwright-mcp/thai-layout-*.png. No artwork changes or new dependencies. Real iOS/Android font rendering, IME and touch remain unverified.

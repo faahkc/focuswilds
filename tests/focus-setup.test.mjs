@@ -120,6 +120,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
     return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
   }
   const button = name => elements(render(false)).find(node => node.props['aria-label'] === name)
+  assert.equal(button('Space').props.children, undefined)
   const confirm = () => button('Confirm text')
   assert.equal(confirm().props.children.props.name, 'enter')
   const toolLabels = () => elements(elements(render(false)).find(node => node.props.className === 'game-key-tools letters')).filter(node => node.props['aria-label']).map(node => node.props['aria-label'])

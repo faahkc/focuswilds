@@ -111,7 +111,7 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
           <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '123'}</Button>
           {languageKey}
           {!letterActions && <>{shiftKey}{deleteKey}</>}
-          <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button>{confirmKey}
+          <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}/>{confirmKey}
         </>}
       </div>
     </div>}

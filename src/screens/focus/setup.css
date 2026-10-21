@@ -4,6 +4,9 @@
 .focus-setup h1:focus { outline: none; }
 .focus-setup header .pixel-button { padding-inline: 12px; }
 .focus-setup-fields { display: grid; align-content: center; flex: 1; min-height: 0; gap: var(--space-section); }
+.focus-timer-details { display: grid; min-height: calc(var(--text-line-height) + var(--space-label) + var(--control-height) * 2 + var(--space-group)); }
+.focus-count-up { display: grid; align-content: center; gap: var(--space-group); }
+.focus-count-up p { margin: 0; }
 .focus-duration-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }
 .focus-duration-options .pixel-button { padding-inline: 4px; }
 .focus-duration-options [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }

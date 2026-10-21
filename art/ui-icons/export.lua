@@ -1,7 +1,7 @@
 local sprite = app.open('art/ui-icons/ui-icons.aseprite')
-assert(sprite.width == 16 and sprite.height == 16 and #sprite.frames == 6)
-local names = {'Check', 'Close', 'Down', 'Up', 'Clear', 'Delete'}
-local base = Image(96,16,ColorMode.RGB)
+assert(sprite.width == 16 and sprite.height == 16 and #sprite.frames == 7)
+local names = {'Check', 'Close', 'Down', 'Up', 'Clear', 'Delete', 'Shift'}
+local base = Image(112,16,ColorMode.RGB)
 for index,name in ipairs(names) do
   local tag = sprite.tags[index]
   assert(tag.name == name and tag.fromFrame.frameNumber == index and tag.toFrame.frameNumber == index, name..': '..tag.name..' '..tostring(tag.fromFrame.frameNumber)..'-'..tostring(tag.toFrame.frameNumber))
@@ -15,7 +15,7 @@ for y=0,15,2 do for x=0,63,2 do
   local pixel = base:getPixel(x,y)
   for dy=0,1 do for dx=0,1 do assert(base:getPixel(x+dx,y+dy) == pixel) end end
 end end
-for index=5,6 do
+for index=5,7 do
  local minx,miny,maxx,maxy=16,16,-1,-1
  for y=0,15 do for x=0,15 do
   if app.pixelColor.rgbaA(base:getPixel((index-1)*16+x,y))>0 then
@@ -41,15 +41,15 @@ for y=0,15 do for x=0,15 do
   assert((visited[y*16+x]==true)~=cross,'Delete outline/cross separation changed')
  end
 end end
-local atlas = Image(192,32,ColorMode.RGB)
-for y=0,31 do for x=0,191 do
+local atlas = Image(224,32,ColorMode.RGB)
+for y=0,31 do for x=0,223 do
   atlas:drawPixel(x,y,base:getPixel(math.floor(x/2),math.floor(y/2)))
 end end
 local path='src/assets/ui-icons.png'
 atlas:saveAs(path)
 local saved=Image{fromFile=path}
-assert(saved.width==192 and saved.height==32)
-for y=0,31 do for x=0,191 do
+assert(saved.width==224 and saved.height==32)
+for y=0,31 do for x=0,223 do
   assert(saved:getPixel(x,y)==base:getPixel(math.floor(x/2),math.floor(y/2)),'Icon export differs from approved 2x scale')
 end end
-print('Verified six 32px icons: exact 2x master pixels and PNG round trip')
+print('Verified seven 32px icons: exact 2x master pixels and PNG round trip')

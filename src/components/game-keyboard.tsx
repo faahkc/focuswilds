@@ -69,6 +69,9 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
   const rows = numeric ? ['123', '456', '789'] : showSymbols ? symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
   const columns = Math.max(...rows.map(row => [...row].length))
   const englishLetters = !numeric && !showSymbols && language === 'en'
+  // The last English row reserves two 44px actions and eight 2px gaps (104px).
+  const keyWidth = `calc((100% - ${(columns - 1) * 2}px) / ${columns})`
+  const shiftKey = <Button className="game-key game-key-shift" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}><PixelIcon name="shift"/></Button>
   const deleteKey = <Button className="game-key game-key-delete" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="delete"/></Button>
   return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
     if (!numeric || event.nativeEvent.isComposing || event.ctrlKey || event.altKey || event.metaKey) return
@@ -87,12 +90,13 @@ export function GameKeyboard({ label, value, numeric, maxLength, helpText, valid
     </div>
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
-        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: `calc((100% - ${(columns - 1) * 2}px) / ${columns})` }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{key}</Button>)}
+        {englishLetters && index === rows.length - 1 && shiftKey}
+        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: englishLetters ? `min(${keyWidth}, calc((100% - 104px) / 7))` : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{key}</Button>)}
         {englishLetters && index === rows.length - 1 && deleteKey}
       </div>)}
       <div className={`game-key-tools${numeric ? ' numeric' : englishLetters ? ' english' : ''}`}>
         {numeric && <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button></>}
-        {!numeric && <><Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '#+='}</Button><Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button><Button className="game-key" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button><Button className="game-key" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}>Aa</Button></>}
+        {!numeric && <><Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '#+='}</Button><Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button><Button className="game-key" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}>Space</Button>{!englishLetters && shiftKey}</>}
         {!englishLetters && deleteKey}
       </div>
     </div>}

@@ -103,7 +103,7 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : thaiLetters ? ' thai' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
         {letterActions && index === rows.length - 1 && shiftKey}
-        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: letterActions ? letterWidth : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{thaiMarkOffsets[key] ? <span className="game-key-mark" style={{ transform: `translate(${thaiMarkOffsets[key][0]}px, ${thaiMarkOffsets[key][1]}px)` }}>{key}</span> : key}</Button>)}
+        {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: englishLetters ? letterWidth : thaiLetters ? 0 : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{thaiMarkOffsets[key] ? <span className="game-key-mark" style={{ transform: `translate(${thaiMarkOffsets[key][0]}px, ${thaiMarkOffsets[key][1]}px)` }}>{key}</span> : key}</Button>)}
         {letterActions && index === rows.length - 1 && deleteKey}
       </div>)}
       <div className={`game-key-tools${numeric ? ' numeric' : letterActions ? ' letters' : ' text'}`}>

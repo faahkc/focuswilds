@@ -147,6 +147,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   button('Switch keyboard language').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props.className === 'game-keyboard thai'))
   assert.ok(button('_'))
+  assert.equal(button('_').props.style.flexBasis, 0)
   assert.equal(button('-'), undefined)
   assert.deepEqual(lastRowLabels(), ['Shift', ...'ผปแอิืทมใฝ', 'Delete previous character'])
   assert.deepEqual(toolLabels(), ['Show symbols', 'Switch keyboard language', 'Space', 'Confirm text'])

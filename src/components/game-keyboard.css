@@ -24,7 +24,10 @@
 .game-keyboard:not(.numeric) { margin-left: calc(max(8px, env(safe-area-inset-left)) - var(--content-left)); margin-right: calc(max(8px, env(safe-area-inset-right)) - var(--content-right)); }
 .game-key-row { display: flex; justify-content: center; gap: 2px; }
 .game-key-row .game-key { flex-grow: 0; flex-shrink: 0; }
-.game-keyboard.thai .game-key-row .game-key { flex-grow: 1; }
+.game-keyboard.thai .game-key-row .game-key { flex: 1 0 0; }
+.game-keyboard.thai .game-key-row .pixel-icon { width: 16px; height: 16px; mask-size: 128px 16px; }
+.game-keyboard.thai .game-key-shift .pixel-icon { mask-position: -96px 0; }
+.game-keyboard.thai .game-key-delete .pixel-icon { mask-position: -80px 0; }
 .game-key-row .game-key-delete, .game-key-row .game-key-shift { flex: 1 0 44px; }
 .game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
 .game-key-tools { display: grid; gap: var(--space-group); }

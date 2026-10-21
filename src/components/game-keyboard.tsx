@@ -100,7 +100,7 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
       }}/>}
       {(error || helpText) && <p className={error ? 'game-editor-error' : 'game-editor-help'} id={`${id}-message`} role="status">{error || helpText}</p>}
     </div>
-    {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
+    {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : thaiLetters ? ' thai' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
         {letterActions && index === rows.length - 1 && shiftKey}
         {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: letterActions ? letterWidth : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{thaiMarkOffsets[key] ? <span className="game-key-mark" style={{ transform: `translate(${thaiMarkOffsets[key][0]}px, ${thaiMarkOffsets[key][1]}px)` }}>{key}</span> : key}</Button>)}

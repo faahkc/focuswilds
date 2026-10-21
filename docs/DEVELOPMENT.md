@@ -805,3 +805,9 @@ Six focused tests, lint and build passed. Browser checks at 320x568 and 390x844 
 Moved ฅ from the second Thai Shift row to immediately after period in the third row, as requested. Normal Thai and other layouts remain unchanged; character widths and action geometry remain stable because the existing last-row constraint still governs key width. Updated the shared-keyboard regression assertion and lasting rules/plan.
 
 Six focused tests, lint and build passed. Browser checks at 320x568 and 390x844 verified placement, absence from row two and insertion of U+0E05; inspected .playwright-mcp/thai-shift-khokhon-320.png and thai-shift-khokhon-390.png. Physical-device touch remains unverified.
+
+### Thai rows aligned to keyboard edges (2026-10-22)
+
+The owner resolved the conflict with prior equal-width-across-rows guidance: Thai normal/Shift must fill both keyboard edges, allowing different character widths between rows while retaining 2px gaps and at least 44px Shift/Delete targets. Added a Thai-only flex-growth rule; English, Symbols and numeric layouts retain their existing behavior. Updated superseded active rules and plan.
+
+Six focused tests, lint and build passed. Repeatable browser check: open Task, switch to Thai, measure every row's first/last button in normal and Shift at 320x568 and 390x844. All four rows measured left 8px and right viewport-minus-8px, 60px height, 2px gaps and no horizontal overflow. Shift/Delete remain 44px; upper character keys are 23.5px/29.33px at 320/390, versus about 19.4px/26.4px on the bottom letter row. Verified Thai character insertion and language switching, and inspected Thai normal/Shift plus English screenshots under .playwright-mcp/thai-full-edges-*.png. No artwork changes. Physical-device safe areas and touch remain unverified.

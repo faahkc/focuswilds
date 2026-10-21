@@ -25,11 +25,6 @@
 .game-key-row { display: flex; justify-content: center; gap: 2px; }
 .game-key-row .game-key { flex-grow: 0; flex-shrink: 0; }
 .game-keyboard.thai .game-key-row .game-key { flex: 1 0 0; }
-/* Approved 10px keyboard artwork at exact 2x; numeric actions keep the shared atlas. */
-.game-keyboard:not(.numeric) .game-key-shift .pixel-icon, .game-keyboard:not(.numeric) .game-key-delete .pixel-icon, .game-key-enter .pixel-icon { width: 20px; height: 20px; mask-image: url('../assets/keyboard-actions.png'); mask-size: 60px 20px; }
-.game-keyboard:not(.numeric) .game-key-shift .pixel-icon { mask-position: 0 0; }
-.game-keyboard:not(.numeric) .game-key-delete .pixel-icon { mask-position: -20px 0; }
-.game-key-enter .pixel-icon { mask-position: -40px 0; }
 .game-key-row .game-key-delete, .game-key-row .game-key-shift { flex: 1 0 44px; }
 .game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
 .game-key-tools { display: grid; gap: var(--space-group); }

@@ -629,3 +629,7 @@ Verification: lint and production build passed. Browser screenshots after fonts 
 The owner identified the visible Count up heading as redundant with the selected Timer mode. Removed that heading and its unused styling; retained the named section for assistive navigation. The first explanation line now starts at the Duration preset label position. Current rules/plan replace the previous heading requirement; the historical checkpoint above records the earlier implementation only.
 
 Verification: lint and production build passed. Inspected both phone-size browser captures after fonts loaded and asserted the repeated heading is absent. Switching modes preserves Task/Timer mode/Start focus coordinates and aligns the first explanation line at 309.5px on 320x568 and 449.5px on 390x844. Captures: ignored .playwright-mcp/count-up-copy-only-{320,390}.png. No logic changed, so the previously passing 88-test suite was not repeated for this copy/style removal. Physical-device review remains pending.
+
+### Count up time-label punctuation (2026-10-21)
+
+Removed the trailing period from Start at 00:00 at the owner's request and synchronized the active copy requirement in AGENTS.md and IMPLEMENTATION_PLAN.md. Lint passed; checked the exact rendered text and visually inspected both 320x568 and 390x844 previews after fonts loaded. Captures: ignored .playwright-mcp/count-up-no-period-{320,390}.png. This one-character copy edit does not change layout or behavior; full tests/build were not repeated. Physical-device review remains pending.

@@ -24,7 +24,7 @@ export default function FocusSetupPage({ value, onChange, onBack }: {
       {value.mode === 'down' ? <section className="game-field" aria-labelledby="duration-label"><span id="duration-label">Duration preset</span><div className="focus-duration-options">
         {durationPresets.map(minutes => <Button key={minutes} className={!custom && value.minutes === minutes ? 'pixel-frame' : ''} aria-pressed={!custom && value.minutes === minutes} onClick={() => { setCustom(false); onChange({ ...value, minutes }) }}>{minutes} min</Button>)}
         <Button ref={customButton} className={custom ? 'pixel-frame' : ''} aria-label={custom ? `Custom duration, ${value.minutes} minutes` : 'Custom duration'} aria-pressed={custom} onClick={() => setEditing(true)}>{custom ? `${value.minutes} min` : 'Custom'}</Button>
-      </div></section> : <section className="focus-count-up" aria-label="Count up timing"><p>Start at 00:00.</p><p>Finish whenever you’re ready.</p></section>}
+      </div></section> : <section className="focus-count-up" aria-label="Count up timing"><p>Start at 00:00</p><p>Finish whenever you’re ready.</p></section>}
       </div>
     </div>
     <Button disabled aria-description="Coming soon. Timer sessions are not available yet.">Start focus</Button>

@@ -1,4 +1,4 @@
-.pixel-icon { display: inline-block; flex-shrink: 0; width: 32px; height: 32px; background: currentColor; mask-image: url("./assets/ui-icons.png"); mask-repeat: no-repeat; mask-size: 224px 32px; image-rendering: pixelated; }
+.pixel-icon { display: inline-block; flex-shrink: 0; width: 32px; height: 32px; background: currentColor; mask-image: url("./assets/ui-icons.png"); mask-repeat: no-repeat; mask-size: 256px 32px; image-rendering: pixelated; }
 /* Center visible pixels, not the transparent margins in the approved atlas. */
 .pixel-icon-check { mask-position: 0 2px; }
 .pixel-icon-close { mask-position: -32px 0; }
@@ -8,3 +8,5 @@
 .pixel-icon-delete { mask-position: -160px 0; }
 
 .pixel-icon-shift { mask-position: -192px 0; }
+
+.pixel-icon-enter { mask-position: -224px 0; }

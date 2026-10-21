@@ -120,6 +120,10 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
     return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
   }
   const button = name => elements(render(false)).find(node => node.props['aria-label'] === name)
+  const confirm = () => button('Confirm text')
+  assert.equal(confirm().props.children.props.name, 'enter')
+  const toolLabels = () => elements(elements(render(false)).find(node => node.props.className === 'game-key-tools english')).filter(node => node.props['aria-label']).map(node => node.props['aria-label'])
+  assert.deepEqual(toolLabels(), ['Show symbols', 'Switch keyboard language', 'Space', 'Confirm text'])
   const characterRows = () => elements(render(false)).filter(node => node.props.className === 'game-key-row')
   assert.equal(characterRows().length, 3)
   assert.equal(button('1'), undefined)
@@ -151,7 +155,19 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   button('_').props.onClick()
   button('Return to letters').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Thai keyboard'))
-  elements(render(false)).find(node => node.props.children === 'Done').props.onClick()
+  confirm().props.onClick()
+  assert.equal(committed, '_')
+  const invalidText = elements(render(false, { validate: () => 'Invalid task' })).find(node => node.props['aria-label'] === 'Confirm text')
+  assert.equal(invalidText.props.disabled, true)
+  committed = undefined
+  invalidText.props.onClick()
+  assert.equal(committed, undefined)
+  const compose = () => elements(render(false)).find(node => node.type === dependencies['./input'].Input).props
+  compose().onCompositionStart()
+  confirm().props.onClick()
+  assert.equal(committed, undefined)
+  compose().onCompositionEnd()
+  confirm().props.onClick()
   assert.equal(committed, '_')
   assert.ok(!elements(render(true)).some(node => node.props['aria-label'] === 'Show symbols'))
   hooks.length = 0

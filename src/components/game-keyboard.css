@@ -6,9 +6,18 @@
 .game-editor h2 { font-size: 24px; line-height: 32px; margin: 0 0 var(--space-group); }
 .game-editor-error, .game-editor-help { margin-top: var(--space-group); }
 .game-editor-error { color: #93462d; }
-.game-editor-numeric .game-editor-body { display: flex; flex-direction: column; }
+.game-editor-numeric { --number-line-height: 104px; padding-top: max(24px, env(safe-area-inset-top)); overflow-y: auto; }
+.game-number-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; gap: var(--space-action); }
+.game-number-header h2 { margin: 0; font-size: 28px; line-height: 36px; }
+.game-number-header .pixel-button { padding-inline: 12px; }
+.game-editor-numeric .game-editor-body { display: flex; flex-direction: column; text-align: center; min-height: calc(var(--number-line-height) + var(--text-line-height) + var(--space-group)); }
 .game-editor-numeric .game-editor-body > * { flex-shrink: 0; }
-.game-editor-numeric h2 { margin-top: auto; }
+.game-number { display: block; margin-top: auto; font-size: 96px; line-height: var(--number-line-height); min-height: var(--number-line-height); overflow-wrap: anywhere; }
+.game-number:focus { outline: none; }
+.game-editor-numeric .game-editor-help, .game-editor-numeric .game-editor-error { margin-bottom: auto; }
+.game-editor-numeric .game-key { display: flex; align-items: center; justify-content: center; }
+.game-editor-numeric .game-editor-actions { grid-template-columns: minmax(0, 1fr); }
+@media (max-height: 650px) { .game-editor-numeric { --number-line-height: 80px; padding-top: max(20px, env(safe-area-inset-top)); } .game-number-header h2 { font-size: 24px; line-height: 32px; } .game-number { font-size: 72px; } }
 .game-keyboard { flex-shrink: 0; display: grid; gap: var(--space-label); }
 .game-keyboard.numeric { gap: var(--space-group); }
 .game-keyboard.numeric .game-key-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }

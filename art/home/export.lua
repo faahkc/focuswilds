@@ -9,6 +9,9 @@ for _,compact in ipairs({false,true}) do
  assert(source.width==128 and source.height==height and #source.frames==32)
  local atlas=Image(4096,height,ColorMode.RGB)
  local baseline,total,changed=nil,0,0
+ local window
+ for _,layer in ipairs(source.layers) do if layer.name=='Same apartment window and city as Login' then window=layer end end
+ assert(window,'Missing editable window layer')
  for i,frame in ipairs(source.frames) do
   local ms=math.floor(frame.duration*1000+0.5)
   if compact then assert(timings[i]==ms,'Variant timings differ') else timings[i]=ms end
@@ -17,6 +20,17 @@ for _,compact in ipairs({false,true}) do
   for _,layer in ipairs(source.layers) do
    local cel=layer:cel(i)
    if cel then im:drawImage(cel.image,cel.position) end
+  end
+  local pane=Image(128,height,ColorMode.RGB)
+  local cel=assert(window:cel(i));pane:drawImage(cel.image,cel.position)
+  local left,right,sill,border=12,68,60,4
+  if compact then left,right,sill,border=7,45,37,3 end
+  local sillHeight=compact and 2 or 3
+  for yy=sill,sill+sillHeight+1 do
+   local first,last
+   for xx=0,79 do if app.pixelColor.rgbaA(pane:getPixel(xx,yy))>0 then first=first or xx;last=xx end end
+   assert(first and first+last==left+right,'Sill or shadow is off-center')
+   if yy<sill+sillHeight then assert(first==left-border and last==right+border,'Unequal sill overhangs') end
   end
   if not baseline then baseline=Image(im) end
   local delta=0

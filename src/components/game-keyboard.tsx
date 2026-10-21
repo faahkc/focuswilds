@@ -11,8 +11,8 @@ const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
 const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
 
-export function GameKeyboard({ label, value, numeric, helpText, validate, onDone, onCancel }: {
-  label: string; value: string; numeric: boolean; helpText?: string; validate?: (value: string) => string
+export function GameKeyboard({ label, value, numeric, maxLength, helpText, validate, onDone, onCancel }: {
+  label: string; value: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
   onDone: (value: string) => void; onCancel: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -53,7 +53,9 @@ export function GameKeyboard({ label, value, numeric, helpText, validate, onDone
     if (composing.current) return
     if (numeric) {
       if (text && !/^\d+$/.test(text)) return
-      setDraft(backspace ? draft.slice(0, -1) : text ? replaceNumber.current ? text : draft + text : '')
+      const next = backspace ? draft.slice(0, -1) : text ? replaceNumber.current ? text : draft + text : ''
+      if (maxLength !== undefined && next.length > maxLength) return
+      setDraft(next)
       replaceNumber.current = false
       return
     }

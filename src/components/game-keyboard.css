@@ -4,14 +4,20 @@
 .game-editor::backdrop { background: var(--page-bg); }
 .game-editor-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .game-editor h2 { font-size: 24px; line-height: 32px; margin: 0 0 var(--space-group); }
-.game-editor-error { color: #93462d; margin-top: var(--space-group); }
+.game-editor-error, .game-editor-help { margin-top: var(--space-group); }
+.game-editor-error { color: #93462d; }
+.game-editor-numeric .game-editor-body { display: flex; flex-direction: column; }
+.game-editor-numeric .game-editor-body > * { flex-shrink: 0; }
+.game-editor-numeric h2 { margin-top: auto; }
 .game-keyboard { flex-shrink: 0; display: grid; gap: var(--space-label); }
+.game-keyboard.numeric { gap: var(--space-group); }
+.game-keyboard.numeric .game-key-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .game-keyboard:not(.numeric) { margin-left: calc(max(8px, env(safe-area-inset-left)) - var(--content-left)); margin-right: calc(max(8px, env(safe-area-inset-right)) - var(--content-right)); }
 .game-key-row { display: flex; justify-content: center; gap: 2px; }
 .game-key-row .game-key { flex-grow: 0; flex-shrink: 0; }
 .game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
 .game-key-tools { display: grid; grid-template-columns: 48px 44px minmax(0, 1fr) 44px 44px; gap: var(--space-label); }
-.game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .game-keyboard [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
 .game-editor-actions { flex-shrink: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }
 @media (min-aspect-ratio: 1/1) { .game-editor, .game-editor::backdrop { visibility: hidden; } }

@@ -84,7 +84,7 @@ test('shared game fields require deliberate editing and keep disabled/read-only 
   assert.equal(opens, 1)
 })
 
-test('symbol keyboard covers ASCII punctuation and preserves the draft and selected language', () => {
+test('shared keyboard preserves symbol drafts and enforces numeric validation without treating empty editing as an error', () => {
   const hooks = []
   let cursor = 0
   let committed
@@ -110,9 +110,9 @@ test('symbol keyboard covers ASCII punctuation and preserves the draft and selec
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
   new Function('require', 'module', 'exports', 'requestAnimationFrame', code)(name => { assert.ok(name in dependencies); return dependencies[name] }, module, module.exports, callback => callback())
-  const render = numeric => {
+  const render = (numeric, extra = {}) => {
     cursor = 0
-    return module.exports.GameKeyboard({ label: 'Task', value: '', numeric, onDone: value => { committed = value }, onCancel() {} })
+    return module.exports.GameKeyboard({ label: 'Task', value: '', numeric, onDone: value => { committed = value }, onCancel() {}, ...extra })
   }
   function elements(node) {
     return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
@@ -132,4 +132,27 @@ test('symbol keyboard covers ASCII punctuation and preserves the draft and selec
   elements(render(false)).find(node => node.props.children === 'Done').props.onClick()
   assert.equal(committed, '_')
   assert.ok(!elements(render(true)).some(node => node.props['aria-label'] === 'Show symbols'))
+  hooks.length = 0
+  committed = undefined
+  const number = () => elements(render(true, { value: '25', validate: durationError, helpText: '1-180 minutes' }))
+  const field = () => number().find(node => node.props['aria-label'] === 'Task')
+  const done = () => number().find(node => node.props.children === 'Done')
+  field().props.onChange({ target: { value: '' } })
+  assert.equal(field().props['aria-invalid'], false)
+  assert.equal(done().props.disabled, true)
+  assert.ok(number().some(node => node.props.className === 'game-editor-help'))
+  done().props.onClick()
+  field().props.onKeyDown({ key: 'Enter', nativeEvent: {}, preventDefault() {} })
+  assert.equal(committed, undefined)
+  field().props.onChange({ target: { value: '181' } })
+  assert.equal(field().props['aria-invalid'], true)
+  assert.equal(done().props.disabled, true)
+  assert.ok(number().some(node => node.props.className === 'game-editor-error'))
+  done().props.onClick()
+  assert.equal(committed, undefined)
+  field().props.onChange({ target: { value: '75' } })
+  assert.equal(field().props['aria-invalid'], false)
+  assert.equal(done().props.disabled, false)
+  done().props.onClick()
+  assert.equal(committed, '75')
 })

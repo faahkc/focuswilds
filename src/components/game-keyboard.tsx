@@ -10,8 +10,8 @@ const symbols = ['1234567890', '!@#$%^&*()', '-_+=[]{};:', '\'"\\|`~,./<>?']
 const thai = ['ๅ/-ภถุึคตจขช', 'ๆไำพะัีรนยบลฃ', 'ฟหกดเ้่าสวง', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,ฅ', 'ฤฆฏโฌ็๋ษศซ.', '()ฉฮฺ์?ฒฬฦ']
 
-export function GameKeyboard({ label, value, numeric, validate, onDone, onCancel }: {
-  label: string; value: string; numeric: boolean; validate?: (value: string) => string
+export function GameKeyboard({ label, value, numeric, helpText, validate, onDone, onCancel }: {
+  label: string; value: string; numeric: boolean; helpText?: string; validate?: (value: string) => string
   onDone: (value: string) => void; onCancel: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -23,13 +23,14 @@ export function GameKeyboard({ label, value, numeric, validate, onDone, onCancel
   const [showSymbols, setShowSymbols] = useState(false)
   const [systemKeyboard, setSystemKeyboard] = useState(false)
   const id = useId()
-  const error = validate?.(draft) ?? ''
+  const validationError = validate?.(draft) ?? ''
+  const error = numeric && draft === '' ? '' : validationError
   useEffect(() => {
     const element = dialog.current!
     const fullHeight = window.innerHeight
     element.showModal()
     input.current?.focus({ preventScroll: true })
-    input.current?.setSelectionRange(value.length, value.length)
+    input.current?.setSelectionRange(numeric ? 0 : value.length, value.length)
     const viewport = window.visualViewport
     const fit = () => {
       const height = viewport?.height ?? window.innerHeight
@@ -42,7 +43,7 @@ export function GameKeyboard({ label, value, numeric, validate, onDone, onCancel
     viewport?.addEventListener('scroll', fit)
     window.addEventListener('resize', fit)
     return () => { viewport?.removeEventListener('resize', fit); viewport?.removeEventListener('scroll', fit); window.removeEventListener('resize', fit); element.close() }
-  }, [value])
+  }, [value, numeric])
 
   function type(text: string, backspace = false) {
     if (composing.current) return
@@ -52,17 +53,17 @@ export function GameKeyboard({ label, value, numeric, validate, onDone, onCancel
     requestAnimationFrame(() => { element.focus({ preventScroll: true }); element.setSelectionRange(next.caret, next.caret) })
   }
   function cancel() { dialog.current?.close(); onCancel() }
-  function done() { if (!error && !composing.current) { dialog.current?.close(); onDone(draft) } }
+  function done() { if (!validationError && !composing.current) { dialog.current?.close(); onDone(draft) } }
   const rows = numeric ? ['123', '456', '789'] : showSymbols ? symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
   const columns = Math.max(...rows.map(row => [...row].length))
-  return <dialog ref={dialog} className="game-editor" aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }}>
+  return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }}>
     <div className="game-editor-body" role="region" aria-label="Text editor" tabIndex={0}>
       <h2 id={`${id}-label`}>{label}</h2>
-      <Input ref={input} aria-label={label} value={draft} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {
+      <Input ref={input} aria-label={label} value={draft} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {
         if (event.key === 'Backspace' && !event.nativeEvent.isComposing && !event.ctrlKey && !event.altKey && !event.metaKey) { event.preventDefault(); type('', true) }
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); done() }
       }}/>
-      {error && <p className="game-editor-error" id={`${id}-error`} role="status">{error}</p>}
+      {(error || helpText) && <p className={error ? 'game-editor-error' : 'game-editor-help'} id={`${id}-message`} role="status">{error || helpText}</p>}
     </div>
     {!systemKeyboard && <div className={`game-keyboard${numeric ? ' numeric' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
@@ -74,6 +75,6 @@ export function GameKeyboard({ label, value, numeric, validate, onDone, onCancel
         <Button className="game-key" aria-label="Delete previous character" onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}>Del</Button>
       </div>
     </div>}
-    <div className="game-editor-actions"><Button onClick={cancel}>Cancel</Button><Button disabled={!!error} onClick={done}>Done</Button></div>
+    <div className="game-editor-actions"><Button onClick={cancel}>Cancel</Button><Button disabled={!!validationError} onClick={done}>Done</Button></div>
   </dialog>
 }

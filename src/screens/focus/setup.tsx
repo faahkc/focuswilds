@@ -28,6 +28,6 @@ export default function FocusSetupPage({ value, onChange, onBack }: {
       </div>
     </div>
     <Button disabled aria-description="Coming soon. Timer sessions are not available yet.">Start focus</Button>
-    {editing && <GameKeyboard label="Focus minutes" value={String(value.minutes)} numeric validate={durationError} onCancel={close} onDone={minutes => { setCustom(true); onChange({ ...value, minutes: Number(minutes) }); close() }}/>}
+    {editing && <GameKeyboard label="Focus minutes" value={String(value.minutes)} numeric helpText="1–180 minutes" validate={durationError} onCancel={close} onDone={minutes => { setCustom(true); onChange({ ...value, minutes: Number(minutes) }); close() }}/>}
   </main>
 }

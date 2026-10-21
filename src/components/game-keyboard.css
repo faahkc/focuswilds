@@ -6,21 +6,19 @@
 .game-editor:not(.game-editor-numeric) .game-editor-body { display: flex; flex-direction: column; flex: 1 0 auto; min-height: var(--control-height); }
 .game-editor:not(.game-editor-numeric) .game-editor-body > * { flex-shrink: 0; }
 .game-editor:not(.game-editor-numeric) .game-editor-body > :first-child { margin-top: auto; }
-.game-editor h2 { font-size: 24px; line-height: 32px; margin: 0 0 var(--space-group); }
 .game-editor-error, .game-editor-help { margin-top: var(--space-group); }
 .game-editor-error { color: #93462d; }
 .game-editor-numeric { --number-line-height: 104px; overflow-y: auto; }
 .game-editor-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; gap: var(--space-group); }
-.game-editor-header h2 { margin: 0; font-size: 24px; line-height: 32px; }
+.game-editor-header h2 { margin: 0; font-size: var(--screen-title-size); line-height: var(--screen-title-line-height); }
 .game-editor-header .pixel-button { flex-shrink: 0; padding-inline: 12px; }
-.game-editor-numeric .game-editor-header h2 { font-size: 28px; line-height: 36px; }
 .game-editor-numeric .game-editor-body { display: flex; flex-direction: column; text-align: center; min-height: calc(var(--number-line-height) + var(--text-line-height) + var(--space-group)); }
 .game-editor-numeric .game-editor-body > * { flex-shrink: 0; }
 .game-number { display: block; margin-top: auto; font-size: 96px; line-height: var(--number-line-height); min-height: var(--number-line-height); overflow-wrap: anywhere; }
 .game-number:focus { outline: none; }
 .game-editor-numeric .game-editor-help, .game-editor-numeric .game-editor-error { margin-bottom: auto; }
 .game-editor .game-key { display: flex; align-items: center; justify-content: center; }
-@media (max-height: 650px) { .game-editor-numeric { --number-line-height: 80px; } .game-editor-numeric .game-editor-header h2 { font-size: 24px; line-height: 32px; } .game-number { font-size: 72px; } }
+@media (max-height: 650px) { .game-editor-numeric { --number-line-height: 80px; } .game-number { font-size: 72px; } }
 .game-keyboard { flex-shrink: 0; display: grid; gap: var(--space-group); }
 .game-keyboard.numeric .game-key-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .game-keyboard:not(.numeric) { margin-left: calc(max(8px, env(safe-area-inset-left)) - var(--content-left)); margin-right: calc(max(8px, env(safe-area-inset-right)) - var(--content-right)); }

@@ -1,4 +1,4 @@
 :root { --screen-padding-top: max(24px, env(safe-area-inset-top)); --screen-padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px)); --content-width: 440px; --content-gutter: 24px; --content-left: max(var(--content-gutter), env(safe-area-inset-left)); --content-right: max(var(--content-gutter), env(safe-area-inset-right)); }
 .app-screen .content-column { box-sizing: border-box; width: min(100%, var(--content-width)); margin-inline: auto; padding-left: var(--content-left); padding-right: var(--content-right); }
 
-@container screen (max-height: 650px) { .content-column, .game-editor { --screen-padding-top: max(20px, env(safe-area-inset-top)); } }
+@container screen (max-height: 650px) { .content-column, .game-editor { --screen-title-size: 24px; --screen-title-line-height: 32px; --screen-padding-top: max(20px, env(safe-area-inset-top)); } }

@@ -799,3 +799,9 @@ Six focus-setup tests, lint and build passed. Browser checks and visual inspecti
 The owner identified the key before ภ as underscore. It was actually mapped to hyphen; changed the normal Thai key to display and insert _. Shift and Symbols mappings remain unchanged. Updated the existing keyboard regression assertions and lasting guidance.
 
 Six focused tests, lint and build passed. Browser checks at 320x568 and 390x844 verified the key immediately precedes ภ and inserts U+005F; visually inspected .playwright-mcp/thai-underscore-320.png and thai-underscore-390.png. No new artwork or layout change. Physical devices remain unverified.
+
+### Thai Shift kho khon placement (2026-10-22)
+
+Moved ฅ from the second Thai Shift row to immediately after period in the third row, as requested. Normal Thai and other layouts remain unchanged; character widths and action geometry remain stable because the existing last-row constraint still governs key width. Updated the shared-keyboard regression assertion and lasting rules/plan.
+
+Six focused tests, lint and build passed. Browser checks at 320x568 and 390x844 verified placement, absence from row two and insertion of U+0E05; inspected .playwright-mcp/thai-shift-khokhon-320.png and thai-shift-khokhon-390.png. Physical-device touch remains unverified.

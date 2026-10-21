@@ -154,6 +154,11 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   const mark = button('้').props.children
   assert.equal(mark.props.children, '้')
   assert.equal(mark.props.className, 'game-key-mark')
+  button('Shift').props.onClick()
+  const shiftedThirdRow = elements(characterRows()[2]).filter(node => node.props['aria-label']).map(node => node.props['aria-label'])
+  assert.deepEqual(shiftedThirdRow.slice(-2), ['.', 'ฅ'])
+  assert.ok(!elements(characterRows()[1]).some(node => node.props['aria-label'] === 'ฅ'))
+  button('Shift').props.onClick()
   button('Show symbols').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Symbol keyboard'))
   const keys = elements(render(false)).filter(node => node.props.tabIndex === -1).map(node => node.props['aria-label'])

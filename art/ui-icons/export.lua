@@ -24,6 +24,23 @@ for index=5,6 do
  end end
  assert(minx+maxx==15 and miny+maxy==15,names[index]..' must stay centered')
 end
+-- The approved backspace outline joins by edges; its inner cross stays separate.
+local visited, pending = {}, {{6,2}}
+while #pending > 0 do
+ local point = table.remove(pending)
+ local x,y = point[1],point[2]
+ local key = y*16+x
+ if x>=0 and x<16 and y>=0 and y<16 and not visited[key] and app.pixelColor.rgbaA(base:getPixel(80+x,y))>0 then
+  visited[key]=true
+  for _,step in ipairs({{1,0},{-1,0},{0,1},{0,-1}}) do pending[#pending+1]={x+step[1],y+step[2]} end
+ end
+end
+for y=0,15 do for x=0,15 do
+ if app.pixelColor.rgbaA(base:getPixel(80+x,y))>0 then
+  local cross = x>=7 and x<=10 and y>=6 and y<=9
+  assert((visited[y*16+x]==true)~=cross,'Delete outline/cross separation changed')
+ end
+end end
 local atlas = Image(192,32,ColorMode.RGB)
 for y=0,31 do for x=0,191 do
   atlas:drawPixel(x,y,base:getPixel(math.floor(x/2),math.floor(y/2)))

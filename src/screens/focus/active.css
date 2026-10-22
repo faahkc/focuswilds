@@ -16,4 +16,5 @@
 @container focus-city (min-aspect-ratio: 13/10) { .focus-city-art { width: max(100cqw, calc(100cqh * 128 / 80)); aspect-ratio: 128 / 80; top: 100%; transform: translate(-50%, -100%); } .focus-city-player { top: 45%; } }
 .focus-round-note { text-align: center; }
 .focus-actions { display: grid; gap: inherit; }
+.focus-finish p { margin-bottom: var(--space-label); }
 @container screen (max-height: 650px) { .focus-active { gap: var(--space-action); } .focus-clock { font-size: 56px; line-height: 64px; } .focus-round-note { display: none; } }

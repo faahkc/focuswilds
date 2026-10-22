@@ -1,5 +1,11 @@
 # Development
 
+## Active task and Finish confirmation (2026-10-22)
+
+Blank/whitespace tasks now omit the centered task row, leaving the Focus header; entered tasks retain their accessible scrollable region. Finish opens a modal using the shared GameMenu frame styling, with Go back initially focused and Finish round as explicit confirmation. Go back/Escape leaves the timer unchanged and restores focus. The timer retains its running/paused state in the modal. Confirmation closes synchronously before calling the existing idempotent finish command; automatic countdown expiry dismisses the obsolete modal and focuses the heading.
+
+Verification: focused Active/controller tests passed (5 tests), lint and production build passed. Chromium preview checks covered all six Active states at 320x568 and 390x844 with fonts loaded, blank/long Thai tasks, confirmation from running/paused states, safe initial focus, Escape, cancellation and repeated confirmation. Native-size captures were inspected, including dialogs and long Thai tasks. Regression test tests/focus-active.test.mjs checks blank/trimmed titles, no command before confirmation, cancel, duplicate confirmation and expiry dismissal. Repeat in UI preview by opening Active, pressing Finish, canceling with Escape/Go back, then explicitly confirming; verify automatic expiry also closes an open dialog. Physical iOS/Android were not retested.
+
 ## Active action spacing (2026-10-22)
 
 The owner approved matching Active's stacked Pause/Resume and Finish gap to Home's section spacing. The action grid inherits the parent gap: 16px normally, 12px in short screen containers. Button height and bottom safe-area padding remain unchanged. Repeatable browser check: open Active in localhost UI preview at 320x568 and 390x844 after fonts load, subtract the first button's bottom from the second button's top, and verify 12px/16px respectively; the final button remains 24px from the viewport bottom without extra device safe-area insets. Native-size screenshots were inspected at both sizes and production build passed. Physical iOS/Android were not retested.

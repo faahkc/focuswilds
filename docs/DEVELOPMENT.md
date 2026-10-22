@@ -1,5 +1,11 @@
 # Development
 
+## Scoped UI review policy (2026-10-22)
+
+Owner approved reviewing according to the impact of the change to avoid repeating a full catalog audit for minor edits. Page-local changes cover that page and related states; shared component/CSS changes cover all affected callers, screens and states. New screens and completed major UI milestones retain a whole-interface overview. All applicable visual checks use 320x568 and 390x844 after fonts/artwork load, with actual visible pixels and shared standards checked proactively. Passing evidence may be reused within the same task unless subsequent changes affect it.
+
+AGENTS.md and IMPLEMENTATION_PLAN.md now replace the earlier blanket requirement below. The completed whole-interface review remains valid historical evidence, not a reason to repeat all 35 fixtures for every small change. Artwork approval, relevant state coverage, lasting-standard updates and honest physical-device limits remain required. Validation: inspected the documentation diff and checked whitespace; no runtime changes, so browser captures, tests and builds were not repeated.
+
 ## Whole-interface visual review and standing review requirement (2026-10-22)
 
 Owner requested another whole-interface review and made it a standing requirement for future UI tasks. Updated AGENTS.md and IMPLEMENTATION_PLAN.md: review the current whole interface proactively at both phone sizes before completion, including state/overlay coverage and actual visual comparison; record evidence and physical-device limits without promising zero future bugs. This task changes documentation only; no visual or gameplay behavior was changed.

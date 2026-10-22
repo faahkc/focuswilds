@@ -12,11 +12,11 @@ const moreSymbols = ['[]{}#%^*+=', '_\\|~<>€£¥°', ".,?!'"]
 const thai = ['ๅ/_ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,', 'ฤฆฏโฌ็๋ษศซ.ฅ', '()ฉฮฺ์?ฒฬฦ']
 
-// Optical offsets for standalone marks in the bundled 20px Unifont; inserted text stays unchanged.
+// Center mark labels horizontally; lower vowels keep their below-baseline position.
 const thaiMarkOffsets: Record<string, [number, number]> = {
-  'ั': [4, 5], 'ิ': [6, 5], 'ี': [6, 5], 'ึ': [6, 5], 'ื': [6, 5],
-  'ุ': [3, -9], 'ู': [4, -9], 'ํ': [3, 8], '็': [6, 7],
-  '่': [4, 8], '้': [4, 8], '๊': [5, 8], '๋': [4, 8], '์': [3, 8], 'ฺ': [4, -9],
+  'ั': [5, 5], 'ิ': [6, 5], 'ี': [5, 5], 'ึ': [5, 5], 'ื': [5, 5],
+  'ุ': [3, 0], 'ู': [4, 0], 'ํ': [3, 8], '็': [6, 7],
+  '่': [3, 8], '้': [4, 8], '๊': [5, 8], '๋': [4, 8], '์': [3, 8], 'ฺ': [4, 0],
 }
 
 export function GameKeyboard({ label, value, placeholder, numeric, maxLength, helpText, validate, onDone, onCancel }: {

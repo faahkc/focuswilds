@@ -888,3 +888,9 @@ Six focused tests, lint and build passed; build rerun after the font change. Ins
 ### Language-aware symbol return label (2026-10-22)
 
 The Return to letters button now displays ABC for English and กขค for Thai on both symbol pages. The 123 page toggle and return semantics are unchanged. Added a Thai-label regression assertion and updated active rules/plan. Six focused tests, lint and build passed. Browser assertions at 320x568 and 390x844 verified all eight language/page/viewport combinations and return to the correct keyboard; visually inspected Thai labels on both pages. Evidence: ignored .playwright-mcp/symbol-return-*.png. Physical-device rendering remains unverified.
+
+### Thai key-label lower vowels restored (2026-10-22)
+
+Owner clarified that the problem concerns glyph placement inside keys: lower vowels must appear below the baseline. Removed negative vertical translations from U+0E38/U+0E39/U+0E3A; these retain horizontal offsets only. Corrected one-pixel horizontal drift on mai han-akat, sara ii/ue/uee and mai ek. Key order, dimensions, font and inserted Unicode are unchanged. Updated the active guidance to replace all-marks vertical centering with an explicit lower-mark exception; added regression assertions for the three lower-mark transforms.
+
+Six focused tests, lint and build passed. Inspected normal/Shift at 320x568 and 390x844 after fonts loaded. Pixel checks place all three lower glyph centers at about y=30 within 48px keys (below the 22px face center), with no clipping. Browser typing confirmed the exact three lower-mark codepoints without inserted helpers. Evidence: ignored .playwright-mcp/thai-marks-lower-*.png. Earlier centered draft checks were superseded by the owner's semantic-position correction; they are not acceptance evidence. Physical-device rendering remains unverified.

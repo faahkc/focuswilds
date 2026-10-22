@@ -131,3 +131,5 @@ Owner-approved symbol actions (2026-10-22): replace Symbols Shift with a functio
 When adding keyboard characters, verify they exist in the bundled Unifont subset and inspect the actual rendered font; CSS font-family alone does not rule out fallback glyphs. Preserve prior glyph outlines, widths and global font metrics when extending the subset.
 
 Symbols return-label standard (owner approved, 2026-10-22): on both 123 and #+=, the Return to letters button displays ABC when opened from English and กขค when opened from Thai. Preserve the prior language, draft and return action; the #+= page toggle back to numbers still reads 123.
+
+Thai lower-mark positioning (owner correction, 2026-10-22): on key labels, lower vowels U+0E38/U+0E39 and phinthu U+0E3A retain their below-baseline vertical position; do not translate them upward to center their ink like upper marks. This supersedes the earlier all-marks vertical-centering requirement. Keep horizontal optical alignment, exact inserted characters and existing key order. Verify both normal/Shift grids with rendered glyph pixels, not span bounds alone.

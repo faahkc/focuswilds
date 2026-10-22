@@ -2,7 +2,7 @@
 import OwnerGame from '@/components/owner-game'
 import { ToastPreview } from '@/dev/toast-preview'
 
-function HomePreview() { return <OwnerGame onSignOut={() => {}}/> }
+function HomePreview() { return <OwnerGame preview onSignOut={() => {}}/> }
 
 export default { Default: HomePreview, cases: {
   'Toast notification': () => <ToastPreview><HomePreview/></ToastPreview>,

@@ -1,0 +1,48 @@
+/* Generated from the approved focus Aseprite masters. */
+.focus-city-art { background-image: url("./city-walk-atlas.png"); background-size: 3200% 100%; animation: focus-city 3840ms step-end infinite; }
+@keyframes focus-city {
+ 0.000000% { background-position: 0.000000% 0; }
+ 3.125000% { background-position: 3.225806% 0; }
+ 6.250000% { background-position: 6.451613% 0; }
+ 9.375000% { background-position: 9.677419% 0; }
+ 12.500000% { background-position: 12.903226% 0; }
+ 15.625000% { background-position: 16.129032% 0; }
+ 18.750000% { background-position: 19.354839% 0; }
+ 21.875000% { background-position: 22.580645% 0; }
+ 25.000000% { background-position: 25.806452% 0; }
+ 28.125000% { background-position: 29.032258% 0; }
+ 31.250000% { background-position: 32.258065% 0; }
+ 34.375000% { background-position: 35.483871% 0; }
+ 37.500000% { background-position: 38.709677% 0; }
+ 40.625000% { background-position: 41.935484% 0; }
+ 43.750000% { background-position: 45.161290% 0; }
+ 46.875000% { background-position: 48.387097% 0; }
+ 50.000000% { background-position: 51.612903% 0; }
+ 53.125000% { background-position: 54.838710% 0; }
+ 56.250000% { background-position: 58.064516% 0; }
+ 59.375000% { background-position: 61.290323% 0; }
+ 62.500000% { background-position: 64.516129% 0; }
+ 65.625000% { background-position: 67.741935% 0; }
+ 68.750000% { background-position: 70.967742% 0; }
+ 71.875000% { background-position: 74.193548% 0; }
+ 75.000000% { background-position: 77.419355% 0; }
+ 78.125000% { background-position: 80.645161% 0; }
+ 81.250000% { background-position: 83.870968% 0; }
+ 84.375000% { background-position: 87.096774% 0; }
+ 87.500000% { background-position: 90.322581% 0; }
+ 90.625000% { background-position: 93.548387% 0; }
+ 93.750000% { background-position: 96.774194% 0; }
+ 96.875000% { background-position: 100.000000% 0; }
+}
+.focus-city-player { background-image: url("./player-walk-atlas.png"); background-size: 800% 100%; animation: focus-player 960ms step-end infinite; }
+@keyframes focus-player {
+ 0.000000% { background-position: 0.000000% 0; }
+ 12.500000% { background-position: 14.285714% 0; }
+ 25.000000% { background-position: 28.571429% 0; }
+ 37.500000% { background-position: 42.857143% 0; }
+ 50.000000% { background-position: 57.142857% 0; }
+ 62.500000% { background-position: 71.428571% 0; }
+ 75.000000% { background-position: 85.714286% 0; }
+ 87.500000% { background-position: 100.000000% 0; }
+}
+@container focus-city (min-aspect-ratio: 13/10) { .focus-city-art { background-image: url("./city-walk-compact-atlas.png"); } }

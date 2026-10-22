@@ -18,7 +18,7 @@ function home() {
     },
     'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement },
     '@/components/button': { Button: () => null },
-    '@/components/app-version': { AppVersion: () => null },
+    '@/components/game-menu': { GameMenu: () => null },
     './system/loading': { __esModule: true, default: function PageLoading() {} },
     './system/app-error': { __esModule: true, default: function AppRecovery() {} },
     '@/assets/home-room-atlas.png': { default: 'portrait.png' },

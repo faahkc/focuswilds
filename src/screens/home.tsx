@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
-import { AppVersion } from '@/components/app-version'
+import { GameMenu } from '@/components/game-menu'
 import PageLoading from './system/loading'
 import AppRecovery from './system/app-error'
 import portrait from '@/assets/home-room-atlas.png'
@@ -41,11 +41,6 @@ export default function HomePage({ onSignOut, onStartFocus }: { onSignOut: () =>
       <Button className="home-unavailable" disabled aria-description="Coming soon">City</Button>
       <Button className="home-unavailable" disabled aria-description="Coming soon">Shop</Button>
     </nav>
-    <dialog ref={menu} className="home-menu pixel-frame" aria-labelledby="home-menu-title">
-      <h2 id="home-menu-title">Menu</h2>
-      <Button onClick={onSignOut}>Sign out</Button>
-      <Button onClick={() => menu.current?.close()}>Close</Button>
-      <AppVersion/>
-    </dialog>
+    <GameMenu menu={menu} onSignOut={onSignOut}/>
   </main>
 }

@@ -42,6 +42,7 @@ test('owner navigation preserves confirmed setup across Back and reentry without
     'react/jsx-runtime': { jsx: React.createElement },
     '@/screens/system/loading': { default: () => null },
     '@/lib/focus-setup': { initialFocusSetup },
+    './use-focus-round': { useFocusRound: () => ({ round: null, start() {} }) },
   }
   const source = readFileSync(new URL('../src/components/owner-game.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText

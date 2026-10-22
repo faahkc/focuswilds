@@ -6,8 +6,8 @@ import { GameKeyboard } from '@/components/game-keyboard'
 import { durationError, durationPresets, titleError, type FocusSetup } from '@/lib/focus-setup'
 import './setup.css'
 
-export default function FocusSetupPage({ value, onChange, onBack }: {
-  value: FocusSetup; onChange: (value: FocusSetup) => void; onBack: () => void
+export default function FocusSetupPage({ value, onChange, onBack, onStart }: {
+  value: FocusSetup; onChange: (value: FocusSetup) => void; onBack: () => void; onStart?: () => void
 }) {
   const customButton = useRef<HTMLButtonElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -27,7 +27,7 @@ export default function FocusSetupPage({ value, onChange, onBack }: {
       </div></section> : <section className="focus-count-up" aria-label="Count up timing"><p>Start at 00:00</p><p>Finish whenever you’re ready.</p></section>}
       </div>
     </div>
-    <Button disabled aria-description="Coming soon. Timer sessions are not available yet.">Start focus</Button>
+    <Button disabled={!onStart || !!titleError(value.title) || !!durationError(String(value.minutes))} aria-description={onStart ? undefined : "Preview only"} onClick={onStart}>Start focus</Button>
     {editing && <GameKeyboard label="Focus minutes" value={String(value.minutes)} numeric maxLength={3} helpText="1–180 minutes" validate={durationError} onCancel={close} onDone={minutes => { setCustom(true); onChange({ ...value, minutes: Number(minutes) }); close() }}/>}
   </main>
 }

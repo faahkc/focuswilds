@@ -1,0 +1,6 @@
+.game-menu { left: calc(var(--content-left) - var(--content-right)); border: 0; color: var(--text); width: min(calc(var(--content-width) - var(--content-left) - var(--content-right)), calc(100% - var(--content-left) - var(--content-right))); max-height: calc(100% - 48px); padding: var(--content-gutter); }
+.game-menu:not([open]) { display: none; }
+.game-menu[open] { display: grid; gap: var(--space-group); }
+.game-menu h2 { margin: 0 0 var(--space-label); font-size: 24px; }
+.game-menu .app-version { position: static; margin-top: var(--space-group); }
+.game-menu::backdrop { background: rgb(46 48 55 / 45%); }

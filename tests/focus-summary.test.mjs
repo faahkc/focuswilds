@@ -32,6 +32,7 @@ test('Summary renders actual focused time and unavailable outcomes without grant
     const html = renderToStaticMarkup(React.createElement(Summary, { round, onHome() {} }))
     assert.match(html, new RegExp(expected))
     assert.match(html, />Read<\/p>/)
+    assert.match(html, /<dl role="region" aria-label="Focus results" tabindex="0">/)
     assert.equal((html.match(/aria-label="Not available yet"/g) ?? []).length, 4)
     assert.match(html, /disabled="" aria-description="Coming soon">Take a break/)
     assert.match(html, />Back home<\/button>/)

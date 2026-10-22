@@ -1,5 +1,11 @@
 # Development
 
+## Summary stationary result frame correction (2026-10-22)
+
+Owner approved keeping the entire Brought home frame visible when short-screen content exceeds the available space. Removed scrolling from the surrounding summary content and moved the named, tabbable scroll region onto the result list. The frame can shrink while its heading, borders and padding remain stationary; only list contents scroll. Time, task, storage warning and actions retain their existing placement. Keyboard focus uses the existing cream frame-surface treatment rather than a native rectangular list outline. This supersedes the outer-content scrolling described in the initial Summary checkpoint.
+
+Verification: all five Summary fixtures were visually inspected at 320x568 and 390x844 after fonts loaded. Default/short/count-up layouts do not scroll; 320px long-task and recovery-warning lists scroll by 50px and 54px respectively. End reaches City walk; before/after frame bounds are identical, outer scroll remains zero, and the frame stays above the actions. Repeat in UI preview using Summary / Long Thai task and Recovery unavailable: focus Focus results, press End/Home, then wheel the list, and compare the frame bounds with the initial screenshot. Focused Summary tests (including the labelled, tabbable list), lint and production build passed. Captures: ignored .playwright-mcp/summary-fixed-*.png. Physical touch devices and screen readers were not retested.
+
 ## Dedicated Focus summary checkpoint (2026-10-22)
 
 Manual confirmed Finish and automatic countdown expiry now open the lazy Summary screen, including finished-round restoration after a same-tab reload. The approved composition uses Well done, actual elapsed time, optional entered task, Brought home with Coins / Player XP / Items found / City walk unavailable marks, disabled Take a break and working Back home. No new artwork was authored. Back home clears only the temporary round and returns Home; the previous Active/Finished presentation and fixture were removed. New summary fixtures cover default, short round, count-up beyond an hour, long Thai task and unavailable recovery. Live Active/Setup previews also reach Summary/Home without account imports or real storage.

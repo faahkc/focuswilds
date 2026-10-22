@@ -10,7 +10,7 @@ export default function FocusSummaryPage({ round, recoverable = true, onHome }: 
   useEffect(() => { heading.current?.focus({ preventScroll: true }) }, [])
   return <main className="focus-summary content-column">
     <header><h1 ref={heading} tabIndex={-1}>Well done</h1></header>
-    <div className="focus-summary-content" role="region" aria-label="Focus results" tabIndex={0}>
+    <div className="focus-summary-content">
       <section className="focus-summary-time" aria-label="Time focused">
         {round.setup.title.trim() && <p className="focus-summary-task" role="region" aria-label="Task" tabIndex={0}>{round.setup.title.trim()}</p>}
         <p className="focus-summary-label">Time focused</p>
@@ -18,7 +18,7 @@ export default function FocusSummaryPage({ round, recoverable = true, onHome }: 
       </section>
       <section className="focus-summary-results pixel-frame" aria-labelledby="results-title" aria-description="Rewards and city progress are coming soon.">
         <h2 id="results-title">Brought home</h2>
-        <dl>{['Coins', 'Player XP', 'Items found', 'City walk'].map(label => <div key={label}>
+        <dl role="region" aria-label="Focus results" tabIndex={0}>{['Coins', 'Player XP', 'Items found', 'City walk'].map(label => <div key={label}>
           <dt>{label}</dt><dd aria-label="Not available yet">—</dd>
         </div>)}</dl>
       </section>

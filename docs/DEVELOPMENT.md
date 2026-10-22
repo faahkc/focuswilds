@@ -1,5 +1,9 @@
 # Development
 
+## Active action spacing (2026-10-22)
+
+The owner approved matching Active's stacked Pause/Resume and Finish gap to Home's section spacing. The action grid inherits the parent gap: 16px normally, 12px in short screen containers. Button height and bottom safe-area padding remain unchanged. Repeatable browser check: open Active in localhost UI preview at 320x568 and 390x844 after fonts load, subtract the first button's bottom from the second button's top, and verify 12px/16px respectively; the final button remains 24px from the viewport bottom without extra device safe-area insets. Native-size screenshots were inspected at both sizes and production build passed. Physical iOS/Android were not retested.
+
 ## Initial owner Home (2026-10-20)
 
 After restoring the owner account, AuthPanel lazy-loads Home instead of showing the signed-in placeholder. New games begin with one black cat already at home; later city encounters are for additional cats. The initial view uses the approved apartment animation, reports 1 cat at home and exposes Menu with Sign out / Close. The menu uses shared frames/buttons and native modal focus handling. Existing Login busy/error states and owner UID enforcement are preserved. The owner subsequently approved Player Lv. 1 / 0 coins as initial display defaults. XP, names and mood are not invented; care, focus, shop and persisted progression remain unimplemented. No database reads/writes, schema changes or progress resets were introduced. Persistent starter-cat initialization belongs to the later saved-game work and must be idempotent.

@@ -311,6 +311,8 @@ Task editor heading (owner approved, 2026-10-22): use Task as the shared-size sc
 
 ## Local active Focus checkpoint (2026-10-22)
 
+Owner-approved action spacing: Active Pause/Resume and Finish share Home's section gap (16px, or 12px in screen containers at most 650px high), with unchanged shared bottom padding and button heights. Other related control groups retain their existing 8px spacing.
+
 Start focus now starts a validated, immutable setup snapshot and opens the approved v5 city/player screen after its code/artwork load. Countdown clamps at the chosen target and completes once; Count up continues until Finish. Pause excludes its duration; Resume continues from accumulated time. Display an empty/whitespace-only task as Focus without altering the setup draft. Retain the current round across orientation and Menu; sign-out pauses it before leaving. The player stops on pause/finish while ambience continues; all rendering pauses while hidden.
 
 The timer derives elapsed milliseconds from Date.now timestamps, not tick counts, and catches up on visibility/pageshow. Validated sessionStorage stores only starts/commands/completion, enabling reload recovery in the same tab. It is not durable session history and may be lost on tab/browser termination; blocked storage leaves the in-memory round usable with an inline warning. Back home after finishing discards this temporary record. Preview rounds are isolated in memory with no storage or account/database access. No new backend path, Firestore write or server rate limit is introduced. Local wall-clock changes can affect elapsed time; future reward settlement must not trust this record alone.

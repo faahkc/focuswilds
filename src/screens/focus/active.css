@@ -15,5 +15,5 @@
 .focus-active[data-paused="true"] .focus-city-player { animation-play-state: paused; }
 @container focus-city (min-aspect-ratio: 13/10) { .focus-city-art { width: max(100cqw, calc(100cqh * 128 / 80)); aspect-ratio: 128 / 80; top: 100%; transform: translate(-50%, -100%); } .focus-city-player { top: 45%; } }
 .focus-round-note { text-align: center; }
-.focus-actions { display: grid; gap: var(--space-group); }
+.focus-actions { display: grid; gap: inherit; }
 @container screen (max-height: 650px) { .focus-active { gap: var(--space-action); } .focus-clock { font-size: 56px; line-height: 64px; } .focus-round-note { display: none; } }

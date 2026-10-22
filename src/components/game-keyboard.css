@@ -31,8 +31,6 @@
 .game-key-tools { display: grid; gap: var(--space-group); }
 .game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .game-key-tools.letters { grid-template-columns: 48px 44px minmax(0, 1fr) 60px; }
-.game-key-tools.text { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.game-key-tools.text .game-key-space { grid-column: 1 / span 3; }
 .game-keyboard [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
 .game-editor-actions { flex-shrink: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-group); }
 @media (min-aspect-ratio: 1/1) { .game-editor, .game-editor::backdrop { visibility: hidden; } }

@@ -872,3 +872,9 @@ Updated the shared 123 page to the owner-selected ten-key second row. Reflowed r
 ### Symbols reduced to three character rows (2026-10-22)
 
 Owner replaced row three with period/comma/question mark/exclamation mark/apostrophe and removed row four. This explicitly supersedes complete ASCII punctuation coverage. Updated shared layout and active guidance; regression checks assert three rows, exact row order and confirmation of the inserted draft. 88 tests, lint and build passed. Browser insertion and visual checks passed at 320x568 and 390x844; evidence: ignored .playwright-mcp/symbols-three-rows-*.png. Physical-device rendering remains unverified.
+
+### Symbol actions and secondary page (2026-10-22)
+
+Moved Delete after apostrophe and replaced the unused symbol Shift with a functional #+=/123 toggle before period. Owner explicitly approved the additional symbol set. Both symbol pages retain the five-key punctuation row, use one ABC/language/Space/Enter tool row, and preserve the draft when switching. Starting symbols from letters resets to the primary 123 page. Removed the obsolete two-row tool styling; unchanged English/Thai and numeric arrangements retain their current dimensions. Updated active rules and regression coverage for placement, secondary keys and return behavior.
+
+Six focused setup/keyboard tests, lint and build passed. Browser assertions and visual inspection at 320x568 and 390x844 covered both symbol pages, access from English/Thai, toggle draft preservation, deletion and Enter confirmation. Screenshots: ignored .playwright-mcp/symbol-actions-*.png. No artwork changed. Physical-device touch/rendering remains unverified.

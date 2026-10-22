@@ -8,6 +8,7 @@ import './game-keyboard.css'
 const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
 const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 const symbols = ['1234567890', '-/:;()$&@"', ".,?!'"]
+const moreSymbols = ['[]{}#%^*+=', '_\\|~<>', ".,?!'"]
 const thai = ['ๅ/_ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,', 'ฤฆฏโฌ็๋ษศซ.ฅ', '()ฉฮฺ์?ฒฬฦ']
 
@@ -31,6 +32,7 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
   const [language, setLanguage] = useState<'en' | 'th'>('en')
   const [shift, setShift] = useState(false)
   const [showSymbols, setShowSymbols] = useState(false)
+  const [showMoreSymbols, setShowMoreSymbols] = useState(false)
   const [systemKeyboard, setSystemKeyboard] = useState(false)
   const id = useId()
   const validationError = validate?.(draft) ?? ''
@@ -73,17 +75,17 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
   }
   function cancel() { dialog.current?.close(); onCancel() }
   function done() { if (!validationError && !composing.current) { dialog.current?.close(); onDone(draft) } }
-  const rows = numeric ? ['123', '456', '789'] : showSymbols ? symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
+  const rows = numeric ? ['123', '456', '789'] : showSymbols ? showMoreSymbols ? moreSymbols : symbols : language === 'en' ? shift ? capitals : english : shift ? thaiShift : thai
   const columns = Math.max(...rows.map(row => [...row].length))
   const englishLetters = !numeric && !showSymbols && language === 'en'
   const thaiLetters = !numeric && !showSymbols && language === 'th'
-  const letterActions = englishLetters || thaiLetters
+  const rowActions = !numeric
   // Reserve two 44px actions plus character gaps in the last letter row.
   const keyWidth = `calc((100% - ${(columns - 1) * 2}px) / ${columns})`
   const letterWidth = `min(${keyWidth}, calc((100% - ${88 + (rows.at(-1)!.length + 1) * 2}px) / ${rows.at(-1)!.length}))`
   const shiftKey = <Button className="game-key game-key-shift" aria-label="Shift" aria-pressed={shift} disabled={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShift(!shift)}><PixelIcon name="keyboard-shift"/></Button>
   const deleteKey = <Button className="game-key game-key-delete" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="keyboard-delete"/></Button>
-  const languageKey = <Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button>
+  const languageKey = <Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false); setShowMoreSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button>
   const confirmKey = <Button className="game-key game-key-enter" aria-label="Confirm text" disabled={!!validationError} onPointerDown={event => event.preventDefault()} onClick={done}><PixelIcon name="keyboard-enter"/></Button>
   return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
     if (!numeric || event.nativeEvent.isComposing || event.ctrlKey || event.altKey || event.metaKey) return
@@ -102,15 +104,14 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
     </div>
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : thaiLetters ? ' thai' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">
-        {letterActions && index === rows.length - 1 && shiftKey}
+        {rowActions && index === rows.length - 1 && (showSymbols ? <Button className="game-key game-key-shift" aria-label={showMoreSymbols ? "Return to numbers" : "More symbols"} onPointerDown={event => event.preventDefault()} onClick={() => setShowMoreSymbols(!showMoreSymbols)}>{showMoreSymbols ? '123' : '#+='}</Button> : shiftKey)}
         {[...row].map((key, i) => <Button key={i} className="game-key" style={{ flexBasis: englishLetters ? letterWidth : thaiLetters ? 0 : keyWidth }} tabIndex={-1} aria-label={key} onPointerDown={event => event.preventDefault()} onClick={() => type(key)}>{thaiMarkOffsets[key] ? <span className="game-key-mark" style={{ transform: `translate(${thaiMarkOffsets[key][0]}px, ${thaiMarkOffsets[key][1]}px)` }}>{key}</span> : key}</Button>)}
-        {letterActions && index === rows.length - 1 && deleteKey}
+        {rowActions && index === rows.length - 1 && deleteKey}
       </div>)}
-      <div className={`game-key-tools${numeric ? ' numeric' : letterActions ? ' letters' : ' text'}`}>
+      <div className={`game-key-tools${numeric ? ' numeric' : ' letters'}`}>
         {numeric ? <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="keyboard-clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button>{deleteKey}</> : <>
-          <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => setShowSymbols(!showSymbols)}>{showSymbols ? 'ABC' : '123'}</Button>
+          <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => { setShowSymbols(!showSymbols); setShowMoreSymbols(false) }}>{showSymbols ? 'ABC' : '123'}</Button>
           {languageKey}
-          {!letterActions && <>{shiftKey}{deleteKey}</>}
           <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}/>{confirmKey}
         </>}
       </div>

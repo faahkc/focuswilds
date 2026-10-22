@@ -54,9 +54,9 @@ export default function ActiveFocusPage({ round, now, recoverable = true, onActi
     {!recoverable && <p role="alert">Keep this tab open. Reloads may lose this round.</p>}
     <div className="focus-actions">{finished ? <Button onClick={onHome}>Back home</Button> : <><Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button><Button onClick={() => finishDialog.current?.showModal()}>Finish</Button></>}</div>
     <dialog ref={finishDialog} className="game-menu focus-finish pixel-frame" aria-labelledby="finish-title" aria-describedby="finish-description">
-      <h2 id="finish-title">Finish round?</h2>
+      <h2 id="finish-title" tabIndex={-1} autoFocus>Finish round?</h2>
       <p id="finish-description">End this focus round now?</p>
-      <Button autoFocus onClick={() => finishDialog.current?.close()}>Go back</Button>
+      <Button onClick={() => finishDialog.current?.close()}>Go back</Button>
       <Button onClick={() => {
         if (!finishDialog.current?.open || finished) return
         finishDialog.current.close()

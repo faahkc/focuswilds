@@ -1,5 +1,11 @@
 # Development
 
+## Modal initial focus correction (2026-10-22)
+
+Owner requested removing the apparent selected frame on the first button when a modal opens. Menu and Finish confirmation now autofocus their non-tabbable heading instead of an action. The heading has no outline; buttons retain the shared focus-visible indicator when reached with Tab. This supersedes the earlier initial Go back focus requirement. Dialog containment and Escape/close focus return remain native.
+
+Verification: Chromium checks of Menu and Finish at 320x568 and 390x844 found H2 focused with zero focus-visible buttons on opening; Tab then focused Sign out or Go back with the normal indicator. Regression test asserts the Finish heading autofocus/tabIndex. Focused test, lint and build passed. Repeat by opening each modal, checking no selected-looking action, pressing Tab, and closing with Escape. Physical devices and screen readers were not retested.
+
 ## Active task and Finish confirmation (2026-10-22)
 
 Blank/whitespace tasks now omit the centered task row, leaving the Focus header; entered tasks retain their accessible scrollable region. Finish opens a modal using the shared GameMenu frame styling, with Go back initially focused and Finish round as explicit confirmation. Go back/Escape leaves the timer unchanged and restores focus. The timer retains its running/paused state in the modal. Confirmation closes synchronously before calling the existing idempotent finish command; automatic countdown expiry dismisses the obsolete modal and focuses the heading.

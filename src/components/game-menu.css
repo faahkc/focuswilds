@@ -2,5 +2,6 @@
 .game-menu:not([open]) { display: none; }
 .game-menu[open] { display: grid; gap: var(--space-group); }
 .game-menu h2 { margin: 0 0 var(--space-label); font-size: 24px; }
+.game-menu h2:focus { outline: none; }
 .game-menu .app-version { position: static; margin-top: var(--space-group); }
 .game-menu::backdrop { background: rgb(46 48 55 / 45%); }

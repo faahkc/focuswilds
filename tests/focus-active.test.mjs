@@ -40,6 +40,9 @@ test('Active hides blank tasks and requires an open confirmation before finishin
     visit(tree); return result
   }
   let nodes = elements(render())
+  const title = nodes.find(node => node.props.id === 'finish-title')
+  assert.equal(title.props.autoFocus, true)
+  assert.equal(title.props.tabIndex, -1)
   assert.equal(nodes.filter(node => node.props.className === 'focus-task').length, 0)
   const dialog = refs[1].current = { open: false, showModal() { this.open = true }, close() { this.open = false } }
   const button = name => nodes.find(node => node.type?.name === 'Button' && node.props.children === name)

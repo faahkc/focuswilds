@@ -120,6 +120,11 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
     return React.isValidElement(node) ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : []
   }
   const button = name => elements(render(false)).find(node => node.props['aria-label'] === name)
+  const optionalEditor = render(false, { optional: true })
+  assert.equal(elements(optionalEditor).find(node => node.type === 'h2').props.children, 'Task')
+  assert.equal(elements(optionalEditor).find(node => node.props.id === 'keyboard-test-optional').props.children, 'Optional')
+  assert.equal(optionalEditor.props['aria-describedby'], 'keyboard-test-optional')
+  assert.equal(render(false).props['aria-describedby'], undefined)
   assert.equal(button('Space').props.children, undefined)
   const confirm = () => button('Confirm text')
   assert.equal(confirm().props.children.props.name, 'keyboard-enter')

@@ -19,8 +19,8 @@ const thaiMarkOffsets: Record<string, [number, number]> = {
   '่': [3, 8], '้': [4, 8], '๊': [5, 8], '๋': [4, 8], '์': [3, 8], 'ฺ': [4, 0],
 }
 
-export function GameKeyboard({ label, value, placeholder, numeric, maxLength, helpText, validate, onDone, onCancel }: {
-  label: string; value: string; placeholder?: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
+export function GameKeyboard({ label, optional = false, value, placeholder, numeric, maxLength, helpText, validate, onDone, onCancel }: {
+  label: string; optional?: boolean; value: string; placeholder?: string; numeric: boolean; maxLength?: number; helpText?: string; validate?: (value: string) => string
   onDone: (value: string) => void; onCancel: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -87,13 +87,13 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
   const deleteKey = <Button className="game-key game-key-delete" aria-label={numeric ? 'Delete previous digit' : 'Delete previous character'} onPointerDown={event => event.preventDefault()} onClick={() => type('', true)}><PixelIcon name="keyboard-delete"/></Button>
   const languageKey = <Button className="game-key" aria-label="Switch keyboard language" onPointerDown={event => event.preventDefault()} onClick={() => { setLanguage(language === 'en' ? 'th' : 'en'); setShowSymbols(false); setShowMoreSymbols(false) }}>{language === 'en' ? 'ไทย' : 'EN'}</Button>
   const confirmKey = <Button className="game-key game-key-enter" aria-label="Confirm text" disabled={!!validationError} onPointerDown={event => event.preventDefault()} onClick={done}><PixelIcon name="keyboard-enter"/></Button>
-  return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
+  return <dialog ref={dialog} className={`game-editor${numeric ? ' game-editor-numeric' : ''}`} aria-labelledby={`${id}-label`} aria-describedby={optional ? `${id}-optional` : undefined} onCancel={event => { event.preventDefault(); cancel() }} onKeyDown={event => {
     if (!numeric || event.nativeEvent.isComposing || event.ctrlKey || event.altKey || event.metaKey) return
     if (/^\d$/.test(event.key)) { event.preventDefault(); type(event.key) }
     else if (event.key === 'Backspace' || event.key === 'Delete') { event.preventDefault(); type('', event.key === 'Backspace') }
     else if (event.key === 'Enter' && !(event.target as HTMLElement).closest('button')) { event.preventDefault(); done() }
   }}>
-    <header className="game-editor-header"><h2 id={`${id}-label`}>{label}</h2><Button onClick={cancel}>Back</Button></header>
+    <header className="game-editor-header"><div className="game-editor-header-copy"><h2 id={`${id}-label`}>{label}</h2>{optional && <p id={`${id}-optional`}>Optional</p>}</div><Button onClick={cancel}>Back</Button></header>
     <div className="game-editor-body" role="region" aria-label={numeric ? 'Number editor' : 'Text editor'} tabIndex={0}>
       {numeric ? <output ref={number} className="game-number" tabIndex={0} aria-label={label} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined}>{draft || '—'}</output> :
       <Input ref={input} aria-label={label} value={draft} placeholder={placeholder} inputMode="none" autoComplete="off" spellCheck={false} aria-invalid={!!error} aria-describedby={error || helpText ? `${id}-message` : undefined} onChange={event => setDraft(event.target.value)} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false }} onKeyDown={event => {

@@ -39,6 +39,6 @@
 
 .game-keyboard.numeric .game-key { font-size: 24px; }
 
-.game-editor-header-copy { display: grid; gap: var(--space-group); min-width: 0; }
+.game-editor-header-copy { display: grid; gap: var(--space-label); min-width: 0; }
 .game-editor-header-copy p { margin: 0; }
 .game-editor-header:has(.game-editor-header-copy p) { align-items: flex-start; }

@@ -8,6 +8,8 @@ When a proposed change conflicts with an existing requirement without an explici
 
 The current shared UI baseline is implemented: content columns and primary-action widths, role-based typography and spacing, pixel frames and controls, and visible-pixel alignment for all four UI icons. Apply the existing shared tokens/components to new screens and audit all affected states when changing them; do not recreate independent screen-specific standards. See the latest checkpoint in DEVELOPMENT.md for verified behavior and remaining acceptance work.
 
+Owner-required final review (2026-10-22): every UI task ends with a proactive whole-interface review at 320x568 and 390x844 after fonts/artwork load, including the current automatically discovered screen catalog, normal/busy/error/long/Thai/recovery states and applicable overlays/editors. Compare actual visible typography, icons, gaps, frames, control edges/heights, scene clearance, focus and scrolling together. Fix routine regressions within the approved direction before completion, record evidence/device limits, and update lasting standards in the same task. Do not wait for a repeated owner instruction or infer physical-device acceptance from preview captures.
+
 Owner decision (2026-10-21): retain Home Menu's existing Sign out / Close presentation. The proposed secondary cream Close button is canceled; do not treat it as pending approval or implement it. The owner subsequently approved the three-screen Focus direction and v5 city/player artwork, then authorized implementing Before focus first with the shared keyboard. Local active timer, dedicated Summary and rest countdown are implemented; persistent settlement remains a subsequent step.
 
 ## Approved cat-care game direction (2026-10-19; planned)

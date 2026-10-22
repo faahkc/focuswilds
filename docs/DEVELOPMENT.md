@@ -1,5 +1,9 @@
 # Development
 
+## Rest status copy (2026-10-22)
+
+Owner approved Ready when you are. beneath the apartment after rest finishes. Running/paused rest retains A moment with your cat. The existing short-screen rule hides this optional note at 320x568; 390x844 shows the status-specific copy. Checked both states at both sizes in Chromium; production build passed. No timing, layout or artwork changes. Physical devices were not retested.
+
 ## Rest countdown checkpoint (2026-10-22)
 
 Owner approved the next Focus → Summary → rest loop. Summary Take a break opens a shared modal with 5/10/15-minute presets, default 5, Start break and Go back. Preset controls show numbers beneath Break minutes, with labelled minute values for accessibility; selected state uses the existing cream frame. Dialogs initially focus their heading. Selection/cancel does not start time. The start dialog closes before the synchronously guarded start command.

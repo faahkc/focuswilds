@@ -49,7 +49,7 @@ export default function RestPage({ round, now, recoverable = true, onAction, onF
       <p className="focus-clock" role="timer" aria-live="off">{clock}</p>
     </section>
     <div className="home-room pixel-frame" role="img" aria-label="Your black cat resting in the apartment."><div className="home-room-window"><div className="home-room-art"/></div></div>
-    <p className="focus-round-note">A moment with your cat.</p>
+    <p className="focus-round-note">{finished ? 'Ready when you are.' : 'A moment with your cat.'}</p>
     {!recoverable && <p role="alert">Keep this tab open. Reloads may lose this break.</p>}
     <div className="focus-actions">{finished ? <><Button onClick={onFocus}>Focus again</Button><Button onClick={onHome}>Back home</Button></> : <>
       <Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button>

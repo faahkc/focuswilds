@@ -868,3 +868,7 @@ Lint and build passed. Repeatable browser check at 320x568 and 390x844: open Tas
 ### Symbols second row updated (2026-10-22)
 
 Updated the shared 123 page to the owner-selected ten-key second row. Reflowed remaining punctuation into rows three/four so every prior ASCII symbol remains available without duplication. Existing dimensions/actions are unchanged. Added a regression assertion for exact row order; existing full ASCII coverage check still passes. 88 tests, lint and build passed. Browser checks and visual review at 320x568 and 390x844 confirmed row order and actual insertion of every second-row character. Evidence: ignored .playwright-mcp/symbols-row2-*.png. Physical-device touch/rendering remains unverified.
+
+### Symbols reduced to three character rows (2026-10-22)
+
+Owner replaced row three with period/comma/question mark/exclamation mark/apostrophe and removed row four. This explicitly supersedes complete ASCII punctuation coverage. Updated shared layout and active guidance; regression checks assert three rows, exact row order and confirmation of the inserted draft. 88 tests, lint and build passed. Browser insertion and visual checks passed at 320x568 and 390x844; evidence: ignored .playwright-mcp/symbols-three-rows-*.png. Physical-device rendering remains unverified.

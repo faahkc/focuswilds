@@ -7,7 +7,7 @@ import './game-keyboard.css'
 
 const english = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
 const capitals = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
-const symbols = ['1234567890', '-/:;()$&@"', '!#%^*_+=[]', "{}'\\|`~,.<>?"]
+const symbols = ['1234567890', '-/:;()$&@"', ".,?!'"]
 const thai = ['ๅ/_ภถุึคตจขช', 'ๆไำพะัีรนยบล', 'ฟหกดเ้่าสวงฃ', 'ผปแอิืทมใฝ']
 const thaiShift = ['+๑๒๓๔ู฿๕๖๗๘๙', '๐"ฎฑธํ๊ณฯญฐ,', 'ฤฆฏโฌ็๋ษศซ.ฅ', '()ฉฮฺ์?ฒฬฦ']
 

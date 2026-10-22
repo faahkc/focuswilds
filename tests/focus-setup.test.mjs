@@ -165,16 +165,13 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   button('Show symbols').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Symbol keyboard'))
   assert.deepEqual(elements(characterRows()[1]).filter(node => node.props['aria-label']).map(node => node.props['aria-label']), [...'-/:;()$&@"'])
-  const keys = elements(render(false)).filter(node => node.props.tabIndex === -1).map(node => node.props['aria-label'])
-  for (let code = 33; code <= 126; code++) {
-    const character = String.fromCharCode(code)
-    if (!/[a-z]/i.test(character)) assert.ok(keys.includes(character), character)
-  }
-  button('_').props.onClick()
+  assert.equal(characterRows().length, 3)
+  assert.deepEqual(elements(characterRows()[2]).filter(node => node.props['aria-label']).map(node => node.props['aria-label']), [...".,?!'"])
+  button('.').props.onClick()
   button('Return to letters').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Thai keyboard'))
   confirm().props.onClick()
-  assert.equal(committed, '_')
+  assert.equal(committed, '.')
   const invalidText = elements(render(false, { validate: () => 'Invalid task' })).find(node => node.props['aria-label'] === 'Confirm text')
   assert.equal(invalidText.props.disabled, true)
   committed = undefined
@@ -186,7 +183,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   assert.equal(committed, undefined)
   compose().onCompositionEnd()
   confirm().props.onClick()
-  assert.equal(committed, '_')
+  assert.equal(committed, '.')
   assert.ok(!elements(render(true)).some(node => node.props['aria-label'] === 'Show symbols'))
   hooks.length = 0
   committed = undefined

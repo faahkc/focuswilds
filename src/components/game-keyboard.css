@@ -27,6 +27,7 @@
 .game-keyboard.thai .game-key-row .game-key { flex: 1 0 0; }
 .game-key-row .game-key-delete, .game-key-row .game-key-shift { flex: 1 0 44px; }
 .game-editor .game-key { min-width: 0; padding: 12px 0 16px; }
+.game-editor .game-keyboard.thai .game-key { min-height: 48px; padding-block: 6px 10px; }
 .game-key-tools { display: grid; gap: var(--space-group); }
 .game-key-tools.numeric { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .game-key-tools.letters { grid-template-columns: 48px 44px minmax(0, 1fr) 60px; }

@@ -172,6 +172,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   button('More symbols').props.onClick()
   for (const key of '#%^*+=[]{}_\\|~<>') assert.ok(button(key), key)
   assert.equal(characterRows().length, 3)
+  assert.deepEqual(elements(characterRows()[1]).filter(node => node.props['aria-label']).map(node => node.props['aria-label']), [...'_\\|~<>€£¥°'])
   button('#').props.onClick()
   button('Return to numbers').props.onClick()
   assert.ok(button('1'))

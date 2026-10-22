@@ -1,5 +1,13 @@
 # Development
 
+## Dedicated Focus summary checkpoint (2026-10-22)
+
+Manual confirmed Finish and automatic countdown expiry now open the lazy Summary screen, including finished-round restoration after a same-tab reload. The approved composition uses Well done, actual elapsed time, optional entered task, Brought home with Coins / Player XP / Items found / City walk unavailable marks, disabled Take a break and working Back home. No new artwork was authored. Back home clears only the temporary round and returns Home; the previous Active/Finished presentation and fixture were removed. New summary fixtures cover default, short round, count-up beyond an hour, long Thai task and unavailable recovery. Live Active/Setup previews also reach Summary/Home without account imports or real storage.
+
+The shared column, pixel frame, typography and 16px/12px action spacing remain intact. All five summary fixtures were captured and inspected after fonts loaded at 320x568 and 390x844; primary actions stay 24px above the viewport bottom without extra safe-area insets. Long task/error content scrolls inside a named keyboard-accessible region; the last result remains reachable and storage warnings stay outside the scroll region. Default/short/count-up content fits without scrolling. Evidence: ignored .playwright-mcp/summary-*.png and summary-scrolled-*.png.
+
+Validation: 95 offline tests, lint and production build passed. Added tests check actual partial/countdown/count-up time, unavailable result marks, disabled rest, round immutability, restored/manual/automatic finished routing and cleanup only on Back home. A real OwnerGame controller mounted in a localhost test host (no authentication services) passed simulated 25-minute expiry, finished reload restoration, Back home storage cleanup and a 12-second count-up with repeated Finish confirmation. Existing local timing/storage limitations remain; this is not cloud history or trusted reward settlement. No Firebase changes or new rate-limited path was introduced. Physical iOS/Android, deployed authenticated handoff and screen readers were not retested. Next: agree rest behavior and bounded/idempotent owner-only settlement before granting rewards.
+
 ## Modal initial focus correction (2026-10-22)
 
 Owner requested removing the apparent selected frame on the first button when a modal opens. Menu and Finish confirmation now autofocus their non-tabbable heading instead of an action. The heading has no outline; buttons retain the shared focus-visible indicator when reached with Tab. This supersedes the earlier initial Go back focus requirement. Dialog containment and Escape/close focus return remain native.

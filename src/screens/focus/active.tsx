@@ -17,9 +17,9 @@ function loadArtwork() {
   })).catch(error => { artwork = undefined; throw error })
 }
 
-export default function ActiveFocusPage({ round, now, recoverable = true, onAction, onHome, onSignOut }: {
+export default function ActiveFocusPage({ round, now, recoverable = true, onAction, onSignOut }: {
   round: FocusRound; now: number; recoverable?: boolean
-  onAction: (action: 'pause' | 'resume' | 'finish') => void; onHome: () => void; onSignOut: () => void
+  onAction: (action: 'pause' | 'resume' | 'finish') => void; onSignOut: () => void
 }) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const menu = useRef<HTMLDialogElement>(null)
@@ -50,9 +50,9 @@ export default function ActiveFocusPage({ round, now, recoverable = true, onActi
       <p className="focus-clock" role="timer" aria-live="off">{clock}</p>
     </section>
     <div className="focus-city pixel-frame" role="img" aria-label="A quiet city street with a walking player, swaying leaves and a shop awning."><div className="focus-city-window"><div className="focus-city-art"><div className="focus-city-player"/></div></div></div>
-    <p className="focus-round-note">{finished ? 'Round finished.' : 'One thing at a time.'}</p>
+    <p className="focus-round-note">One thing at a time.</p>
     {!recoverable && <p role="alert">Keep this tab open. Reloads may lose this round.</p>}
-    <div className="focus-actions">{finished ? <Button onClick={onHome}>Back home</Button> : <><Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button><Button onClick={() => finishDialog.current?.showModal()}>Finish</Button></>}</div>
+    <div className="focus-actions"><Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button><Button onClick={() => finishDialog.current?.showModal()}>Finish</Button></div>
     <dialog ref={finishDialog} className="game-menu focus-finish pixel-frame" aria-labelledby="finish-title" aria-describedby="finish-description">
       <h2 id="finish-title" tabIndex={-1} autoFocus>Finish round?</h2>
       <p id="finish-description">End this focus round now?</p>

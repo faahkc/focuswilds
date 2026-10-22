@@ -1,0 +1,19 @@
+.focus-summary { height: 100%; min-height: 540px; padding-top: var(--screen-padding-top); padding-bottom: var(--screen-padding-bottom); display: flex; flex-direction: column; gap: var(--space-section); }
+.focus-summary header, .focus-summary-actions, .focus-summary-warning { flex-shrink: 0; }
+.focus-summary h1 { font-size: var(--screen-title-size); line-height: var(--screen-title-line-height); }
+.focus-summary h1:focus { outline: none; }
+.focus-summary-content { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: var(--space-section); }
+.focus-summary-content > * { flex-shrink: 0; }
+.focus-summary-time { display: grid; gap: var(--space-group); text-align: center; margin-top: auto; }
+.focus-summary-task { max-height: calc(var(--text-line-height) * 2); overflow: auto; overflow-wrap: anywhere; }
+.focus-summary-label { color: var(--muted); }
+.focus-summary-clock { font-size: 64px; line-height: 72px; overflow-wrap: anywhere; }
+.focus-summary-results { padding: var(--control-padding); margin-bottom: auto; }
+.focus-summary-results h2 { font-size: var(--text-size); line-height: var(--text-line-height); margin-bottom: var(--space-group); }
+.focus-summary-results dl, .focus-summary-results dd { margin: 0; }
+.focus-summary-results dl { display: grid; gap: var(--space-group); }
+.focus-summary-results dl > div { display: flex; justify-content: space-between; gap: var(--space-action); }
+.focus-summary-results dl > div:last-child { border-top: 2px solid var(--text); margin-top: var(--space-label); padding-top: var(--space-action); }
+.focus-summary-actions { display: grid; gap: inherit; }
+.focus-summary-actions button:disabled { cursor: not-allowed; }
+@container screen (max-height: 650px) { .focus-summary, .focus-summary-content { gap: var(--space-action); } .focus-summary-clock { font-size: 56px; line-height: 64px; } }

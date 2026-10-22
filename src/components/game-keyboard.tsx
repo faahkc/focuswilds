@@ -110,7 +110,7 @@ export function GameKeyboard({ label, value, placeholder, numeric, maxLength, he
       </div>)}
       <div className={`game-key-tools${numeric ? ' numeric' : ' letters'}`}>
         {numeric ? <><Button className="game-key" aria-label="Clear number" onPointerDown={event => event.preventDefault()} onClick={() => type('')}><PixelIcon name="keyboard-clear"/></Button><Button className="game-key" tabIndex={-1} onPointerDown={event => event.preventDefault()} onClick={() => type('0')}>0</Button>{deleteKey}</> : <>
-          <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => { setShowSymbols(!showSymbols); setShowMoreSymbols(false) }}>{showSymbols ? 'ABC' : '123'}</Button>
+          <Button className="game-key" aria-label={showSymbols ? 'Return to letters' : 'Show symbols'} aria-pressed={showSymbols} onPointerDown={event => event.preventDefault()} onClick={() => { setShowSymbols(!showSymbols); setShowMoreSymbols(false) }}>{showSymbols ? language === 'th' ? 'กขค' : 'ABC' : '123'}</Button>
           {languageKey}
           <Button className="game-key game-key-space" aria-label="Space" onPointerDown={event => event.preventDefault()} onClick={() => type(' ')}/>{confirmKey}
         </>}

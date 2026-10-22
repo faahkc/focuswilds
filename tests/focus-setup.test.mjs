@@ -164,6 +164,7 @@ test('shared keyboard preserves symbol drafts and enforces numeric validation wi
   button('Shift').props.onClick()
   button('Show symbols').props.onClick()
   assert.ok(elements(render(false)).some(node => node.props['aria-label'] === 'Symbol keyboard'))
+  assert.equal(button('Return to letters').props.children, 'กขค')
   assert.deepEqual(elements(characterRows()[1]).filter(node => node.props['aria-label']).map(node => node.props['aria-label']), [...'-/:;()$&@"'])
   assert.equal(characterRows().length, 3)
   assert.deepEqual(elements(characterRows()[2]).filter(node => node.props['aria-label']).map(node => node.props['aria-label']), ['More symbols', ...".,?!'", 'Delete previous character'])

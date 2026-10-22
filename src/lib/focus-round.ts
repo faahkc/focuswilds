@@ -8,6 +8,13 @@ export type FocusRound = {
   status: 'running' | 'paused' | 'finished'
 }
 export const roundStorageKey = 'focuswilds.focus-round.v1'
+export const restStorageKey = 'focuswilds.rest-round.v1'
+export const restPresets = [5, 10, 15]
+
+export function startRest(minutes: number, now: number): FocusRound {
+  if (!restPresets.includes(minutes)) throw new Error('Invalid rest duration')
+  return startRound({ title: '', mode: 'down', minutes }, now)
+}
 
 export function startRound(setup: FocusSetup, now: number): FocusRound {
   if (!['down', 'up'].includes(setup.mode) || titleError(setup.title) || durationError(String(setup.minutes)) || !Number.isFinite(now) || now < 0) throw new Error('Invalid focus setup')
@@ -28,11 +35,15 @@ export function changeRound(round: FocusRound, action: 'tick' | 'pause' | 'resum
   return round
 }
 
-export function restoreRound(raw: string | null): FocusRound | null {
+export function restoreRound(raw: string | null, phase: 'focus' | 'rest' = 'focus'): FocusRound | null {
   try {
     const value = JSON.parse(raw ?? 'null') as FocusRound
     if (!value || value.version !== 1 || !value.setup || typeof value.setup.title !== 'string' || !Number.isInteger(value.setup.minutes)) return null
     startRound(value.setup, 0)
+    if (phase === 'rest') {
+      startRest(value.setup.minutes, 0)
+      if (value.setup.mode !== 'down' || value.setup.title !== '') return null
+    }
     if (!Number.isFinite(value.elapsedMs) || value.elapsedMs < 0 || value.elapsedMs > Number.MAX_SAFE_INTEGER || !['running', 'paused', 'finished'].includes(value.status)) return null
     if (value.status === 'running' ? typeof value.startedAt !== 'number' || !Number.isFinite(value.startedAt) || value.startedAt < 0 : value.startedAt !== null) return null
     if (value.setup.mode === 'down' && value.elapsedMs > value.setup.minutes * 60_000) return null

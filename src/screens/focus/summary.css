@@ -17,4 +17,8 @@
 .focus-summary-results dl > div:last-child { border-top: 2px solid var(--text); margin-top: var(--space-label); padding-top: var(--space-action); }
 .focus-summary-actions { display: grid; gap: inherit; }
 .focus-summary-actions button:disabled { cursor: not-allowed; }
+.break-presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
+.break-duration { display: grid; gap: var(--space-label); }
+.break-presets button { padding-inline: 4px; }
+.break-presets [aria-pressed="true"] { color: var(--text); background: transparent; box-shadow: none; }
 @container screen (max-height: 650px) { .focus-summary, .focus-summary-content { gap: var(--space-action); } .focus-summary-clock { font-size: 56px; line-height: 64px; } }

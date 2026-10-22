@@ -5,6 +5,27 @@ import ts from 'typescript'
 import * as rounds from '../src/lib/focus-round.ts'
 import { initialFocusSetup } from '../src/lib/focus-setup.ts'
 
+test('rest uses only approved countdown presets and rejects invalid restored rest records', () => {
+  assert.deepEqual(rounds.restPresets, [5, 10, 15])
+  for (const minutes of rounds.restPresets) {
+    const rest = rounds.startRest(minutes, 1000)
+    assert.deepEqual(rest.setup, { title: '', mode: 'down', minutes })
+    assert.deepEqual(rounds.restoreRound(JSON.stringify(rest), 'rest'), rest)
+    const paused = rounds.changeRound(rest, 'pause', 61_000)
+    assert.equal(rounds.elapsedTime(paused, 1_000_000), 60_000)
+    const resumed = rounds.changeRound(paused, 'resume', 1_000_000)
+    const finished = rounds.changeRound(resumed, 'tick', 2_000_000)
+    assert.equal(finished.elapsedMs, minutes * 60_000)
+    assert.equal(rounds.changeRound(finished, 'finish', 3_000_000), finished)
+  }
+  for (const minutes of [0, 1, 25, 180, 5.5, NaN]) assert.throws(() => rounds.startRest(minutes, 0))
+  const rest = rounds.startRest(5, 0)
+  for (const setup of [{ ...rest.setup, title: 'task' }, { ...rest.setup, mode: 'up' }, { ...rest.setup, minutes: 25 }]) {
+    assert.equal(rounds.restoreRound(JSON.stringify({ ...rest, setup }), 'rest'), null)
+  }
+  assert.notEqual(rounds.restStorageKey, rounds.roundStorageKey)
+})
+
 test('countdown uses elapsed timestamps across a suspended tab and completes once at its exact target', () => {
   const round = rounds.startRound(initialFocusSetup, 1000)
   assert.equal(rounds.elapsedTime(round, 31_000), 30_000)

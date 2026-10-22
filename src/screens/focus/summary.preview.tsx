@@ -1,11 +1,15 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export presentation cases. */
 import FocusSummaryPage from './summary'
+import { useFocusRound } from '@/components/use-focus-round'
+import RestPage from './rest'
 import { startRound, type FocusRound } from '@/lib/focus-round'
 import { initialFocusSetup } from '@/lib/focus-setup'
 
 const base: FocusRound = { ...startRound(initialFocusSetup, 0), status: 'finished', startedAt: null, elapsedMs: 1_500_000 }
 function SummaryPreview({ round = base, recoverable = true }: { round?: FocusRound; recoverable?: boolean }) {
-  return <FocusSummaryPage round={round} recoverable={recoverable} onHome={() => {}}/>
+  const rest = useFocusRound(false, 'rest')
+  if (rest.round) return <RestPage round={rest.round} now={rest.now} onAction={rest.action} onHome={rest.close} onFocus={rest.close} onSignOut={() => {}}/>
+  return <FocusSummaryPage round={round} recoverable={recoverable} onRest={minutes => rest.start({ title: '', mode: 'down', minutes })} onHome={() => {}}/>
 }
 export default { Default: SummaryPreview, cases: {
   'Short round': () => <SummaryPreview round={{ ...base, elapsedMs: 12_000 }}/>,

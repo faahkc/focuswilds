@@ -5,7 +5,7 @@ import React from 'react'
 import * as jsx from 'react/jsx-runtime'
 import { renderToStaticMarkup } from 'react-dom/server'
 import ts from 'typescript'
-import { startRound, changeRound, formatFocusTime } from '../src/lib/focus-round.ts'
+import { startRound, startRest, restPresets, changeRound, formatFocusTime } from '../src/lib/focus-round.ts'
 import { initialFocusSetup } from '../src/lib/focus-setup.ts'
 
 function load(path, dependencies) {
@@ -24,7 +24,7 @@ test('Summary renders actual focused time and unavailable outcomes without grant
   const Summary = load('../src/screens/focus/summary.tsx', {
     react: React, 'react/jsx-runtime': jsx,
     '@/components/button': { Button: props => React.createElement('button', props) },
-    '@/lib/focus-round': { formatFocusTime }, './summary.css': {},
+    '@/lib/focus-round': { formatFocusTime, restPresets }, './summary.css': {}, '@/components/game-menu.css': {},
   })
   for (const [mode, elapsed, expected] of [['down', 12_000, '00:12'], ['down', 1_500_000, '25:00'], ['up', 3_723_000, '1:02:03']]) {
     const round = changeRound(startRound({ ...initialFocusSetup, mode, title: '  Read  ' }, 0), 'finish', elapsed)
@@ -48,11 +48,15 @@ test('Owner routes restored/manual/automatic finished rounds to Summary and clea
     action(action) { this.round = changeRound(this.round, action, this.now) },
     close() { clears++; this.round = null },
   }
+  const rest = { round: null, now: 12_000, recoverable: true,
+    start(setup) { this.round = startRest(setup.minutes, this.now) },
+    close() { this.round = null },
+  }
   const Owner = load('../src/components/owner-game.tsx', {
     react: { Suspense: React.Suspense, lazy: () => { const screen = function Screen() {}; screens.push(screen); return screen },
       useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; return [values[i], value => { values[i] = value }] } },
     'react/jsx-runtime': jsx, '@/screens/system/loading': { default: () => null },
-    '@/lib/focus-setup': { initialFocusSetup }, './use-focus-round': { useFocusRound: () => timer },
+    '@/lib/focus-setup': { initialFocusSetup }, './use-focus-round': { useFocusRound: (persist, phase) => phase === 'rest' ? rest : timer },
   })
   const render = () => { cursor = 0; return Owner({ onSignOut() {} }).props.children }
   assert.equal(render().type, screens[3])
@@ -68,4 +72,15 @@ test('Owner routes restored/manual/automatic finished rounds to Summary and clea
     assert.equal(render().type, screens[3])
     assert.equal(render().props.round.elapsedMs, 1_500_000)
   }
+  const focused = structuredClone(timer.round)
+  render().props.onRest(10)
+  assert.equal(render().type, screens[4])
+  assert.equal(render().props.round.setup.minutes, 10)
+  assert.deepEqual(timer.round, focused)
+  rest.round = changeRound(rest.round, 'tick', rest.now + 600_000)
+  render().props.onFocus()
+  assert.equal(rest.round, null)
+  assert.equal(timer.round, null)
+  assert.equal(render().type, screens[1])
+  assert.deepEqual(render().props.value, initialFocusSetup)
 })

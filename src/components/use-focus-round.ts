@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { changeRound, restoreRound, roundStorageKey, startRound, type FocusRound } from '@/lib/focus-round'
+import { changeRound, restoreRound, roundStorageKey, restStorageKey, startRound, startRest, type FocusRound } from '@/lib/focus-round'
 import type { FocusSetup } from '@/lib/focus-setup'
 
-export function useFocusRound(persist = true) {
+export function useFocusRound(persist = true, phase: 'focus' | 'rest' = 'focus') {
+  const storageKey = phase === 'rest' ? restStorageKey : roundStorageKey
   const [round, setRound] = useState(() => {
-    try { return persist ? restoreRound(sessionStorage.getItem(roundStorageKey)) : null } catch { return null }
+    try { return persist ? restoreRound(sessionStorage.getItem(storageKey), phase) : null } catch { return null }
   })
   const current = useRef(round)
   const [now, setNow] = useState(Date.now)
@@ -14,11 +15,11 @@ export function useFocusRound(persist = true) {
     setRound(next)
     try {
       if (!persist) return
-      if (next) sessionStorage.setItem(roundStorageKey, JSON.stringify(next))
-      else sessionStorage.removeItem(roundStorageKey)
+      if (next) sessionStorage.setItem(storageKey, JSON.stringify(next))
+      else sessionStorage.removeItem(storageKey)
       setRecoverable(true)
     } catch { setRecoverable(false) }
-  }, [persist])
+  }, [persist, storageKey])
   const action = useCallback((action: 'tick' | 'pause' | 'resume' | 'finish') => {
     const time = Date.now()
     setNow(time)
@@ -40,8 +41,8 @@ export function useFocusRound(persist = true) {
     if (current.current) return
     const time = Date.now()
     setNow(time)
-    replace(startRound(setup, time))
-  }, [replace])
+    replace(phase === 'rest' ? startRest(setup.minutes, time) : startRound(setup, time))
+  }, [replace, phase])
   return { round, now, recoverable, action, start,
     close() { if (current.current?.status === 'finished') replace(null) },
   }

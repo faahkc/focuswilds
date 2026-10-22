@@ -123,3 +123,5 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Batch independent reads, search narrowly, and keep tool output concise.
 - Avoid repeated CI/deployment polling; report pending status and the run link unless completion must be verified now.
 - Request escalation only when necessary; preserve approval and sandbox protections.
+
+Owner-approved symbols layout (2026-10-22): the shared 123 page has second-row keys in this exact order: hyphen, slash, colon, semicolon, opening parenthesis, closing parenthesis, dollar, ampersand, at sign, double quote. Reflow remaining punctuation into rows three/four without duplicates or losing ASCII coverage. Both text languages share this page; preserve its current sizing and actions.

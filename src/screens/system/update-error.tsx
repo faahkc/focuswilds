@@ -6,7 +6,7 @@ export default function UpdateRecovery({ onRetry, onContinue }: { onRetry: () =>
     <span className="recovery-cat" aria-hidden="true"/>
     <h1>Update unavailable</h1>
     <p>Try again or continue with your current version.</p>
-    <div className="recovery-actions"><Button onClick={onRetry}>Try again</Button><Button onClick={onContinue}>Continue with current version</Button></div>
+    <div className="recovery-actions"><Button onClick={onRetry}>Try again</Button><Button onClick={onContinue}>Use current version</Button></div>
     <AppVersion/>
   </main>
 }

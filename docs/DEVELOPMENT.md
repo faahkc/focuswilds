@@ -1,5 +1,34 @@
 # Development
 
+## Explicit artwork export destinations and Steam usage (2026-10-23)
+
+All six art/*/export.lua entry points now require --script-param output=<folder> before opening a master or writing anything. Home already required it; Logo, Login, Loading, Focus and UI icons now follow that contract. There is no fallback to src/ or public/. Create the destination first and run from the repository root. This supersedes older export command examples below, which describe earlier checkpoints. Unapproved drafts use art/drafts/; verification exports use .playwright-mcp/. Neither is deployed or backed up by Git.
+
+Example, after creating art/drafts/login-export:
+
+```powershell
+& 'C:/Program Files (x86)/Steam/steamapps/common/Aseprite/Aseprite.exe' --batch --script-param output=art/drafts/login-export --script art/login/export.lua
+```
+
+Each exporter writes flat files into the specified directory. This is a staging directory, not an automatically runnable web preview: generated CSS deliberately retains its original runtime-relative image URLs. After explicit artwork approval, place matching image/CSS outputs at these existing destinations together; do not change their contents or deploy drafts implicitly:
+
+| Exporter | Runtime destination after approval |
+| --- | --- |
+| logo | Six icon PNGs in public/ |
+| home | Both room PNGs and home-room.css in src/assets/ |
+| focus | Three atlas PNGs and focus-city.css in src/assets/ |
+| login | login-window.png in src/assets/; login-scene.css in src/screens/ |
+| loading | loading-cat.png in src/assets/; loading.css in src/ |
+| ui-icons | Combined ui-icons.png in src/assets/ |
+
+Acceptance: node .playwright-mcp/check-export-destinations.mjs ran every exporter once without output and verified the required-parameter diagnostic, then exported each into its own ignored directory. All six exporters' internal assertions passed. Independent Pillow RGBA comparison found all 14 PNGs identical to current runtime files; all four generated CSS files matched after line-ending normalization. SHA-256 checks confirmed every runtime target remained unchanged. Evidence is under .playwright-mcp/export-destinations/. These are unchanged approved assets, so no new artwork approval or UI composition review was needed. git diff --check passed; application tests/build were not repeated because runtime files and behavior were unchanged.
+
+Steam usage preference: do not pass --noinapp in default Aseprite commands. The official CLI documents that this flag disables Steam visibility and playtime counting (https://www.aseprite.org/docs/cli/). Keep Steam signed in and launch Aseprite from its Library for normal interactive usage; remove --noinapp from Library > Properties > Launch Options if present. Short batch processes exit when their work finishes, so they are not an elapsed-time tracker for the whole coding session.
+
+For Godot, launch the installed Steam edition from the Library and open the intended project in its Editor. The official integration is editor-only (https://github.com/godotengine/godot/pull/79126); it is not a guarantee that direct script/game/headless jobs contribute usage time. Verify Steam shows the application running and check accumulated time after a normal session. No Steam launch options/account state were changed, no idle Editor was opened, and playtime updates were not tested. Continue bounded, hidden CLI checks for automation rather than keeping an Editor open solely to count hours.
+
+Token/resource policy: batch related work, avoid repeated unchanged exports/checks and frequent polling, keep logs local with concise results, and inspect visual output at meaningful milestones. Use normal sandbox execution first and escalate only for actual permission failures. The installed Godot templates include matching 4.7.2.stable Web/no-threads archives; their presence is not successful Web export acceptance. No main Godot project, visual redesign, PWA migration, new dependency or global PATH change was introduced.
+
 ## Official Godot CLI tooling (2026-10-23)
 
 The owner replaced the third-party Godot MCP setup with the official CLI. Removed only mcp_servers.godot and its environment block from the user-level Codex config; the other MCP entries remain intact. Stopped matching MCP launcher processes and deleted the local third-party installation, Windows launcher, obsolete pre-install config backup and MCP-only diagnostic fixture/addon. Recursive cleanup verified the exact absolute target paths and refused reparse points. Restart the Codex host to discard its already-loaded tool catalog; do not call the retired MCP tools. This supersedes the earlier MCP setup checkpoint.

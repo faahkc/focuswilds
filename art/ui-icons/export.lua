@@ -1,3 +1,4 @@
+local output=assert(app.params['output'],'Supply --script-param output=<folder>; this exporter does not choose a deployment path')
 local sprite = app.open('art/ui-icons/ui-icons.aseprite')
 assert(sprite.width == 16 and sprite.height == 16 and #sprite.frames == 8)
 local names = {'Check', 'Close', 'Down', 'Up', 'Clear', 'Delete', 'Shift', 'Enter'}
@@ -78,7 +79,7 @@ end end
 for y=0,19 do for x=0,79 do
  atlas:drawPixel(x,32+y,keyboard:getPixel(math.floor(x/2),math.floor(y/2)))
 end end
-local path='src/assets/ui-icons.png'
+local path=output..'/ui-icons.png'
 atlas:saveAs(path)
 local saved=Image{fromFile=path}
 assert(saved.width==256 and saved.height==64)

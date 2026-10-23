@@ -1,3 +1,4 @@
+local output=assert(app.params['output'],'Supply --script-param output=<folder>; this exporter does not choose a deployment path')
 local source=app.open('art/logo/black-cat.aseprite')
 assert(source.width==16 and source.height==16 and #source.frames==1)
 local base=Image(16,16,ColorMode.RGB)
@@ -37,7 +38,7 @@ for _,export in ipairs(exports) do
    assert(result:getPixel(offset+x*scale,offset+y*scale)==pixel,'Scaled cat pixels changed')
   end
  end end
- local path='public/'..name..'.png'
+ local path=output..'/'..name..'.png'
  result:saveAs(path)
  local saved=Image{fromFile=path}
  assert(saved.width==size and saved.height==size)

@@ -1,3 +1,4 @@
+local output=assert(app.params['output'],'Supply --script-param output=<folder>; this exporter does not choose a deployment path')
 local css={'/* Generated from the approved focus Aseprite masters. */'}
 for _,spec in ipairs({{'city-walk',128,144,32,'.focus-city-art','focus-city'}, {'city-walk-compact',128,80,32,nil,nil}, {'player-walk',20,36,8,'.focus-city-player','focus-player'}}) do
  local name,w,h,count,selector,animation=table.unpack(spec)
@@ -13,7 +14,7 @@ for _,spec in ipairs({{'city-walk',128,144,32,'.focus-city-art','focus-city'}, {
   end
   duration=duration+frame.duration
  end
- local path='src/assets/'..name..'-atlas.png'
+ local path=output..'/'..name..'-atlas.png'
  atlas:saveAs(path)
  local saved=Image{fromFile=path}
  for y=0,h-1 do for x=0,w*count-1 do assert(saved:getPixel(x,y)==atlas:getPixel(x,y),'PNG round trip differs') end end
@@ -25,5 +26,5 @@ for _,spec in ipairs({{'city-walk',128,144,32,'.focus-city-art','focus-city'}, {
  end
 end
 css[#css+1]='@container focus-city (min-aspect-ratio: 13/10) { .focus-city-art { background-image: url("./city-walk-compact-atlas.png"); } }'
-local file=assert(io.open('src/assets/focus-city.css','w'));file:write(table.concat(css,'\n')..'\n');file:close()
+local file=assert(io.open(output..'/focus-city.css','w'));file:write(table.concat(css,'\n')..'\n');file:close()
 print('PASS: approved focus grids/timing and atlas PNG round trips')

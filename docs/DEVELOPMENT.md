@@ -1,5 +1,11 @@
 # Development
 
+## Shared scene across phone proportions (2026-10-23; owner decision)
+
+The owner selected one canonical scene per location with shared artwork/animation and responsive camera framing/UI. Updated AGENTS.md and IMPLEMENTATION_PLAN.md to supersede the separate native-grid approach for new redesign work. Keep essential character/interactions visible at the smallest usable portrait framing, expose more surroundings where space permits, and preserve pixel geometry, relative object scale and accessible controls. A separate composition needs demonstrated framing constraints and owner approval; phone dimensions alone do not justify duplicated production work.
+
+320x568 and 390x844 remain regression viewports, with intermediate ratios and resize/orientation restoration included in prototype acceptance. The existing two-size static drafts below remain historical, unapproved review artifacts; they do not establish the future Godot architecture. No runtime files, draft artwork, Firebase data or current shipped responsive assets changed. Verified the documentation diff and checked for conflicting active redesign requirements; no application tests or visual captures were repeated for this documentation-only decision. Actual responsive camera behavior, Web export and physical-device performance remain unimplemented/unverified.
+
 ## First cutaway scene composition drafts (2026-10-23; pending review)
 
 The owner authorized fresh layouts/animation direction while retaining the core focus/cat-care/city systems. Recorded that clarification in the rules and visual plan: old Home layout A and animation sequences do not constrain replacement drafts, but continue to describe the shipped app until review/integration approval. No shipped code, artwork, account flow or Firebase data/rules changed.

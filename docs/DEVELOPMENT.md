@@ -1,5 +1,13 @@
 # Development
 
+## Mobile scene design constraints recorded (2026-10-23)
+
+Recorded the owner-approved next scene direction and resource acceptance gates in IMPLEMENTATION_PLAN.md and AGENTS.md: Aseprite-authored 2D pixel art with fixed-camera cutaway room depth, uncluttered floor and consistent character/furniture scale across Home/Focus. The new section distinguishes reviewed future targets from current approved runtime assets. No reference images, external art or private design titles were copied into the repository.
+
+Design must account for GitHub Pages static delivery, Firebase Spark/owner-only event-based persistence and the existing portrait PWA/update owner. Measure transfer/build/cache footprint separately from decoded textures, render buffers and engine overhead; review latency/frame pacing, resource release, sustained heat/battery and background/resume on the owner's device before engine adoption. Static layers and small reused animations/baked light are the initial low-cost approach; no new effect, paid service, second service worker or timer-tick database writes are authorized. Numeric budgets remain pending baseline measurements rather than invented promises.
+
+This checkpoint changes rules/planning only. No artwork draft, new game project, renderer or integration was produced; current assets/UI/backend behavior are unchanged. git diff --check passed. Build/runtime tests and phone screenshots were not repeated; actual Web export, load/memory profiling and physical-device heat/battery acceptance remain pending.
+
 ## Project naming and source layout review (2026-10-23)
 
 The approved future Godot source root is game/, separate from art/ editable Aseprite masters and src/ web code. Its intended children are project.godot, scenes/, scripts/ and assets/ (only approved used exports, not duplicated Aseprite masters). Generated Web builds go to game/build/. Root .gitignore now excludes only /game/.godot/ and /game/build/ in addition to the existing draft/diagnostic ignores. Keep project.godot, scene/script files, resource UID sidecars, approved assets and non-secret export_presets.cfg eligible for Git. Export credentials/secrets must stay outside tracked presets.

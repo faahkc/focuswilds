@@ -9,6 +9,14 @@ async (page) => {
     await page.goto(url)
     await page.waitForFunction(() => document.body.dataset.ready === 'true')
     await page.evaluate(() => document.fonts.ready)
+    const back = await page.locator('.back').evaluate(node => {
+      const css = getComputedStyle(node), box = node.getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(node)
+      const text = range.getBoundingClientRect()
+      return { height: box.height, compensation: parseFloat(css.paddingBottom) - parseFloat(css.paddingTop), offset: (text.top + text.bottom) / 2 - (box.top + (box.height - 4) / 2) }
+    })
+    check(back.height === 44 && back.compensation === 4 && Math.abs(back.offset) <= 1, 'Compact Back text must center on the button face above its lower edge')
     const geometry = await page.evaluate(() => {
       const canvas = document.querySelector('canvas'), pet = document.querySelector('#pet')
       const c = canvas.getBoundingClientRect(), p = pet.getBoundingClientRect()

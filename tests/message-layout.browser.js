@@ -38,6 +38,11 @@ async (page) => {
         const geometry = await page.evaluate(() => {
           const visible = node => node.getBoundingClientRect().height > 0 && getComputedStyle(node).visibility !== 'hidden'
           const issues = []
+          for (const button of [...document.querySelectorAll('.pixel-button')].filter(visible)) {
+            if (!button.textContent.trim()) continue
+            const css = getComputedStyle(button)
+            if (parseFloat(css.paddingBottom) - parseFloat(css.paddingTop) !== 4) issues.push(`Button face alignment: ${button.textContent}`)
+          }
           const loginTitle = document.querySelector('.login-page h1')
           if (loginTitle && getComputedStyle(loginTitle).fontSize !== '48px') issues.push('Login title')
           for (const root of [...document.querySelectorAll('.home-page, .focus-active, .focus-setup, .focus-summary')].filter(visible)) {

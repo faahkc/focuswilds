@@ -18,6 +18,12 @@ async (page) => {
     await page.addStyleTag({ content: '.ui-preview-tools{visibility:hidden!important}' })
   }
   async function capture(name, width) {
+    const misaligned = await page.locator('.pixel-button').evaluateAll(nodes => nodes.filter(node => {
+      if (!node.textContent.trim() || !node.getClientRects().length || getComputedStyle(node).visibility === 'hidden') return false
+      const css = getComputedStyle(node)
+      return parseFloat(css.paddingBottom) - parseFloat(css.paddingTop) !== 4
+    }).map(node => node.textContent))
+    check(misaligned.length === 0, `${name}: button face padding ${misaligned.join(', ')}`)
     await page.screenshot({ path: `.playwright-mcp/shared-controls-${width}-${name}.png` })
   }
   const results = []

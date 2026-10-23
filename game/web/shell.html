@@ -15,7 +15,7 @@
     *{box-sizing:border-box}body{margin:0;background:#e5d7bd;color:#303139;font:700 var(--text-size)/var(--text-line-height) 'GNU Unifont',monospace;touch-action:manipulation}h1,p{margin:0}button,a{font-family:inherit}
     [hidden]{display:none!important}.shell{height:100dvh;max-width:var(--content-width);margin:auto;display:flex;flex-direction:column}
     header{display:flex;justify-content:space-between;align-items:start;gap:var(--space-group);padding:var(--screen-padding-top) var(--content-right) 0 var(--content-left);flex-shrink:0}
-    h1{font-size:var(--screen-title-size);line-height:var(--screen-title-line-height)}.back{min-height:44px;padding:6px 10px;text-decoration:none;flex-shrink:0}
+    h1{font-size:var(--screen-title-size);line-height:var(--screen-title-line-height)}.back{text-decoration:none;flex-shrink:0}
     .stage{position:relative;flex:1;min-height:270px;overflow:hidden}canvas{display:block;width:100%;height:100%;position:absolute;inset:0;image-rendering:pixelated;outline:none}
     #pet{position:absolute;padding:0;border:0;box-shadow:none;background:transparent;min-width:44px;min-height:44px;cursor:pointer}#pet::before,#pet::after{display:none}#pet:active{transform:none}#pet:focus-visible{outline:none;border:2px solid var(--text);clip-path:var(--pixel-outline)}
     .actions>button{background:#667969;box-shadow:inset 0 -4px #4c5f50}.actions nav button{background:#f2ebdc;color:#303139;box-shadow:inset 0 -4px #c6b99e}footer{display:grid;gap:var(--space-action);padding:var(--space-action) var(--content-right) var(--screen-padding-bottom) var(--content-left);flex-shrink:0}#notice{text-align:center;min-height:27px}.actions{display:grid;gap:var(--space-section)}nav{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-group)}nav button{padding-inline:4px}
@@ -28,7 +28,7 @@
 <body>
   <main class="page-loading" id="loading" role="status" aria-label="Loading…"><span class="loading-cat" aria-hidden="true"></span><p class="message-copy" id="loading-message">Loading…</p><button class="pixel-button" id="retry" hidden>Reload</button></main>
   <main class="shell" id="shell" hidden>
-    <header><div><h1>Your home</h1><p>Lv. 1 / 0 coins</p></div><a class="pixel-button back" href="../../../">Back</a></header>
+    <header><div><h1>Your home</h1><p>Lv. 1 / 0 coins</p></div><a class="pixel-button pixel-button-compact back" href="../../../">Back</a></header>
     <section class="stage" aria-label="Apartment"><canvas id="canvas" aria-hidden="true" tabindex="-1"></canvas><button id="pet" class="pixel-button" aria-label="Pet your black cat" hidden></button></section>
     <footer><p id="notice" role="status" aria-live="polite">Your black cat</p><div class="actions"><button class="pixel-button" disabled aria-describedby="prototype-description">Start focus</button><nav aria-label="Game areas"><button class="pixel-button" disabled>Cats</button><button class="pixel-button" disabled>City</button><button class="pixel-button" disabled>Shop</button></nav></div></footer>
     <span id="prototype-description" hidden>Scene prototype. Gameplay remains in the main application.</span>

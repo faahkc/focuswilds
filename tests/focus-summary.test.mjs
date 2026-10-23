@@ -80,8 +80,8 @@ test('Owner routes restored/manual/automatic finished rounds to Summary and clea
     react: { Suspense: React.Suspense, lazy: () => { const screen = function Screen() {}; screens.push(screen); return screen },
       useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; return [values[i], value => { values[i] = value }] } },
     'react/jsx-runtime': jsx, '@/screens/system/loading': { default: () => null },
-    '@/lib/focus-setup': { initialFocusSetup }, './use-focus-round': { useFocusRound: (persist, phase) => phase === 'rest' ? rest : timer },
-    './use-focus-history': { useFocusHistory: () => ({ state: saveState, retained: true, retry() {} }) },
+    '@/lib/focus-setup': { initialFocusSetup }, '@/hooks/use-focus-round': { useFocusRound: (persist, phase) => phase === 'rest' ? rest : timer },
+    '@/hooks/use-focus-history': { useFocusHistory: () => ({ state: saveState, retained: true, retry() {} }) },
   })
   const render = () => { cursor = 0; return Owner({ onSignOut() {} }).props.children }
   assert.equal(render().type, screens[3])

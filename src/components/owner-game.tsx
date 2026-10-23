@@ -1,9 +1,9 @@
 import { lazy, Suspense, useState } from 'react'
 import PageLoading from '@/screens/system/loading'
-import { useFocusRound } from './use-focus-round'
+import { useFocusRound } from '@/hooks/use-focus-round'
 import { initialFocusSetup } from '@/lib/focus-setup'
 import type { SaveFocusRound, LoadFocusHistory } from '@/lib/focus-history'
-import { useFocusHistory } from './use-focus-history'
+import { useFocusHistory } from '@/hooks/use-focus-history'
 
 const HomePage = lazy(() => import('@/screens/home'))
 const FocusSetupPage = lazy(() => import('@/screens/focus/setup'))

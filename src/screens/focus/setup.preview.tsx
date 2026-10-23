@@ -5,7 +5,7 @@ import FocusSetupPage from './setup'
 import ActiveFocusPage from './active'
 import FocusSummaryPage from './summary'
 import RestPage from './rest'
-import { useFocusRound } from '@/components/use-focus-round'
+import { useFocusRound } from '@/hooks/use-focus-round'
 import { initialFocusSetup, type FocusSetup } from '@/lib/focus-setup'
 
 function SetupPreview({ initial = initialFocusSetup }: { initial?: FocusSetup }) {

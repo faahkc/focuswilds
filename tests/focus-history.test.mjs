@@ -204,7 +204,7 @@ test('save controller keeps pending data, guards repeated attempts and releases 
     useRef(initial) { const i = cursor++; return state[i] ??= { current: initial } },
     useCallback: fn => fn, useEffect: fn => effects.push(fn),
   }
-  const hook = load('../src/components/use-focus-history.ts', {
+  const hook = load('../src/hooks/use-focus-history.ts', {
     react, '@/lib/focus-pending': { keepPendingFocus: () => false, clearPendingFocus: round => cleared.push(round.id) },
   }).useFocusHistory
   const save = () => { calls++; return new Promise(resolve => { settle = resolve }) }

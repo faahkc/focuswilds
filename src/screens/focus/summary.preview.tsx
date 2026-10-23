@@ -1,6 +1,6 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export presentation cases. */
 import FocusSummaryPage from './summary'
-import { useFocusRound } from '@/components/use-focus-round'
+import { useFocusRound } from '@/hooks/use-focus-round'
 import RestPage from './rest'
 import { startRound, type FocusRound } from '@/lib/focus-round'
 import { initialFocusSetup } from '@/lib/focus-setup'

@@ -61,7 +61,7 @@ test('recovery validates stored data and preserves running, paused and completed
 })
 
 test('round controller guards duplicate starts, persists only commands and expiry, and restores without resetting time', () => {
-  const source = readFileSync(new URL('../src/components/use-focus-round.ts', import.meta.url), 'utf8')
+  const source = readFileSync(new URL('../src/hooks/use-focus-round.ts', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText
   let now = 1000, writes = 0, stored = null, cursor = 0, effects = [], state = [], blocked = false, pending = null
   const dependencies = {

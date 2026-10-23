@@ -1,5 +1,5 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export presentation cases. */
-import { useFocusRound } from '@/components/use-focus-round'
+import { useFocusRound } from '@/hooks/use-focus-round'
 import { useEffect, useState } from 'react'
 import OwnerGame from '@/components/owner-game'
 import PageLoading from '@/screens/system/loading'

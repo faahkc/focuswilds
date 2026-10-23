@@ -10,6 +10,9 @@ coverage/
 .cache/
 .playwright-mcp/
 art/drafts/
+# Godot source stays tracked; only its cache and export output are ignored.
+/game/.godot/
+/game/build/
 *.tsbuildinfo
 .eslintcache
 .stylelintcache

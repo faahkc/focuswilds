@@ -1,6 +1,6 @@
 /* oxlint-disable react/only-export-components -- Preview fixtures export presentation cases. */
 import { useEffect } from 'react'
-import { useFocusRound } from '@/components/use-focus-round'
+import { useFocusRound } from '@/hooks/use-focus-round'
 import PageLoading from '@/screens/system/loading'
 import { startRest } from '@/lib/focus-round'
 import RestPage from './rest'

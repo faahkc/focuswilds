@@ -31,5 +31,44 @@ rebuilt:drawImage(cat,Point(101,127))
 for y=0,223 do for x=0,223 do
  assert(rebuilt:getPixel(x,y)==approved:getPixel(x,y),'Split exports must preserve every approved pixel')
 end end
-room:saveAs(output..'/room.png');cat:saveAs(output..'/cat.png')
-print('PASS: approved room/cat split, 50,176 recomposed pixels match; hidden reference omitted')
+room:saveAs(output..'/room.png')
+local animation=app.open('art/apartment/cat-reaction.aseprite')
+assert(animation.width==28 and animation.height==30 and #animation.frames==14)
+assert(animation.tags[1].name=='Idle' and animation.tags[2].name=='React')
+local times={3200,80,100,80,2000,100,2500,80,120,100,350,80,120,150}
+local unique={1,2,3,6,9,10,12}
+local mapping={0,1,2,1,0,3,0,0,4,5,4,6,0,0}
+local images={}
+local atlas=Image(196,30,ColorMode.RGB)
+local neutral=Image(28,30,ColorMode.RGB)
+neutral:drawImage(cat,Point(2,2))
+for i,frame in ipairs(animation.frames) do
+ assert(math.abs(frame.duration*1000-times[i])<.01,'Approved timing changed')
+ local image=Image(28,30,ColorMode.RGB)
+ image:drawSprite(animation,i)
+ images[i]=image
+ for y=0,29 do for x=0,27 do
+  if i==1 or y>=15 then assert(image:getPixel(x,y)==neutral:getPixel(x,y),'Approved neutral/body/feet/shadow changed') end
+ end end
+end
+for i,n in ipairs(unique) do atlas:drawImage(images[n],Point((i-1)*28,0)) end
+for i,image in ipairs(images) do for y=0,29 do for x=0,27 do
+ assert(image:getPixel(x,y)==atlas:getPixel(mapping[i]*28+x,y),'Atlas timeline mismatch')
+end end end
+atlas:saveAs(output..'/cat-atlas.png')
+local resource={'[gd_resource type="SpriteFrames" load_steps=9 format=3]\n\n[ext_resource type="Texture2D" path="res://assets/cat-atlas.png" id="1"]\n'}
+for i=0,6 do
+ resource[#resource+1]='\n[sub_resource type="AtlasTexture" id="Pose'..i..'"]\natlas = ExtResource("1")\nregion = Rect2('..(i*28)..', 0, 28, 30)\n'
+end
+resource[#resource+1]='\n[resource]\nanimations = ['
+for n,tag in ipairs(animation.tags) do
+ assert(tag.fromFrame.frameNumber==(n==1 and 1 or 8) and tag.toFrame.frameNumber==(n==1 and 7 or 14),'Approved tags changed')
+ resource[#resource+1]=(n>1 and ', ' or '')..'{"name": &"'..tag.name..'", "loop": '..(n==1 and 'true' or 'false')..', "speed": 1000.0, "frames": ['
+ for i=tag.fromFrame.frameNumber,tag.toFrame.frameNumber do
+  resource[#resource+1]=(i>tag.fromFrame.frameNumber and ', ' or '')..'{"duration": '..times[i]..'.0, "texture": SubResource("Pose'..mapping[i]..'")}'
+ end
+ resource[#resource+1]=']}'
+end
+resource[#resource+1]=']\n'
+local file=assert(io.open(output..'/cat-animation.tres','w'));file:write(table.concat(resource));file:close()
+print('PASS: approved room recomposition, 14 animation timings, fixed feet/shadow and 7-pose atlas; hidden reference omitted')

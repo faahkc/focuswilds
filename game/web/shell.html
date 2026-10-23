@@ -42,6 +42,7 @@
     function syncVisibility(){document.documentElement.style.setProperty('--loading-animation-state',isVisible()?'running':'paused');window.focuswildsSetVisible?.(isVisible()&&!failed);}
     window.focuswildsGraphicsState=active=>{document.body.dataset.rendering=active?'active':'paused';};
     window.focuswildsCatNotice=()=>{document.getElementById('notice').textContent='Your cat noticed you.';};
+    window.focuswildsCatFrame=(animation,frame)=>{document.body.dataset.catAnimation=animation;document.body.dataset.catFrame=frame;};
     window.focuswildsSceneReady=(x,y,width,height)=>{if(failed)return;clearTimeout(startupDeadline);shell.style.visibility='';Object.assign(pet.style,{left:x+'px',top:y+'px',width:width+'px',height:height+'px'});pet.hidden=false;loading.hidden=true;shell.hidden=false;document.body.dataset.ready='true';document.body.dataset.loadMs=(performance.now()-began).toFixed(0);syncVisibility();};
     pet.addEventListener('click',()=>window.focuswildsPetCat?.());
     document.addEventListener('visibilitychange',syncVisibility);addEventListener('resize',syncVisibility);addEventListener('pagehide',()=>window.focuswildsSetVisible?.(false));addEventListener('pageshow',syncVisibility);

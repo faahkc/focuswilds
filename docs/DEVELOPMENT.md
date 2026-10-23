@@ -1,6 +1,16 @@
 # Development
 
-## Focus walking posture and curb staging draft v4 (2026-10-23; awaiting review)
+## Focus fringe and road cadence draft v5 (2026-10-23; awaiting review)
+
+Owner authorized cleaning the dark forehead dot and shortening the projected road dash/gap cadence. Created ignored art/drafts/focus-walk-v5/ with official Aseprite batch/Lua, preserving v4 for comparison. Replace only the dangling fringe pixel with skin at head-source (11,7). Independent RGBA comparisons confirm exactly one changed pixel in every player atlas pose and its mirrored pixel in each counter-walker atlas pose; car/cat/HUD veil pixels are unchanged. Retain the aligned head/neck/chest, original hair silhouette apart from that notch, height, outfit and planted stride.
+
+Road paint retains its lane position v=216..218, thickness, color and 2:1 projection. Change 72-unit dashes/gaps to 36/36, with two complete periods per 144-unit ground module. Aseprite checks sample the exported paint at projected coordinates and verify dash/gap lengths, alongside existing tile coverage/contact/master/atlas assertions. The real HUD still occludes paint passing behind buttons; this is not a new unoccluded street composition or a change to control layout/camera.
+
+Validation: Aseprite assertions and 21 browser fixtures passed at 320x568, 390x844 and 393x852, including all eight walk poses/Stand, module-seam seeks, bounded ten-minute route, Pause/hidden/orientation behavior, recovery, Menu/Finish focus and fixed shared geometry. Inspected native head/pose pixels, face-before-after.png, road-phases-320/390.png and native 393px road views across six route positions. Reviewed paint cadence over moving frames; animation-review.gif is an eight-second diagnostic scene capture, not runtime art. road-detail-before-after.png additionally isolates the two paint patterns for inspection without controls. Evidence and editable masters remain under the ignored v5 draft folder. Review URL: http://localhost:5173/focuswilds/art/drafts/focus-walk-v5/review.html .
+
+Nine loaded PNGs total 33,317 bytes; base RGBA8 remains 2,650,796 bytes, excluding render/engine overhead. No live assets, shared UI, Godot export or Firebase behavior changed; unrelated app tests/build/catalog were not repeated. Individual artwork approval remains pending. Physical iPhone/Safari/PWA behavior, sustained heat/battery and device memory remain unverified.
+
+## Focus walking posture and curb staging draft v4 (2026-10-23; superseded by v5 review)
 
 The owner authorized correcting prop placement, the backward-looking head alignment and excessive visible road. Created ignored art/drafts/focus-walk-v4/ through official Aseprite batch/Lua, retaining v3 for comparison. Translate the original head two source pixels forward onto the existing neck/chest axis in all nine player/counter-walker frames; preserve every head pixel and the established outfit, body height, stride/foot anchors and scale. The prior neck-contact assertions did not establish whole-body posture. Master/atlas recomposition and translated head-identity assertions pass.
 

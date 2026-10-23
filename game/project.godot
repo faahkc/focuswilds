@@ -1,0 +1,21 @@
+config_version=5
+
+[application]
+config/name="Focuswilds apartment prototype"
+run/main_scene="res://scenes/apartment.tscn"
+run/max_fps=30
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+window/size/viewport_width=393
+window/size/viewport_height=554
+window/dpi/allow_hidpi=false
+window/energy_saving/keep_screen_on=false
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.898039, 0.843137, 0.741176, 1)
+

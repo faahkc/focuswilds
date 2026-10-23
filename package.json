@@ -1,7 +1,7 @@
 {
     "name": "focuswilds",
     "private": true,
-    "version": "0.1.233",
+    "version": "0.1.234",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -9,6 +9,8 @@
         "lint": "oxlint",
         "preview": "vite preview",
         "test": "node --import ./tests/offline.mjs --test tests/*.test.mjs",
+        "game:check": "node scripts/game.mjs check",
+        "game:build": "node scripts/game.mjs build",
         "app:version": "node scripts/version.mjs",
         "version:minor": "node scripts/version.mjs minor",
         "version:major": "node scripts/version.mjs major",

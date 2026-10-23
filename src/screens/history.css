@@ -1,0 +1,18 @@
+.game-menu.history-menu[open] { display: flex; height: min(720px, calc(100% - 48px)); }
+.focus-history { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--space-section); }
+.focus-history header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; gap: var(--space-group); }
+.focus-history header h2 { margin: 0; }
+.focus-history-body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.focus-history .page-loading.content-column { width: 100%; padding: 0; }
+.focus-history ol { min-height: 0; margin: 0; padding: 0; overflow: auto; list-style: none; display: grid; gap: var(--space-group); }
+.focus-history ol:focus-visible { outline: none; }
+.focus-history ol:focus-visible li { --frame-surface: #e1d9ca; }
+.focus-history li { min-width: 0; padding: var(--control-padding); display: grid; gap: var(--space-group); }
+.focus-history-task { overflow-wrap: anywhere; }
+.focus-history time { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--space-group); color: var(--muted); }
+.focus-history footer, .focus-history-message { flex-shrink: 0; display: grid; gap: var(--space-group); }
+.focus-history footer nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }
+.focus-history footer nav button { padding-inline: 8px; }
+.focus-history-page, .focus-history-empty, .focus-history-message { text-align: center; text-wrap: balance; }
+.focus-history-empty, .focus-history-message { margin-block: auto; }
+@container screen (max-height: 650px) { .focus-history { gap: var(--space-action); } }

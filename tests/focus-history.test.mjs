@@ -34,7 +34,25 @@ function store({ documents = new Map(), loseAck = false, denied = false, stalled
     if (denied) return reply({}, 403)
     const path = url.split('/v1/')[1]
     if (options.method === 'GET') return documents.has(path) ? reply(documents.get(path)) : reply({}, 404)
-    const { writes } = JSON.parse(options.body)
+    const body = JSON.parse(options.body)
+    if (path.endsWith(':runQuery')) {
+      assert.equal(path, root + ':runQuery')
+      const query = body.structuredQuery
+      assert.equal(query.limit, 25)
+      assert.deepEqual(query.from, [{ collectionId: 'focusRounds' }])
+      assert.deepEqual(query.orderBy.map(order => [order.field.fieldPath, order.direction]), [['savedAt', 'DESCENDING'], ['__name__', 'DESCENDING']])
+      assert.equal(query.offset, undefined)
+      const rows = [...documents].filter(([name]) => name.startsWith(root + '/focusRounds/')).map(([name, value]) => ({ name, ...value }))
+        .sort((a, b) => b.fields.savedAt.timestampValue.localeCompare(a.fields.savedAt.timestampValue) || b.name.localeCompare(a.name))
+        .filter(value => {
+          if (!query.startAt) return true
+          assert.equal(query.startAt.before, false)
+          const [time, name] = query.startAt.values
+          return value.fields.savedAt.timestampValue < time.timestampValue || (value.fields.savedAt.timestampValue === time.timestampValue && value.name < name.referenceValue)
+        }).slice(0, query.limit)
+      return reply(rows.length ? rows.map(document => ({ document })) : [{ readTime: new Date(now).toISOString() }])
+    }
+    const { writes } = body
     assert.equal(writes.length, 2)
     // Fake atomic preconditions/rate enforcement; this is not a Firestore Rules emulator.
     for (const write of writes) {
@@ -208,4 +226,65 @@ test('save controller keeps pending data, guards repeated attempts and releases 
   render(false); effects[0](); await render(false).retry()
   assert.equal(calls, 2)
   assert.equal(render(false).state, undefined)
+})
+
+test('history reads are owner-only, bounded, cursor-paged with stable ties and cached without extra traffic', async () => {
+  const s = store()
+  for (let i = 0; i < 60; i++) await s.saveFocusRound(s.user, finished())
+  const before = s.stats()
+  const first = s.readFocusHistory(s.user)
+  assert.equal(first, s.readFocusHistory(s.user))
+  const a = await first
+  assert.equal(a.entries.length, 25)
+  assert.equal(a.next.id, a.entries.at(-1).roundId)
+  assert.equal(a.next.savedAt, a.entries.at(-1).savedAt)
+  assert.equal(await s.readFocusHistory(s.user), a)
+  assert.equal(s.stats().requests, before.requests + 1)
+  const b = await s.readFocusHistory(s.user, a.next)
+  const c = await s.readFocusHistory(s.user, b.next)
+  assert.equal(b.entries.length, 25)
+  assert.equal(c.entries.length, 10)
+  assert.equal(c.next, null)
+  assert.equal(new Set([...a.entries, ...b.entries, ...c.entries].map(entry => entry.roundId)).size, 60)
+  assert.equal(s.stats().commits, before.commits)
+  await s.readFocusHistory(s.user, undefined, true)
+  assert.equal(s.stats().requests, before.requests + 4)
+  s.advance(60000)
+  await s.readFocusHistory(s.user)
+  assert.equal(s.stats().requests, before.requests + 5)
+  await s.saveFocusRound(s.user, finished())
+  const count = s.stats().requests
+  await s.readFocusHistory(s.user)
+  assert.equal(s.stats().requests, count + 1)
+  assert.equal(s.stats().timers, 0)
+})
+
+test('history rejects invalid cursors, malformed/foreign receipts and failed reads; token stalls are bounded', async () => {
+  const s = store()
+  assert.deepEqual(await s.readFocusHistory(s.user), { entries: [], next: null })
+  const before = s.stats().requests
+  for (const cursor of [{ id: '../other', savedAt: new Date().toISOString() }, { id: finished().id, savedAt: 'wrong' }]) await assert.rejects(s.readFocusHistory(s.user, cursor))
+  await assert.rejects(s.readFocusHistory({ uid: 'other' }))
+  await assert.rejects(s.readFocusHistory(null))
+  assert.equal(s.stats().requests, before)
+  const denied = store({ denied: true })
+  await assert.rejects(denied.readFocusHistory(denied.user))
+  await assert.rejects(denied.readFocusHistory(denied.user))
+  assert.equal(denied.stats().requests, 2)
+  const stalled = store({ stalledToken: true }), promise = stalled.readFocusHistory(stalled.user)
+  stalled.expire()
+  await assert.rejects(promise, /timeout/)
+  assert.equal(stalled.stats().requests, 0)
+  const round = finished()
+  await s.saveFocusRound(s.user, round)
+  const doc = s.documents.get(s.root + '/focusRounds/' + round.id)
+  doc.fields.savedAt.timestampValue = '2026-10-23T01:02:03.123456789Z'
+  const parsed = history.parseHistoryPage([{ document: { ...doc, name: s.root + '/focusRounds/' + round.id } }], s.root)
+  assert.equal(parsed.entries[0].savedAt, '2026-10-23T01:02:03.123456789Z')
+  const valid = { ...doc, name: s.root + '/focusRounds/' + round.id }
+  for (const raw of [null, {}, [{}], [{ readTime: 'wrong' }], [{ error: {} }], [{ document: { ...valid, name: 'other/' + round.id } }], [{ document: valid }, { document: valid }], Array(27).fill({})]) assert.throws(() => history.parseHistoryPage(raw, s.root))
+  doc.fields.elapsedMs.integerValue = null
+  assert.throws(() => history.parseHistoryPage([{ document: valid }], s.root))
+  doc.fields.elapsedMs.integerValue = '-1'
+  assert.throws(() => history.parseHistoryPage([{ document: valid }], s.root))
 })

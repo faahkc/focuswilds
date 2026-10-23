@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { GameMenu } from '@/components/game-menu'
+import type { LoadFocusHistory } from '@/lib/focus-history'
 import { elapsedTime, formatFocusTime, type FocusRound } from '@/lib/focus-round'
 import PageLoading from '@/screens/system/loading'
 import AppRecovery from '@/screens/system/app-error'
@@ -17,9 +18,9 @@ function loadArtwork() {
   })).catch(error => { artwork = undefined; throw error })
 }
 
-export default function ActiveFocusPage({ round, now, recoverable = true, onAction, onSignOut }: {
+export default function ActiveFocusPage({ round, now, recoverable = true, onAction, onSignOut, loadHistory }: {
   round: FocusRound; now: number; recoverable?: boolean
-  onAction: (action: 'pause' | 'resume' | 'finish') => void; onSignOut: () => void
+  onAction: (action: 'pause' | 'resume' | 'finish') => void; onSignOut: () => void; loadHistory?: LoadFocusHistory
 }) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const menu = useRef<HTMLDialogElement>(null)
@@ -64,6 +65,6 @@ export default function ActiveFocusPage({ round, now, recoverable = true, onActi
         heading.current?.focus({ preventScroll: true })
       }}>Finish round</Button>
     </dialog>
-    <GameMenu menu={menu} onSignOut={onSignOut}/>
+    <GameMenu menu={menu} onSignOut={onSignOut} loadHistory={loadHistory}/>
   </main>
 }

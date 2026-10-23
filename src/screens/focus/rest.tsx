@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { GameMenu } from '@/components/game-menu'
+import type { LoadFocusHistory } from '@/lib/focus-history'
 import { elapsedTime, formatFocusTime, type FocusRound } from '@/lib/focus-round'
 import PageLoading from '@/screens/system/loading'
 import AppRecovery from '@/screens/system/app-error'
@@ -18,10 +19,10 @@ function loadArtwork() {
   })).catch(error => { artwork = undefined; throw error })
 }
 
-export default function RestPage({ round, now, recoverable = true, onAction, onFocus, onHome, onSignOut }: {
+export default function RestPage({ round, now, recoverable = true, onAction, onFocus, onHome, onSignOut, loadHistory }: {
   round: FocusRound; now: number; recoverable?: boolean
   onAction: (action: 'pause' | 'resume' | 'finish') => void
-  onFocus: () => void; onHome: () => void; onSignOut: () => void
+  onFocus: () => void; onHome: () => void; onSignOut: () => void; loadHistory?: LoadFocusHistory
 }) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const heading = useRef<HTMLHeadingElement>(null)
@@ -65,6 +66,6 @@ export default function RestPage({ round, now, recoverable = true, onAction, onF
         onAction('finish')
       }}>Finish break</Button>
     </dialog>
-    <GameMenu menu={menu} onSignOut={onSignOut}/>
+    <GameMenu menu={menu} onSignOut={onSignOut} loadHistory={loadHistory}/>
   </main>
 }

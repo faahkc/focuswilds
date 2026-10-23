@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { GameMenu } from '@/components/game-menu'
+import type { LoadFocusHistory } from '@/lib/focus-history'
 import PageLoading from './system/loading'
 import AppRecovery from './system/app-error'
 import portrait from '@/assets/home-room-atlas.png'
@@ -17,7 +18,7 @@ function loadArtwork() {
   }))
 }
 
-export default function HomePage({ onSignOut, onStartFocus }: { onSignOut: () => void; onStartFocus?: () => void }) {
+export default function HomePage({ onSignOut, onStartFocus, loadHistory }: { onSignOut: () => void; onStartFocus?: () => void; loadHistory?: LoadFocusHistory }) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const menu = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -41,6 +42,6 @@ export default function HomePage({ onSignOut, onStartFocus }: { onSignOut: () =>
       <Button className="home-unavailable" disabled aria-description="Coming soon">City</Button>
       <Button className="home-unavailable" disabled aria-description="Coming soon">Shop</Button>
     </nav>
-    <GameMenu menu={menu} onSignOut={onSignOut}/>
+    <GameMenu menu={menu} onSignOut={onSignOut} loadHistory={loadHistory}/>
   </main>
 }

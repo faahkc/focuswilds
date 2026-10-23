@@ -18,17 +18,18 @@ function LivePreview({ mode = 'down' }: { mode?: 'down' | 'up' }) {
   const [editing, setEditing] = useState(false)
   const { start } = timer
   useEffect(() => { start({ ...initialFocusSetup, mode }) }, [mode, start])
-  if (home) return <OwnerGame preview onSignOut={() => {}}/>
-  if (rest.round) return <RestPage round={rest.round} now={rest.now} onAction={rest.action} onFocus={() => { rest.close(); timer.close(); setEditing(true) }} onHome={() => { rest.close(); timer.close(); setHome(true) }} onSignOut={() => rest.action('pause')}/>
+  if (home) return <OwnerGame preview onSignOut={() => {}} loadHistory={loadHistory}/>
+  if (rest.round) return <RestPage round={rest.round} now={rest.now} onAction={rest.action} onFocus={() => { rest.close(); timer.close(); setEditing(true) }} onHome={() => { rest.close(); timer.close(); setHome(true) }} onSignOut={() => rest.action('pause')} loadHistory={loadHistory}/>
   if (editing) return <FocusSetupPage value={setup} onChange={setSetup} onBack={() => setHome(true)} onStart={() => { timer.start(setup); setEditing(false) }}/>
   if (timer.round?.status === 'finished') return <FocusSummaryPage round={timer.round} onRest={minutes => rest.start({ title: '', mode: 'down', minutes })} onHome={() => { timer.close(); setHome(true) }}/>
-  return timer.round ? <ActiveFocusPage round={timer.round} now={timer.now} onAction={timer.action} onSignOut={() => {}}/> : <PageLoading/>
+  return timer.round ? <ActiveFocusPage round={timer.round} now={timer.now} onAction={timer.action} onSignOut={() => {}} loadHistory={loadHistory}/> : <PageLoading/>
 }
 const base = startRound(initialFocusSetup, 1000)
 const noop = () => {}
+const loadHistory = async () => ({ entries: [], next: null })
 export default { Default: LivePreview, cases: {
   'Count up': () => <LivePreview mode="up"/>,
-  'Paused': () => <ActiveFocusPage round={{ ...base, elapsedMs: 60_000, startedAt: null, status: 'paused' }} now={61_000} onAction={noop} onSignOut={noop}/>,
-  'Long Thai task': () => <ActiveFocusPage round={{ ...base, setup: { ...base.setup, title: 'อ่านหนังสือและเตรียมงานให้เสร็จ '.repeat(3) } }} now={1000} onAction={noop} onSignOut={noop}/>,
-  'Recovery unavailable': () => <ActiveFocusPage round={base} now={1000} recoverable={false} onAction={noop} onSignOut={noop}/>,
+  'Paused': () => <ActiveFocusPage round={{ ...base, elapsedMs: 60_000, startedAt: null, status: 'paused' }} now={61_000} onAction={noop} onSignOut={noop} loadHistory={loadHistory}/>,
+  'Long Thai task': () => <ActiveFocusPage round={{ ...base, setup: { ...base.setup, title: 'อ่านหนังสือและเตรียมงานให้เสร็จ '.repeat(3) } }} now={1000} onAction={noop} onSignOut={noop} loadHistory={loadHistory}/>,
+  'Recovery unavailable': () => <ActiveFocusPage round={base} now={1000} recoverable={false} onAction={noop} onSignOut={noop} loadHistory={loadHistory}/>,
 } }

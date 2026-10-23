@@ -98,6 +98,9 @@ service cloud.firestore {
       }
       match /focusRounds/{roundId} {
         allow get: if owner(uid);
+        allow list: if owner(uid) && request.query.limit is int
+          && request.query.limit >= 1 && request.query.limit <= 25
+          && (!('offset' in request.query) || request.query.offset == 0);
         allow create: if owner(uid) && validFocusRound(roundId)
           && getAfter(/databases/$(database)/documents/users/$(uid)/focus/history).data.lastRoundId == roundId
           && getAfter(/databases/$(database)/documents/users/$(uid)/focus/history).data.updatedAt == request.time;

@@ -168,7 +168,11 @@ test('rules contract scopes access to the owner and validates bounded append-onl
   assert.match(rules, /next.windowCount == previous.windowCount \+ 1/)
   assert.match(rules, /request.resource.data.windowStartedAt == request.time/)
   assert.match(rules, /allow read, write: if false/)
-  assert.doesNotMatch(rules, /allow (list|delete):|allow write: if owner|allow update: if owner\(uid\);/)
+  assert.doesNotMatch(rules, /allow delete:|allow write: if owner|allow update: if owner\(uid\);/)
+  const lists = rules.match(/allow list:[^;]+;/g) ?? []
+  assert.equal(lists.length, 1)
+  assert.match(lists[0], /owner\(uid\).*request.query.limit is int/s)
+  assert.match(lists[0], /request.query.limit <= 25/)
 })
 
 

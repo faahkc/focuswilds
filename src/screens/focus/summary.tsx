@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
+import { RoundRecoveryWarning } from '@/components/round-recovery-warning'
 import { formatFocusTime, restPresets, type FocusRound } from '@/lib/focus-round'
 import type { FocusSaveState } from '@/lib/focus-history'
 import '@/components/game-menu.css'
@@ -33,7 +34,7 @@ export default function FocusSummaryPage({ round, recoverable = true, onHome, on
         </div>)}</dl>
       </section>
     </div>
-    {!recoverable && saveState !== 'saved' && <p className="focus-summary-warning" role="alert">Keep this tab open. Reloads may lose this round.</p>}
+    {!recoverable && saveState !== 'saved' && <RoundRecoveryWarning/>}
     <div className="focus-summary-actions">
       {saveState && saveState !== 'saved' && <p className="focus-summary-save" role="status" aria-live="polite">{saveMessage}</p>}
       {pending && saveState !== 'saving' && onRetry && <Button onClick={onRetry}>Try again</Button>}

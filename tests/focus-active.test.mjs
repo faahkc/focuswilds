@@ -19,6 +19,7 @@ test('Active hides blank tasks and requires an open confirmation before finishin
     'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement },
     '@/components/button': { Button: function Button() {} },
     '@/components/game-menu': { GameMenu: function GameMenu() {} },
+    '@/components/round-recovery-warning': { RoundRecoveryWarning: function RoundRecoveryWarning() {} },
     '@/lib/focus-round': { elapsedTime: () => 0, formatFocusTime: () => '25:00' },
   }
   const module = { exports: {} }
@@ -29,9 +30,9 @@ test('Active hides blank tasks and requires an open confirmation before finishin
   }, module, module.exports, class Image { async decode() {} })
   const actions = []
   const round = { setup: { title: '  ', mode: 'down', minutes: 25 }, status: 'running' }
-  const render = () => {
+  const render = (recoverable = true) => {
     refIndex = stateIndex = 0; effects.length = 0
-    return module.exports.default({ round, now: 0, onAction: action => actions.push(action), onHome() {}, onSignOut() {} })
+    return module.exports.default({ round, now: 0, recoverable, onAction: action => actions.push(action), onHome() {}, onSignOut() {} })
   }
   render(); effects[0](); await new Promise(resolve => setImmediate(resolve))
   function elements(tree) {
@@ -44,6 +45,9 @@ test('Active hides blank tasks and requires an open confirmation before finishin
   assert.equal(title.props.autoFocus, true)
   assert.equal(title.props.tabIndex, -1)
   assert.equal(nodes.filter(node => node.props.className === 'focus-task').length, 0)
+  const warningNodes = elements(render(false))
+  assert.equal(warningNodes.filter(node => node.type?.name === 'RoundRecoveryWarning').length, 1)
+  assert.equal(warningNodes.filter(node => node.props.className === 'focus-round-note').length, 0)
   const dialog = refs[1].current = { open: false, showModal() { this.open = true }, close() { this.open = false } }
   const button = name => nodes.find(node => node.type?.name === 'Button' && node.props.children === name)
   button('Finish round').props.onClick(); assert.deepEqual(actions, [])

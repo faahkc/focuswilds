@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { GameMenu } from '@/components/game-menu'
+import { RoundRecoveryWarning } from '@/components/round-recovery-warning'
 import type { LoadFocusHistory } from '@/lib/focus-history'
 import { elapsedTime, formatFocusTime, type FocusRound } from '@/lib/focus-round'
 import PageLoading from '@/screens/system/loading'
@@ -51,8 +52,7 @@ export default function ActiveFocusPage({ round, now, recoverable = true, onActi
       <p className="focus-clock" role="timer" aria-live="off">{clock}</p>
     </section>
     <div className="focus-city pixel-frame" role="img" aria-label="A quiet city street with a walking player, swaying leaves and a shop awning."><div className="focus-city-window"><div className="focus-city-art"><div className="focus-city-player"/></div></div></div>
-    <p className="focus-round-note">One thing at a time.</p>
-    {!recoverable && <p role="alert">Keep this tab open. Reloads may lose this round.</p>}
+    {recoverable ? <p className="focus-round-note">One thing at a time.</p> : <RoundRecoveryWarning/>}
     <div className="focus-actions"><Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button><Button onClick={() => finishDialog.current?.showModal()}>Finish</Button></div>
     <dialog ref={finishDialog} className="game-menu focus-finish pixel-frame" aria-labelledby="finish-title" aria-describedby="finish-description">
       <h2 id="finish-title" tabIndex={-1} autoFocus>Finish round?</h2>

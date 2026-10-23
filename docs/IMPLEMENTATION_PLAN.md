@@ -1,5 +1,9 @@
 # Focuswilds Implementation Plan
 
+## Recovery message placement (2026-10-23)
+
+Active and Rest replace their normal encouragement with the shared RoundRecoveryWarning when local round recovery is unavailable. Center this required alert, state the reload risk before Keep this tab open, and retain it on short screens. Use shared 18px/27px type, allowing three lines at 320px rather than shrinking the font. Summary shares the warning until cloud confirmation; preserve its separate actionable save status/retry treatment. Future screens place normal/busy/error/recovery copy deliberately in the relevant message area, replacing incompatible decorative text without suppressing independent actionable errors. Recovery previews must genuinely render their recovery condition. Record visual and regression evidence in DEVELOPMENT.md; documentation is not a promise of zero future defects.
+
 Approved requirements, not a checklist of shipped features. README and this plan remain English. The application supports English and Thai, defaults to English, and is restricted to the owner account.
 
 ## Continuation baseline (2026-10-21)

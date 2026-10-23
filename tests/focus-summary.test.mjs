@@ -17,13 +17,17 @@ function load(path, dependencies) {
     assert.ok(name in dependencies, `Unexpected dependency: ${name}`)
     return dependencies[name]
   }, module, module.exports)
-  return module.exports.default
+  return module.exports.default ?? module.exports
 }
 
 test('Summary renders actual focused time and unavailable outcomes without granting mock rewards', () => {
+  const { RoundRecoveryWarning } = load('../src/components/round-recovery-warning.tsx', {
+    'react/jsx-runtime': jsx, './round-recovery-warning.css': {},
+  })
   const Summary = load('../src/screens/focus/summary.tsx', {
     react: React, 'react/jsx-runtime': jsx,
     '@/components/button': { Button: props => React.createElement('button', props) },
+    '@/components/round-recovery-warning': { RoundRecoveryWarning },
     '@/lib/focus-round': { formatFocusTime, restPresets }, './summary.css': {}, '@/components/game-menu.css': {},
   })
   for (const [mode, elapsed, expected] of [['down', 12_000, '00:12'], ['down', 1_500_000, '25:00'], ['up', 3_723_000, '1:02:03']]) {
@@ -38,6 +42,15 @@ test('Summary renders actual focused time and unavailable outcomes without grant
     assert.match(html, />Back home<\/button>/)
     assert.deepEqual(round, before)
   }
+  const round = changeRound(startRound(initialFocusSetup, 0), 'finish', 12_000)
+  const pending = renderToStaticMarkup(React.createElement(Summary, { round, recoverable: false, saveState: 'unavailable', onRetry() {}, onHome() {} }))
+  assert.match(pending, /class="round-recovery-warning" role="alert">Reloading may lose this round\.<br\/>Keep this tab open\./)
+  assert.match(pending, /Could not save/)
+  assert.match(pending, />Try again<\/button>/)
+  assert.doesNotMatch(pending, />Back home<\/button>/)
+  const saved = renderToStaticMarkup(React.createElement(Summary, { round, recoverable: false, saveState: 'saved', onHome() {} }))
+  assert.doesNotMatch(saved, /Keep this tab open/)
+  assert.match(renderToStaticMarkup(React.createElement(RoundRecoveryWarning, { kind: 'break' })), /Reloading may lose this break/)
 })
 
 test('Owner routes restored/manual/automatic finished rounds to Summary and clears only on Back home', () => {

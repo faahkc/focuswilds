@@ -1,5 +1,5 @@
 .focus-summary { height: 100%; min-height: 540px; padding-top: var(--screen-padding-top); padding-bottom: var(--screen-padding-bottom); display: flex; flex-direction: column; gap: var(--space-section); }
-.focus-summary header, .focus-summary-actions, .focus-summary-warning { flex-shrink: 0; }
+.focus-summary header, .focus-summary-actions { flex-shrink: 0; }
 .focus-summary header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-group); }
 .focus-summary header p { color: var(--muted); }
 .focus-summary h1 { font-size: var(--screen-title-size); line-height: var(--screen-title-line-height); }

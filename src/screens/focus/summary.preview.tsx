@@ -16,7 +16,7 @@ export default { Default: SummaryPreview, cases: {
   'Short round': () => <SummaryPreview round={{ ...base, elapsedMs: 12_000 }}/>,
   'Count up': () => <SummaryPreview round={{ ...base, setup: { ...base.setup, mode: 'up' }, elapsedMs: 3_723_000 }}/>,
   'Long Thai task': () => <SummaryPreview round={{ ...base, setup: { ...base.setup, title: 'อ่านหนังสือและเตรียมงานให้เสร็จ '.repeat(3) } }}/>,
-  'Recovery unavailable': () => <SummaryPreview recoverable={false}/>,
+  'Recovery unavailable': () => <SummaryPreview recoverable={false} saveState="saving"/>,
   'Saving round': () => <SummaryPreview saveState="saving"/>,
   'Round saved': () => <SummaryPreview saveState="saved"/>,
   'Save error': () => <SummaryPreview saveState="unavailable"/>,

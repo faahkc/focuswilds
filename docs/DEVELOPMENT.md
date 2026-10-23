@@ -1,5 +1,11 @@
 # Development
 
+## Resource assessment without physical-device access (2026-10-23)
+
+The owner accepted continuing the isolated Godot scene prototype with conservative estimates instead of requiring an unavailable iPhone test before further work. Updated the active plan and lasting rules to distinguish prototype progress from production adoption. Preserve the existing 30 FPS cap, hidden rendering suspension, baked 2D artwork and scene/resource reuse; account/data services remain in the web app. Add scene loading/release only when needed, and keep Firebase writes event-based rather than frame-based.
+
+Reused the preceding measured export/image baseline and passing prototype checks; no new performance measurement is claimed. Engine/runtime transfer remains the principal known startup cost. Image storage excludes engine heap and render buffers; mobile memory, sustained heat, battery and physical Safari/PWA behavior remain unverified. No runtime, artwork, Firebase or deployment change was made. Documentation consistency and whitespace were checked; application/build/browser checks were not repeated for this documentation-only change. New artwork still requires draft approval.
+
 ## Isolated Godot apartment Web prototype (2026-10-23)
 
 The owner approved proceeding after the v5 scale review. Promoted that approved editable master to art/apartment/apartment.aseprite, retaining its separate seated-player/furniture/cat layers and hidden scale reference. art/apartment/export.lua requires an explicit destination, ignores hidden reference layers, exports room.png plus a cropped 24x26 cat at canonical (101,127), and checks all 50,176 recomposed pixels against the approved image. A first hardcoded crop assertion exposed a transparent top row and one narrower alpha edge; corrected the crop/anchor rather than altering artwork. Final PNGs are 5,273 and 469 bytes; decoded RGBA8 image storage is 203,200 bytes before engine/render-target overhead.

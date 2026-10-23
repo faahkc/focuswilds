@@ -7,7 +7,7 @@
 }
 
 /* Leave room for Unifont glyph edges at the interface's small text sizes. */
-:root { --screen-title-size: 28px; --screen-title-line-height: 36px; --text-size: 18px; --text-line-height: 27px; --control-font-size: 20px; --space-label: 4px; --space-group: 8px; --space-action: 12px; --space-section: 16px; letter-spacing: 1px; }
+:root { --screen-title-size: 28px; --screen-title-line-height: 36px; --timer-size: 64px; --timer-line-height: 72px; --number-readout-size: 96px; --number-readout-line-height: 104px; --text-size: 18px; --text-line-height: 27px; --control-font-size: 20px; --space-label: 4px; --space-group: 8px; --space-action: 12px; --space-section: 16px; letter-spacing: 1px; }
 button, input, textarea, select { letter-spacing: inherit; }
 .message-copy { text-wrap: balance; }
 .message-copy-line { display: block; text-wrap: balance; }

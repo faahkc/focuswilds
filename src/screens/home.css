@@ -1,4 +1,4 @@
-.home-page { position: relative; height: 100%; min-height: 540px; padding: var(--screen-padding-top) 0 var(--screen-padding-bottom); display: flex; flex-direction: column; gap: var(--space-section); }
+.home-page { position: relative; min-height: max(100%, 540px); padding: var(--screen-padding-top) 0 var(--screen-padding-bottom); display: flex; flex-direction: column; gap: var(--space-section); }
 .home-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-action); }
 .home-header h1 { font-size: var(--screen-title-size); line-height: var(--screen-title-line-height); text-align: left; }
 .home-header button { padding-inline: 12px; }
@@ -13,4 +13,3 @@
 .home-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-group); }
 .home-nav button { padding-inline: 8px; }
 .home-page .home-unavailable { cursor: not-allowed; }
-@container screen (max-height: 650px) { .home-page { gap: var(--space-action); } .home-cat { padding: 8px 16px 12px; } }

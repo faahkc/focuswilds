@@ -1,4 +1,4 @@
-.focus-active { height: 100%; min-height: 540px; display: flex; flex-direction: column; gap: var(--space-section); padding-top: var(--screen-padding-top); padding-bottom: var(--screen-padding-bottom); }
+.focus-active { min-height: max(100%, 540px); display: flex; flex-direction: column; gap: var(--space-section); padding-top: var(--screen-padding-top); padding-bottom: var(--screen-padding-bottom); }
 .focus-active > * { flex-shrink: 0; }
 .focus-active header { display: flex; justify-content: space-between; align-items: center; min-height: var(--control-height); gap: var(--space-action); }
 .focus-active h1 { font-size: var(--screen-title-size); line-height: var(--screen-title-line-height); }
@@ -7,7 +7,7 @@
 .focus-timer { text-align: center; display: grid; gap: var(--space-group); }
 .focus-task { max-height: calc(var(--text-line-height) * 2); overflow: auto; overflow-wrap: anywhere; }
 .focus-timer-label { color: var(--muted); }
-.focus-clock { font-size: 64px; line-height: 72px; overflow-wrap: anywhere; }
+.focus-clock { font-size: var(--timer-size); line-height: var(--timer-line-height); overflow-wrap: anywhere; }
 .focus-active .focus-city { flex: 1; min-height: 100px; }
 .focus-city-window { position: absolute; inset: 2px 2px 4px; container: focus-city / size; overflow: hidden; clip-path: var(--pixel-outline); }
 .focus-city-art { position: absolute; width: max(100cqw, calc(100cqh * 128 / 144)); aspect-ratio: 128 / 144; left: 50%; top: 50%; transform: translate(-50%, -50%); image-rendering: pixelated; background-repeat: no-repeat; animation-play-state: var(--loading-animation-state, running); }
@@ -15,6 +15,4 @@
 .focus-active[data-paused="true"] .focus-city-player { animation-play-state: paused; }
 @container focus-city (min-aspect-ratio: 13/10) { .focus-city-art { width: max(100cqw, calc(100cqh * 128 / 80)); aspect-ratio: 128 / 80; top: 100%; transform: translate(-50%, -100%); } .focus-city-player { top: 45%; } }
 .focus-round-note { text-align: center; }
-.focus-actions { display: grid; gap: inherit; }
 .focus-finish p { margin-bottom: var(--space-label); }
-@container screen (max-height: 650px) { .focus-active { gap: var(--space-action); } .focus-clock { font-size: 56px; line-height: 64px; } .focus-round-note { display: none; } }

@@ -35,6 +35,33 @@ async (page) => {
         await page.setViewportSize({ width, height })
         await page.waitForTimeout(180)
         await page.locator('.app-screen').evaluate(node => { node.scrollTop = 0 })
+        const geometry = await page.evaluate(() => {
+          const visible = node => node.getBoundingClientRect().height > 0 && getComputedStyle(node).visibility !== 'hidden'
+          const issues = []
+          const loginTitle = document.querySelector('.login-page h1')
+          if (loginTitle && getComputedStyle(loginTitle).fontSize !== '48px') issues.push('Login title')
+          for (const root of [...document.querySelectorAll('.home-page, .focus-active, .focus-setup, .focus-summary')].filter(visible)) {
+            const css = getComputedStyle(root)
+            if (css.gap !== '16px' || css.paddingTop !== '24px') issues.push('Page spacing')
+            if (getComputedStyle(root.querySelector('h1')).fontSize !== '28px') issues.push('Page title')
+            const clock = root.querySelector('.focus-clock, .focus-summary-clock')
+            if (clock && getComputedStyle(clock).fontSize !== '64px') issues.push('Timer size')
+            const group = root.querySelector('.focus-actions, .focus-summary-actions')
+            if (group && getComputedStyle(group).gap !== '16px') issues.push('Action gap')
+            if (root.matches('.home-page')) {
+              const first = root.querySelector(':scope > .pixel-button').getBoundingClientRect()
+              const next = root.querySelector('.home-nav').getBoundingClientRect()
+              if (next.top - first.bottom !== 16) issues.push('Home action gap')
+            }
+            const shell = document.querySelector('.app-screen')
+            shell.scrollTop = shell.scrollHeight
+            const last = [...root.querySelectorAll(':scope > .pixel-button, .home-nav, .focus-actions, .focus-summary-actions')].filter(visible).at(-1)
+            if (last && last.getBoundingClientRect().bottom > innerHeight - 23) issues.push('Bottom action clearance')
+            shell.scrollTop = 0
+          }
+          return issues
+        })
+        check(geometry.length === 0, `${screen.name}/${state}/${width}: ${geometry.join(', ')}`)
         const messages = await page.locator('.message-copy, .message-copy-line').evaluateAll(nodes => nodes.filter(node => node.getBoundingClientRect().height > 0 && getComputedStyle(node).visibility !== 'hidden').map(node => {
           const range = document.createRange()
           const runs = [...node.childNodes].filter(child => child.nodeType === Node.TEXT_NODE && child.textContent.trim()).map(child => {

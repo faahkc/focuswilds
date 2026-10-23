@@ -15,4 +15,3 @@
 .focus-history footer nav button { padding-inline: 8px; }
 .focus-history-page, .focus-history-empty, .focus-history-message { text-align: center; }
 .focus-history-empty, .focus-history-message { margin-block: auto; }
-@container screen (max-height: 650px) { .focus-history { gap: var(--space-action); } }

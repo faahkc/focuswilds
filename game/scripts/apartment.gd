@@ -52,4 +52,3 @@ func _set_visible(arguments: Array) -> void:
 	RenderingServer.render_loop_enabled = active
 	if window:
 		window.focuswildsGraphicsState.call(null, active)
-

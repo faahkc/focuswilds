@@ -52,11 +52,11 @@ export default function ActiveFocusPage({ round, now, recoverable = true, onActi
       <p className="focus-clock" role="timer" aria-live="off">{clock}</p>
     </section>
     <div className="focus-city pixel-frame" role="img" aria-label="A quiet city street with a walking player, swaying leaves and a shop awning."><div className="focus-city-window"><div className="focus-city-art"><div className="focus-city-player"/></div></div></div>
-    {recoverable ? <p className="focus-round-note">One thing at a time.</p> : <RoundRecoveryWarning/>}
+    {recoverable ? <p className="focus-round-note message-copy">One thing at a time.</p> : <RoundRecoveryWarning/>}
     <div className="focus-actions"><Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button><Button onClick={() => finishDialog.current?.showModal()}>Finish</Button></div>
     <dialog ref={finishDialog} className="game-menu focus-finish pixel-frame" aria-labelledby="finish-title" aria-describedby="finish-description">
       <h2 id="finish-title" tabIndex={-1} autoFocus>Finish round?</h2>
-      <p id="finish-description">End this focus round now?</p>
+      <p id="finish-description" className="message-copy">End this focus round now?</p>
       <Button onClick={() => finishDialog.current?.close()}>Go back</Button>
       <Button onClick={() => {
         if (!finishDialog.current?.open || finished) return

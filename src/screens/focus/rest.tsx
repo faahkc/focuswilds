@@ -51,14 +51,14 @@ export default function RestPage({ round, now, recoverable = true, onAction, onF
       <p className="focus-clock" role="timer" aria-live="off">{clock}</p>
     </section>
     <div className="home-room pixel-frame" role="img" aria-label="Your black cat resting in the apartment."><div className="home-room-window"><div className="home-room-art"/></div></div>
-    {recoverable ? <p className="focus-round-note">{finished ? 'Ready when you are.' : 'A moment with your cat.'}</p> : <RoundRecoveryWarning kind="break"/>}
+    {recoverable ? <p className="focus-round-note message-copy">{finished ? 'Ready when you are.' : 'A moment with your cat.'}</p> : <RoundRecoveryWarning kind="break"/>}
     <div className="focus-actions">{finished ? <><Button onClick={onFocus}>Focus again</Button><Button onClick={onHome}>Back home</Button></> : <>
       <Button onClick={() => onAction(round.status === 'paused' ? 'resume' : 'pause')}>{round.status === 'paused' ? 'Resume' : 'Pause'}</Button>
       <Button onClick={() => confirm.current?.showModal()}>Finish break</Button>
     </>}</div>
     <dialog ref={confirm} className="game-menu focus-finish pixel-frame" aria-labelledby="finish-break-title" aria-describedby="finish-break-description">
       <h2 id="finish-break-title" tabIndex={-1} autoFocus>Finish break?</h2>
-      <p id="finish-break-description">End this break now?</p>
+      <p id="finish-break-description" className="message-copy">End this break now?</p>
       <Button onClick={() => confirm.current?.close()}>Go back</Button>
       <Button onClick={() => {
         if (!confirm.current?.open || finished) return

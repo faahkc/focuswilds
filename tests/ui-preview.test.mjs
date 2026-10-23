@@ -95,7 +95,11 @@ test('login preview fixtures use shared account UI without account services', ()
     assert.equal(panel.props.signedIn, ['Access denied', 'Signing out'].includes(name))
     assert.equal(panel.props.owner, ['Signing out'].includes(name))
     assert.equal(panel.props.busy, ['Signing in', 'Signing out'].includes(name))
-    assert.equal(panel.props.error?.code ?? null, name === 'Account error' ? 'auth/restore-failed' : null)
+    assert.equal(panel.props.error?.code ?? null, {
+      'Account error': 'auth/restore-failed', 'Connection error': 'auth/network-request-failed',
+      'Sign-in expired': 'auth/invalid-redirect', 'Sign-in limited': 'auth/too-many-requests',
+      'Sign-in cancelled': 'auth/sign-in-cancelled',
+    }[name] ?? null)
     assert.doesNotThrow(() => panel.props.onAction())
   }
 })

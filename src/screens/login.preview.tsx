@@ -16,6 +16,10 @@ export default { Default: LoginPreview, cases: {
   'Signing in': () => <AccountPreview busy/>,
   'Signing out': () => <AccountPreview signedIn owner busy/>,
   'Account error': () => <AccountPreview error={{ code: 'auth/restore-failed' }}/>,
+  'Connection error': () => <AccountPreview error={{ code: 'auth/network-request-failed' }}/>,
+  'Sign-in expired': () => <AccountPreview error={{ code: 'auth/invalid-redirect' }}/>,
+  'Sign-in limited': () => <AccountPreview error={{ code: 'auth/too-many-requests' }}/>,
+  'Sign-in cancelled': () => <AccountPreview error={{ code: 'auth/sign-in-cancelled' }}/>,
   'Toast notification': () => <AccountPreview toast/>,
   'Toast notification (Thai)': () => <AccountPreview toast thai/>,
 } }

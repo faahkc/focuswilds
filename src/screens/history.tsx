@@ -19,8 +19,8 @@ export default function HistoryPage({ state = 'ready', entries = [], page = 1, h
   return <section className="focus-history" aria-label="Focus history">
     <header><h2 ref={heading} tabIndex={-1} autoFocus>History</h2><Button onClick={onBack}>Back</Button></header>
     <div className="focus-history-body">
-      {state === 'loading' ? <PageLoading message="Loading history…"/> : state === 'error' ? <div className="focus-history-message"><p role="alert">Could not load history.</p><Button onClick={onRetry}>Try again</Button></div>
-      : entries.length === 0 ? <p className="focus-history-empty" role="status">No rounds saved yet.</p>
+      {state === 'loading' ? <PageLoading message="Loading history…"/> : state === 'error' ? <div className="focus-history-message"><p className="message-copy" role="alert">Could not load history.</p><Button onClick={onRetry}>Try again</Button></div>
+      : entries.length === 0 ? <p className="focus-history-empty message-copy" role="status">No rounds saved yet.</p>
       : <ol ref={list} tabIndex={0} role="region" aria-label="Saved focus rounds">{entries.map(entry => <li key={entry.roundId} className="pixel-frame">
         <p className="focus-history-task">{entry.task || 'Focus'}</p>
         <p>{formatFocusTime(entry.elapsedMs)} · {entry.mode === 'up' ? 'Count up' : entry.completion === 'completed' ? 'Completed' : 'Ended early'}</p>
@@ -28,7 +28,7 @@ export default function HistoryPage({ state = 'ready', entries = [], page = 1, h
       </li>)}</ol>}
     </div>
     {state === 'ready' && <footer>
-      {entries.length > 0 && <><p className="focus-history-page">Page {page} · Saved in Bangkok time</p><nav aria-label="History pages"><Button disabled={!hasPrevious} onClick={onPrevious}>Newer</Button><Button disabled={!hasNext} onClick={onNext}>Older</Button></nav></>}
+      {entries.length > 0 && <><p className="focus-history-page message-copy">Page {page} · Saved in Bangkok time</p><nav aria-label="History pages"><Button disabled={!hasPrevious} onClick={onPrevious}>Newer</Button><Button disabled={!hasNext} onClick={onNext}>Older</Button></nav></>}
       <Button onClick={onRefresh}>Refresh</Button>
     </footer>}
   </section>

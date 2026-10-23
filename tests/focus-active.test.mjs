@@ -47,7 +47,7 @@ test('Active hides blank tasks and requires an open confirmation before finishin
   assert.equal(nodes.filter(node => node.props.className === 'focus-task').length, 0)
   const warningNodes = elements(render(false))
   assert.equal(warningNodes.filter(node => node.type?.name === 'RoundRecoveryWarning').length, 1)
-  assert.equal(warningNodes.filter(node => node.props.className === 'focus-round-note').length, 0)
+  assert.equal(warningNodes.filter(node => node.props.className?.split(' ').includes('focus-round-note')).length, 0)
   const dialog = refs[1].current = { open: false, showModal() { this.open = true }, close() { this.open = false } }
   const button = name => nodes.find(node => node.type?.name === 'Button' && node.props.children === name)
   button('Finish round').props.onClick(); assert.deepEqual(actions, [])

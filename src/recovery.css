@@ -1,14 +1,13 @@
 .app-screen .startup-recovery { box-sizing: border-box; padding: max(24px, env(safe-area-inset-top)) 0 max(64px, calc(env(safe-area-inset-bottom) + 40px)); gap: 0; }
 .startup-recovery .recovery-cat { margin-bottom: var(--space-section); }
 .startup-recovery h1 { margin: 0 0 var(--space-group); max-width: 100%; text-wrap: balance; font: 700 28px/1.3 'GNU Unifont', monospace; }
-.startup-recovery p { margin: 0 0 var(--space-action); max-width: 100%; font: 700 var(--text-size)/var(--text-line-height) 'GNU Unifont', monospace; text-wrap: balance; }
+.startup-recovery p { margin: 0 0 var(--space-action); max-width: 100%; font: 700 var(--text-size)/var(--text-line-height) 'GNU Unifont', monospace; }
 .app-version { position: absolute; left: 0; right: 0; bottom: max(16px, env(safe-area-inset-bottom)); font: 400 12px/1.5 'GNU Unifont', monospace; text-align: center; color: var(--muted); }
 ::selection { background: var(--accent); color: var(--text); }
 .startup-recovery h1, .orientation-notice { -webkit-user-select: none; user-select: none; }
 .app-version, .login-error, .startup-recovery p { -webkit-user-select: text; user-select: text; }
 .app-screen .page-loading { gap: var(--space-section); font: 700 var(--text-size)/var(--text-line-height) 'GNU Unifont', monospace; }
-.page-loading > span:not(.loading-cat) { max-width: 100%; text-wrap: balance; overflow-wrap: anywhere; }
-.orientation-notice { text-wrap: balance; }
+.page-loading > span:not(.loading-cat) { max-width: 100%; overflow-wrap: anywhere; }
 .startup-recovery > .pixel-button, .recovery-actions { width: 100%; }
 .recovery-actions { display: grid; gap: var(--space-group); }
 .recovery-actions .pixel-button { text-wrap: balance; }

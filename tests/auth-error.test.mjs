@@ -11,6 +11,9 @@ test('account errors default to English for every known code and explain recover
   assert.match(authErrorMessage({ code: 'auth/popup-blocked' }, 'en'), /Allow popups/)
   assert.match(authErrorMessage({ code: 'auth/network-request-failed' }, 'en'), /connection/)
   assert.equal(authErrorMessage({ secret: 'private' }, 'en').includes('private'), false)
+  for (const code of ['auth/invalid-redirect', 'auth/sign-in-cancelled', 'auth/network-request-failed', 'auth/too-many-requests', 'unknown']) {
+    assert.equal(authErrorMessage({ code }).split('\n').length, 2, `${code} separates its condition and recovery instruction`)
+  }
 })
 
 test('Thai account errors require an explicit Thai language selection', () => {
@@ -25,7 +28,7 @@ test('Thai account errors require an explicit Thai language selection', () => {
 
 test('unknown errors do not expose provider messages or credentials', () => {
   for (const error of [null, undefined, 'private message', new Error('secret'), { code: 'unknown', message: 'secret' }]) {
-    assert.equal(authErrorMessage(error), 'Could not complete the account action. Please retry.')
+    assert.equal(authErrorMessage(error), 'Could not complete the account action.\nPlease retry.')
     assert.equal(authErrorMessage(error, 'th'), 'ดำเนินการกับบัญชีไม่ได้ โปรดลองอีกครั้ง')
   }
 })

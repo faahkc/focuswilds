@@ -13,6 +13,6 @@
 .focus-history footer, .focus-history-message { flex-shrink: 0; display: grid; gap: var(--space-group); }
 .focus-history footer nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-group); }
 .focus-history footer nav button { padding-inline: 8px; }
-.focus-history-page, .focus-history-empty, .focus-history-message { text-align: center; text-wrap: balance; }
+.focus-history-page, .focus-history-empty, .focus-history-message { text-align: center; }
 .focus-history-empty, .focus-history-message { margin-block: auto; }
 @container screen (max-height: 650px) { .focus-history { gap: var(--space-action); } }

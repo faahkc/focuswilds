@@ -1,5 +1,9 @@
 # Focuswilds Implementation Plan
 
+## System message composition (2026-10-23)
+
+Apply the shared message-copy class from head-loaded fonts.css to short explanatory/status/error/help text across all screens, dialogs, toast, editors, Preview and pre-React equivalents. Preserve each role's alignment; balanced wrapping is not a request to center data labels or toast. Distinct condition/instruction sentences use an intentional boundary, with natural balanced wrapping within each sentence; use message-copy-line blocks where forced breaks alone do not balance each sentence independently. Safe auth copy authors its newline boundaries explicitly rather than guessing from punctuation. Check rendered line endings for stranded words and mixed sentences in every affected state, not only container overflow. Reuse tests/message-layout.browser.js for automatically discovered catalog coverage at both phone sizes; inspect its captures and supplement dialogs/editors/bootstrap. This extends the earlier recovery-only requirement. Do not shrink typography or suppress independent failures to hide line-layout problems.
+
 ## Recovery message placement (2026-10-23)
 
 Active and Rest replace their normal encouragement with the shared RoundRecoveryWarning when local round recovery is unavailable. Center this required alert, state the reload risk before Keep this tab open, and retain it on short screens. Use shared 18px/27px type, allowing three lines at 320px rather than shrinking the font. Summary shares the warning until cloud confirmation; preserve its separate actionable save status/retry treatment. Future screens place normal/busy/error/recovery copy deliberately in the relevant message area, replacing incompatible decorative text without suppressing independent actionable errors. Recovery previews must genuinely render their recovery condition. Record visual and regression evidence in DEVELOPMENT.md; documentation is not a promise of zero future defects.

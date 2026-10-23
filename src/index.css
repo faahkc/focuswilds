@@ -12,8 +12,7 @@ h1, h2, p { margin: 0; font-weight: inherit; }
 h1 { font-weight: 700; font-size: 48px; line-height: 1.1; text-wrap: balance; }
 h2 { font-size: 22px; line-height: 1.5; margin-bottom: var(--space-action); }
 .login-scene { width: 100%; max-width: 336px; aspect-ratio: 8 / 7; flex-shrink: 0; }
-.login-intro { margin-bottom: var(--space-action); font-size: var(--text-size); line-height: var(--text-line-height); text-wrap: balance; }
-.login-intro[role="status"] { text-wrap: pretty; }
+.login-intro { margin-bottom: var(--space-action); font-size: var(--text-size); line-height: var(--text-line-height); }
 .login-account button { width: 100%; }
 .login-account { width: 100%; display: grid; gap: var(--space-group); }
 .login-intro.login-error { color: #93462d; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }

@@ -32,7 +32,7 @@ test('React recovery uses a static cat, shared controls/version and a working re
 test('pre-React failure hides loading and exposes the same recovery content', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
   assert.match(html, /href="\/src\/recovery.css"/)
-  assert.match(html, /class="startup-recovery content-column" role="alert" hidden><span class="recovery-cat" aria-hidden="true"><\/span><h1>Something went wrong<\/h1><p>Please reload to try again\.<\/p>/)
+  assert.match(html, /class="startup-recovery content-column" role="alert" hidden><span class="recovery-cat" aria-hidden="true"><\/span><h1>Something went wrong<\/h1><p class="message-copy">Please reload to try again\.<\/p>/)
   assert.match(html, /class="app-version">v%APP_VERSION%<\/footer>/)
   const loading = { hidden: false }, recovery = { hidden: true }
   const document = { querySelector: selector => selector === '.page-loading' ? loading : recovery }

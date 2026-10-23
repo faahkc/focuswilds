@@ -100,7 +100,7 @@ export function GameKeyboard({ label, optional = false, value, placeholder, nume
         if (event.key === 'Backspace' && !event.nativeEvent.isComposing && !event.ctrlKey && !event.altKey && !event.metaKey) { event.preventDefault(); type('', true) }
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); done() }
       }}/>}
-      {(error || helpText) && <p className={error ? 'game-editor-error' : 'game-editor-help'} id={`${id}-message`} role="status">{error || helpText}</p>}
+      {(error || helpText) && <p className={`${error ? 'game-editor-error' : 'game-editor-help'} message-copy`} id={`${id}-message`} role="status">{error || helpText}</p>}
     </div>
     {(numeric || !systemKeyboard) && <div className={`game-keyboard${numeric ? ' numeric' : thaiLetters ? ' thai' : ''}`} aria-label={numeric ? 'Number keyboard' : showSymbols ? 'Symbol keyboard' : `${language === 'en' ? 'English' : 'Thai'} keyboard`}>
       {rows.map((row, index) => <div key={index} className="game-key-row">

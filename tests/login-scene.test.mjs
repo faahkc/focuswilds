@@ -2,13 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import React from 'react'
+import * as jsx from 'react/jsx-runtime'
 import ts from 'typescript'
 
 test('login intro preserves the default tagline, safe errors and account operation messages', () => {
   const source = readFileSync(new URL('../src/screens/login.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const dependencies = {
-    'react/jsx-runtime': { jsx: React.createElement, jsxs: React.createElement },
+    'react/jsx-runtime': jsx,
     '@/components/app-version': { AppVersion: () => null },
     './login-scene.css': {},
   }
@@ -22,7 +23,11 @@ test('login intro preserves the default tagline, safe errors and account operati
   const action = React.createElement('button', null, 'Account action')
   const failed = module.exports.default({ errorMessage: 'Safe account error', children: action })
   assert.equal(failed.props.children[2].props.role, 'alert')
-  assert.equal(failed.props.children[2].props.children, 'Safe account error')
+  assert.equal(failed.props.children[2].props.children[0].props.children, 'Safe account error')
+  const separated = module.exports.default({ errorMessage: 'Could not connect.\nCheck your connection and retry.' })
+  assert.deepEqual(separated.props.children[2].props.children.map(line => [line.props.className, line.props.children]), [
+    ['message-copy-line', 'Could not connect.'], ['message-copy-line', 'Check your connection and retry.'],
+  ])
   assert.equal(failed.props.children[3], action)
   assert.doesNotMatch(JSON.stringify(failed), /A little focus|You are signed in/)
   for (const statusMessage of ['Signing you in…', 'Signing you out…']) {

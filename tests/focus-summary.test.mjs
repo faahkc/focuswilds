@@ -44,10 +44,21 @@ test('Summary renders actual focused time and unavailable outcomes without grant
   }
   const round = changeRound(startRound(initialFocusSetup, 0), 'finish', 12_000)
   const pending = renderToStaticMarkup(React.createElement(Summary, { round, recoverable: false, saveState: 'unavailable', onRetry() {}, onHome() {} }))
-  assert.match(pending, /class="round-recovery-warning" role="alert">Reloading may lose this round\.<br\/>Keep this tab open\./)
+  assert.match(pending, /class="round-recovery-warning message-copy" role="alert">Reloading may lose this round\.<br\/>Keep this tab open\./)
   assert.match(pending, /Could not save/)
   assert.match(pending, />Try again<\/button>/)
   assert.doesNotMatch(pending, />Back home<\/button>/)
+  for (const [saveState, message] of [
+    ['full', 'History is full.<br/>Keep this round here.'],
+    ['limited', 'History is busy.<br/>Try again shortly.'],
+    ['invalid', 'This round needs checking.<br/>Keep it here.'],
+    ['unavailable', 'Could not save.<br/>Your round is kept here.'],
+  ]) {
+    const html = renderToStaticMarkup(React.createElement(Summary, { round, saveState, onRetry() {}, onHome() {} }))
+    assert.ok(html.includes(`aria-live="polite">${message}</p>`), `${saveState} separates the condition from its instruction`)
+    assert.match(html, />Try again<\/button>/)
+    assert.doesNotMatch(html, />Back home<\/button>/)
+  }
   const saved = renderToStaticMarkup(React.createElement(Summary, { round, recoverable: false, saveState: 'saved', onHome() {} }))
   assert.doesNotMatch(saved, /Keep this tab open/)
   assert.match(renderToStaticMarkup(React.createElement(RoundRecoveryWarning, { kind: 'break' })), /Reloading may lose this break/)

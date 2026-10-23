@@ -8,8 +8,8 @@ export function ToastHost() {
     {notice && <div key={notice.id} className="toast-card pixel-frame" onAnimationEnd={event => {
       if (event.target === event.currentTarget) clearToast(notice.id)
     }}>
-      <p className="toast-title">{notice.title}</p>
-      <p>{notice.message}</p>
+      <p className="toast-title message-copy">{notice.title}</p>
+      <p className="message-copy">{notice.message}</p>
     </div>}
   </div>
 }

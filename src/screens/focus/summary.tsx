@@ -14,10 +14,10 @@ export default function FocusSummaryPage({ round, recoverable = true, onHome, on
   const [minutes, setMinutes] = useState(5)
   const pending = saveState !== undefined && saveState !== 'saved'
   const saveMessage = saveState === 'saving' ? 'Saving your round…' : saveState === 'saved' ? 'Round saved.'
-    : saveState === 'limited' ? 'History is busy. Try again shortly.'
-    : saveState === 'full' ? 'History is full. Keep this round here.'
-    : saveState === 'invalid' ? 'This round needs checking. Keep it here.'
-    : 'Could not save. Your round is kept here.'
+    : saveState === 'limited' ? <>History is busy.<br/>Try again shortly.</>
+    : saveState === 'full' ? <>History is full.<br/>Keep this round here.</>
+    : saveState === 'invalid' ? <>This round needs checking.<br/>Keep it here.</>
+    : <>Could not save.<br/>Your round is kept here.</>
   useEffect(() => { heading.current?.focus({ preventScroll: true }) }, [])
   return <main className="focus-summary content-column">
     <header><h1 ref={heading} tabIndex={-1}>Well done</h1>{saveState === 'saved' && <p role="status">Round saved.</p>}</header>
@@ -36,7 +36,7 @@ export default function FocusSummaryPage({ round, recoverable = true, onHome, on
     </div>
     {!recoverable && saveState !== 'saved' && <RoundRecoveryWarning/>}
     <div className="focus-summary-actions">
-      {saveState && saveState !== 'saved' && <p className="focus-summary-save" role="status" aria-live="polite">{saveMessage}</p>}
+      {saveState && saveState !== 'saved' && <p className="focus-summary-save message-copy" role="status" aria-live="polite">{saveMessage}</p>}
       {pending && saveState !== 'saving' && onRetry && <Button onClick={onRetry}>Try again</Button>}
       {!pending && <>
         <Button disabled={!onRest} aria-description={!onRest ? 'Coming soon' : undefined} onClick={() => restDialog.current?.showModal()}>Take a break</Button>

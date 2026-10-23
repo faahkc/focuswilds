@@ -31,13 +31,13 @@ export default function UIPreview() {
   const groups = [...new Set(visible.map(screen => screen.group))]
   const Screen = loaded && (loaded.cases[variant] ?? loaded.Default)
   return <>
-    <div className="pixel-frame ui-preview-tools"><details ref={tools}>
+    <div className="pixel-frame ui-preview-tools" data-preview-states={loaded ? JSON.stringify(['Default', ...Object.keys(loaded.cases)]) : undefined}><details ref={tools}>
       <summary><span>UI preview: {selected?.name ?? 'No screens'}{variant && ` / ${variant}`}</span><PixelIcon name="down" className="preview-disclosure-arrow"/></summary>
       <div className="ui-preview-menu" role="region" aria-label="Preview controls" tabIndex={0}>
         <GameInput label="Search screens" value={query} onChange={setQuery} search placeholder="Name or group"/>
         <p>{visible.length} / {catalog.length} screens</p>
         <nav className="ui-preview-list" aria-label="Preview screens" tabIndex={0}>
-          {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
+          {groups.map(group => <section key={group}><h2>{group}</h2>{visible.filter(screen => screen.group === group).map(screen => <Button key={screen.id} data-preview-screen={screen.id} aria-pressed={selected?.id === screen.id} onClick={event => {
             setSelected(screen)
             setVariant('')
             setLoaded(null)
@@ -45,7 +45,7 @@ export default function UIPreview() {
             setRetry(value => value + 1)
             event.currentTarget.closest('details')?.removeAttribute('open')
           }}><span>{screen.name}</span><span className="pixel-choice-mark" aria-hidden="true">{selected?.id === screen.id && <PixelIcon name="check"/>}</span></Button>)}</section>)}
-          {!visible.length && <p role="status">No matching screens.</p>}
+          {!visible.length && <p className="message-copy" role="status">No matching screens.</p>}
         </nav>
         {loaded && <Select label="State" value={variant} options={[{ value: '', label: 'Default' }, ...Object.keys(loaded.cases).map(name => ({ value: name, label: name }))]} onChange={value => {
           setVariant(value)
@@ -57,10 +57,10 @@ export default function UIPreview() {
           tools.current?.removeAttribute('open')
           tools.current?.querySelector('summary')?.focus()
         }}>Replay preview</Button>}
-        <p>Preview only. Account actions are simulated.</p>
+        <p className="message-copy"><span className="message-copy-line">Preview only.</span><span className="message-copy-line">Account actions are simulated.</span></p>
         <a className="pixel-button" href={import.meta.env.BASE_URL}>Exit preview</a>
       </div>
     </details></div>
-    {!selected ? <p>No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p>Unable to load preview.</p><Button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</Button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}
+    {!selected ? <p className="message-copy">No screens found in src/screens/.</p> : failed ? <main className="startup-recovery" role="alert"><p className="message-copy">Unable to load preview.</p><Button onClick={() => { setFailed(false); setRetry(value => value + 1) }}>Retry preview</Button></main> : Screen ? <AppErrorBoundary key={`${selected.id}/${variant}/${retry}`}><Screen/></AppErrorBoundary> : <PageLoading/>}
   </>
 }

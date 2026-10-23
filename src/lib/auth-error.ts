@@ -2,17 +2,17 @@ export function authErrorMessage(error: unknown, language: 'en' | 'th' = 'en') {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : null
   if (language !== 'th') {
     switch (code) {
-      case 'auth/invalid-redirect': return 'This sign-in request expired or could not be verified. Please sign in again.'
+      case 'auth/invalid-redirect': return 'This sign-in request expired or could not be verified.\nPlease sign in again.'
       case 'auth/access-denied': return 'This account does not have access to Focuswilds.'
-      case 'auth/sign-in-cancelled': return 'GitHub sign-in was cancelled. Please try again.'
+      case 'auth/sign-in-cancelled': return 'GitHub sign-in was cancelled.\nPlease try again.'
       case 'auth/popup-closed-by-user':
-      case 'auth/cancelled-popup-request': return 'GitHub sign-in was cancelled. Please try again.'
+      case 'auth/cancelled-popup-request': return 'GitHub sign-in was cancelled.\nPlease try again.'
       case 'auth/popup-blocked': return 'Allow popups for this site, then try signing in again.'
       case 'auth/unauthorized-domain': return 'This website domain is not authorized for sign-in.'
       case 'auth/operation-not-allowed': return 'GitHub sign-in has not been enabled.'
-      case 'auth/network-request-failed': return 'Could not connect. Check your connection and retry.'
-      case 'auth/too-many-requests': return 'Too many sign-in attempts. Wait a moment and retry.'
-      default: return 'Could not complete the account action. Please retry.'
+      case 'auth/network-request-failed': return 'Could not connect.\nCheck your connection and retry.'
+      case 'auth/too-many-requests': return 'Too many sign-in attempts.\nWait a moment and retry.'
+      default: return 'Could not complete the account action.\nPlease retry.'
     }
   }
   switch (code) {

@@ -2,6 +2,7 @@ import { durationError, titleError, type FocusSetup } from './focus-setup.ts'
 
 export type FocusRound = {
   version: 1
+  id: string
   setup: FocusSetup
   elapsedMs: number
   startedAt: number | null
@@ -18,7 +19,7 @@ export function startRest(minutes: number, now: number): FocusRound {
 
 export function startRound(setup: FocusSetup, now: number): FocusRound {
   if (!['down', 'up'].includes(setup.mode) || titleError(setup.title) || durationError(String(setup.minutes)) || !Number.isFinite(now) || now < 0) throw new Error('Invalid focus setup')
-  return { version: 1, setup: { ...setup }, elapsedMs: 0, startedAt: now, status: 'running' }
+  return { version: 1, id: crypto.randomUUID(), setup: { ...setup }, elapsedMs: 0, startedAt: now, status: 'running' }
 }
 
 export function elapsedTime(round: FocusRound, now: number) {
@@ -39,6 +40,7 @@ export function restoreRound(raw: string | null, phase: 'focus' | 'rest' = 'focu
   try {
     const value = JSON.parse(raw ?? 'null') as FocusRound
     if (!value || value.version !== 1 || !value.setup || typeof value.setup.title !== 'string' || !Number.isInteger(value.setup.minutes)) return null
+    if (value.id !== undefined && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value.id)) return null
     startRound(value.setup, 0)
     if (phase === 'rest') {
       startRest(value.setup.minutes, 0)
@@ -47,7 +49,7 @@ export function restoreRound(raw: string | null, phase: 'focus' | 'rest' = 'focu
     if (!Number.isFinite(value.elapsedMs) || value.elapsedMs < 0 || value.elapsedMs > Number.MAX_SAFE_INTEGER || !['running', 'paused', 'finished'].includes(value.status)) return null
     if (value.status === 'running' ? typeof value.startedAt !== 'number' || !Number.isFinite(value.startedAt) || value.startedAt < 0 : value.startedAt !== null) return null
     if (value.setup.mode === 'down' && value.elapsedMs > value.setup.minutes * 60_000) return null
-    return { version: 1, setup: { title: value.setup.title, mode: value.setup.mode, minutes: value.setup.minutes }, elapsedMs: value.elapsedMs, startedAt: value.startedAt, status: value.status }
+    return { version: 1, id: value.id ?? crypto.randomUUID(), setup: { title: value.setup.title, mode: value.setup.mode, minutes: value.setup.minutes }, elapsedMs: value.elapsedMs, startedAt: value.startedAt, status: value.status }
   } catch { return null }
 }
 

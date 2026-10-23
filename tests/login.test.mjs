@@ -22,6 +22,7 @@ async function panel({ initialUser = null, restoreError = false, signInError = n
       signOut: async () => { signOuts++; if (signOutError) throw signOutError },
     },
     '@/lib/firebase': { auth: {} },
+    '@/lib/focus-records': { saveFocusRound: async () => 'saved' },
     '@/lib/github-sign-in': {
       startGitHubSignIn: async () => { signIns++; if (signInError) throw signInError },
       finishGitHubSignIn: async () => { await finishWait; if (callbackError) throw callbackError },

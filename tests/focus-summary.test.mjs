@@ -42,7 +42,7 @@ test('Summary renders actual focused time and unavailable outcomes without grant
 
 test('Owner routes restored/manual/automatic finished rounds to Summary and clears only on Back home', () => {
   const values = [], screens = []
-  let cursor = 0, clears = 0
+  let cursor = 0, clears = 0, saveState
   const round = changeRound(startRound(initialFocusSetup, 0), 'finish', 12_000)
   const timer = { round, now: 12_000, recoverable: true,
     action(action) { this.round = changeRound(this.round, action, this.now) },
@@ -57,14 +57,24 @@ test('Owner routes restored/manual/automatic finished rounds to Summary and clea
       useState: initial => { const i = cursor++; if (!(i in values)) values[i] = initial; return [values[i], value => { values[i] = value }] } },
     'react/jsx-runtime': jsx, '@/screens/system/loading': { default: () => null },
     '@/lib/focus-setup': { initialFocusSetup }, './use-focus-round': { useFocusRound: (persist, phase) => phase === 'rest' ? rest : timer },
+    './use-focus-history': { useFocusHistory: () => ({ state: saveState, retained: true, retry() {} }) },
   })
   const render = () => { cursor = 0; return Owner({ onSignOut() {} }).props.children }
   assert.equal(render().type, screens[3])
   assert.equal(render().props.round, round)
   assert.equal(clears, 0)
+  for (const pending of ['saving', 'unavailable', 'limited']) {
+    saveState = pending
+    render().props.onHome()
+    render().props.onRest(5)
+    assert.equal(clears, 0)
+    assert.equal(rest.round, null)
+  }
+  saveState = 'saved'
   render().props.onHome()
   assert.equal(clears, 1)
   assert.equal(render().type, screens[0])
+  saveState = undefined
   for (const action of ['finish', 'tick']) {
     timer.round = startRound(initialFocusSetup, 0); timer.now = 1_500_000
     assert.equal(render().type, screens[2])

@@ -49,6 +49,33 @@ service cloud.firestore {
           : next.windowStartedAt == previous.windowStartedAt
             && next.windowCount == previous.windowCount + 1);
     }
+    function validFocusRound(roundId) {
+      let data = request.resource.data;
+      return roundId.matches('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        && data.keys().hasAll(['schemaVersion', 'roundId', 'task', 'mode', 'plannedMinutes', 'elapsedMs', 'completion', 'savedAt'])
+        && data.keys().hasOnly(['schemaVersion', 'roundId', 'task', 'mode', 'plannedMinutes', 'elapsedMs', 'completion', 'savedAt'])
+        && data.schemaVersion is int && data.schemaVersion == 1
+        && data.roundId == roundId
+        && data.task is string && data.task.size() <= 10000
+        && data.mode in ['down', 'up']
+        && data.plannedMinutes is int && data.plannedMinutes >= 1 && data.plannedMinutes <= 180
+        && data.elapsedMs is int && data.elapsedMs >= 0 && data.elapsedMs <= 9007199254740991
+        && (data.mode == 'up' || data.elapsedMs <= data.plannedMinutes * 60000)
+        && data.completion == (data.mode == 'down' && data.elapsedMs == data.plannedMinutes * 60000 ? 'completed' : 'ended')
+        && data.savedAt == request.time;
+    }
+    function validFocusCounter(uid) {
+      let data = request.resource.data;
+      let roundPath = /databases/$(database)/documents/users/$(uid)/focusRounds/$(data.lastRoundId);
+      return data.keys().hasAll(['count', 'windowStartedAt', 'windowCount', 'updatedAt', 'lastRoundId'])
+        && data.keys().hasOnly(['count', 'windowStartedAt', 'windowCount', 'updatedAt', 'lastRoundId'])
+        && data.count is int && data.count >= 1 && data.count <= 10000
+        && data.windowCount is int && data.windowCount >= 1 && data.windowCount <= 60
+        && data.windowStartedAt is timestamp && data.updatedAt == request.time
+        && data.lastRoundId is string
+        && data.lastRoundId.matches('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        && !exists(roundPath) && getAfter(roundPath).data.savedAt == request.time;
+    }
     match /users/{uid} {
       allow get: if owner(uid);
       allow create: if owner(uid)
@@ -58,6 +85,23 @@ service cloud.firestore {
         && request.resource.data.language == 'en'
         && request.resource.data.timezone == 'Asia/Bangkok'
         && request.resource.data.createdAt == request.time;
+      match /focus/{documentId} {
+        allow get: if owner(uid) && documentId == 'history';
+        allow create: if owner(uid) && documentId == 'history' && validFocusCounter(uid)
+          && request.resource.data.count == 1 && newWindow();
+        allow update: if owner(uid) && documentId == 'history' && validFocusCounter(uid)
+          && request.resource.data.count == resource.data.count + 1
+          && (request.time >= resource.data.windowStartedAt + duration.value(60, 's')
+            ? newWindow()
+            : request.resource.data.windowStartedAt == resource.data.windowStartedAt
+              && request.resource.data.windowCount == resource.data.windowCount + 1);
+      }
+      match /focusRounds/{roundId} {
+        allow get: if owner(uid);
+        allow create: if owner(uid) && validFocusRound(roundId)
+          && getAfter(/databases/$(database)/documents/users/$(uid)/focus/history).data.lastRoundId == roundId
+          && getAfter(/databases/$(database)/documents/users/$(uid)/focus/history).data.updatedAt == request.time;
+      }
       match /logs/{logId} {
         allow get: if owner(uid) && logId == 'account';
         allow create: if owner(uid) && logId == 'account' && validHistory() && newWindow()

@@ -6,6 +6,7 @@ import { OWNER_UID } from '@/lib/account'
 import { prepareOwnerAccount, recordAccountEvent, recordAccountError } from '@/lib/account-records'
 import { AccountView } from '@/components/account-view'
 import PageLoading from '@/screens/system/loading'
+import { saveFocusRound } from '@/lib/focus-records'
 
 const OwnerGame = lazy(() => import('@/components/owner-game'))
 
@@ -75,6 +76,6 @@ export function AuthPanel() {
   }
 
   if (loading) return <PageLoading message={returning ? 'Signing in…' : undefined}/>
-  if (user?.uid === OWNER_UID && !busy && error === null) return <Suspense fallback={<PageLoading message="Loading your home…"/>}><OwnerGame onSignOut={() => void updateAccount()}/></Suspense>
+  if (user?.uid === OWNER_UID && !busy && error === null) return <Suspense fallback={<PageLoading message="Loading your home…"/>}><OwnerGame onSignOut={() => void updateAccount()} onSaveRound={round => saveFocusRound(user, round)}/></Suspense>
   return <AccountView signedIn={user !== null} owner={user?.uid === OWNER_UID} busy={busy} error={error} onAction={() => void updateAccount()}/>
 }

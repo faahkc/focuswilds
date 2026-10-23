@@ -43,6 +43,7 @@ test('owner navigation preserves confirmed setup across Back and reentry without
     '@/screens/system/loading': { default: () => null },
     '@/lib/focus-setup': { initialFocusSetup },
     './use-focus-round': { useFocusRound: () => ({ round: null, start() {} }) },
+    './use-focus-history': { useFocusHistory: () => ({ state: undefined, retry() {} }) },
   }
   const source = readFileSync(new URL('../src/components/owner-game.tsx', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText

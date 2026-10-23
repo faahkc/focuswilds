@@ -63,7 +63,7 @@ test('recovery validates stored data and preserves running, paused and completed
 test('round controller guards duplicate starts, persists only commands and expiry, and restores without resetting time', () => {
   const source = readFileSync(new URL('../src/components/use-focus-round.ts', import.meta.url), 'utf8')
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText
-  let now = 1000, writes = 0, stored = null, cursor = 0, effects = [], state = [], blocked = false
+  let now = 1000, writes = 0, stored = null, cursor = 0, effects = [], state = [], blocked = false, pending = null
   const dependencies = {
     react: {
       useCallback(callback) { return callback },
@@ -72,6 +72,7 @@ test('round controller guards duplicate starts, persists only commands and expir
       useEffect(effect) { effects.push(effect) },
     },
     '@/lib/focus-round': rounds,
+    '@/lib/focus-pending': { keepPendingFocus: () => true, restorePendingFocus: id => pending?.id === id ? null : pending },
   }
   const module = { exports: {} }
   new Function('require', 'module', 'exports', 'Date', 'sessionStorage', code)(name => dependencies[name], module, module.exports, { now: () => now }, {
@@ -101,4 +102,15 @@ test('round controller guards duplicate starts, persists only commands and expir
   state = []; writes = 0
   render(false).start(initialFocusSetup)
   assert.equal(writes, 0)
+  state = []; stored = null; blocked = false
+  pending = rounds.changeRound(rounds.startRound(initialFocusSetup, 0), 'finish', 12000)
+  assert.equal(render().round.id, pending.id)
+  assert.equal(JSON.parse(stored).id, pending.id)
+  render().close()
+  assert.equal(stored, null)
+  state = []; stored = JSON.stringify({ ...pending, id: undefined }); pending = null
+  const migrated = render().round.id
+  assert.equal(JSON.parse(stored).id, migrated)
+  state = []
+  assert.equal(render().round.id, migrated)
 })

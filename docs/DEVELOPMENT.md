@@ -1,5 +1,9 @@
 # Development
 
+## Home v6 owner acceptance (2026-10-24)
+
+Owner approved the presented apartment-layout-v6 Home composition and seated pose. Record v6 as the baseline for subsequent work, replacing the rejected v4/v5 seated treatments. This accepts the reviewed image, not a new departure animation, Focus replacement or production engine migration. No artwork, runtime behavior or data changed in this acceptance step; reuse the preceding rendered/Aseprite verification. Review artifacts currently remain in ignored art/drafts/apartment-layout-v6/; promote the approved editable source when authoring/integrating the replacement, without overwriting current runtime exports implicitly. The planned next visual step is the existing goodbye/door/elevator/street sequence, requiring a separate review. Physical-device and engine adoption boundaries remain unchanged.
+
 ## Seated workstation projection correction (2026-10-24; v6 pending review)
 
 Continued the unfinished ignored art/drafts/apartment-layout-v6/ after the owner rejected v5 as resting a leg beside the chair. V5 used a connected screen-space leg without a shared world-space seat-to-knee direction. V6 authors the thigh, knee, calf and shoe using the same 2:1 projection as furniture, extending along -v toward the laptop. The seat is now 8x10 world units centered under the existing seated body (height unchanged), with supports and back moved together. Foreground near supports are composited after the person, retaining partial natural occlusion instead of hiding the entire lower limb. Preserve head, upper body/hands, workstation footprint/desk, door sweep/corridor, cat/rug, camera and UI sizes. The smaller chair's actual functional footprint is updated; no gameplay or production asset changed.
